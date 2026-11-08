@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/crossbow",
+  "textures": {
+    "layer0": "twilightforest_finale:item/ender_crossbow_firework"
+  }
+}

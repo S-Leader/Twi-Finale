@@ -1,0 +1,172 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "comment": "scepter",
+      "bonus_rolls": 0.0,
+      "rolls": 2.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:proverbs_scepter"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:force_field_scepter"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:shadow_scepter"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:wraith_scepter"
+        }
+      ]
+    },
+    {
+      "comment": "random_scepter",
+      "bonus_rolls": 0.0,
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0.0,
+        "max": 2.0
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:proverbs_scepter"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:force_field_scepter"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:shadow_scepter"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:wraith_scepter"
+        }
+      ]
+    },
+    {
+      "comment": "enchanted_book",
+      "bonus_rolls": 0.0,
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2.0,
+        "max": 4.0
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "functions": [
+            {
+              "function": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 10.0,
+                "max": 40.0
+              },
+              "options": "#minecraft:non_treasure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "comment": "charm",
+      "bonus_rolls": 0.0,
+      "rolls": 1.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:charm_of_life_3",
+          "conditions": [
+            {
+              "condition": "minecraft:random_chance",
+              "chance": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "comment": "ender_pearl",
+      "bonus_rolls": 0.0,
+      "rolls": 1.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:ender_pearl",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1.0,
+                "max": 4.0
+              },
+              "add": false
+            },
+            {
+              "function": "minecraft:enchanted_count_increase",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0.0,
+                "max": 1.0
+              },
+              "enchantment": "minecraft:looting"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "comment": "diamond",
+      "bonus_rolls": 0.0,
+      "rolls": 1.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 5.0,
+                "max": 9.0
+              },
+              "add": false
+            },
+            {
+              "function": "minecraft:enchanted_count_increase",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0.0,
+                "max": 1.0
+              },
+              "enchantment": "minecraft:looting"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "comment": "trophy",
+      "bonus_rolls": 0.0,
+      "rolls": 1.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:adherent_trophy"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "twilightforest_finale:entities/adherent_high_priest"
+}

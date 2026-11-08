@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "twilightforest:charm_of_life_2"
+    },
+    {
+      "item": "twilightforest:charm_of_life_2"
+    },
+    {
+      "item": "twilightforest:charm_of_life_2"
+    },
+    {
+      "item": "twilightforest:charm_of_life_2"
+    }
+  ],
+  "result": {
+    "id": "twilightforest_finale:charm_of_life_3"
+  }
+}

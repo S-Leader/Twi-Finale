@@ -1,0 +1,23 @@
+{
+  "result": {
+    "id": "twilightforest_finale:naga_helmet",
+    "components": {
+      "minecraft:enchantments": {
+        "levels": {
+          "minecraft:protection": 3
+        }
+      }
+    }
+  },
+  "group": "naga_armor",
+  "pattern": [
+    "###",
+    "# #"
+  ],
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "item": "twilightforest:naga_scale"
+    }
+  }
+}

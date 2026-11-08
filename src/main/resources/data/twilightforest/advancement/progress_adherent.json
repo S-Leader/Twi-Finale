@@ -1,0 +1,147 @@
+{
+  "parent": "twilightforest:progress_castle",
+  "criteria": {
+    "kill_adherent": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "twilightforest_finale:adherent_high_priest"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:player_killed_entity"
+    },
+    "castle": {
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type_specific": {
+                "type": "player",
+                "advancements": {
+                  "twilightforest:progress_castle": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:tick"
+    },
+    "proverbs_scepter": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "twilightforest_finale:proverbs_scepter"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "force_field_scepter": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "twilightforest_finale:force_field_scepter"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "trophy": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "twilightforest_finale:adherent_trophy"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "wraith_scepter": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "twilightforest_finale:wraith_scepter"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "was_in_fight": {
+      "conditions": {
+        "hurt_entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "twilightforest_finale:adherent_high_priest"
+            }
+          }
+        ]
+      },
+      "trigger": "twilightforest:hurt_boss"
+    },
+    "shadow_scepter": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "twilightforest_finale:shadow_scepter"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.twilightforest_finale.kill_adherent.desc",
+      "with": [
+        {
+          "translate": "entity.twilightforest_finale.adherent_high_priest"
+        }
+      ]
+    },
+    "frame": "goal",
+    "hidden": false,
+    "icon": {
+      "id": "twilightforest_finale:adherent_trophy"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.twilightforest_finale.kill_adherent"
+    }
+  },
+  "requirements": [
+    [
+      "kill_adherent",
+      "trophy",
+      "proverbs_scepter",
+      "wraith_scepter",
+      "shadow_scepter",
+      "force_field_scepter",
+      "was_in_fight"
+    ],
+    [
+      "castle"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

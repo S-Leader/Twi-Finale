@@ -1,0 +1,11 @@
+{
+  "type": "twilightforest:scepter_repair",
+  "durability": 99,
+  "repair_ingredients": [
+    {
+      "item": "twilightforest_finale:phantommetal_ingot"
+    }
+  ],
+  "scepter": "twilightforest_finale:shadow_scepter"
+}
+

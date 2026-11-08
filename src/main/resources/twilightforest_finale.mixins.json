@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "show.twilight.finale.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "CrumbleHornItemMixin",
+    "EntityEventsMixin",
+    "GiantSwordItemMixin",
+    "FinalCastleStructureMixin",
+    "ForceFieldBlockMixin",
+    "AdherentMixin",
+    "FinaleScepterRepairMixin",
+    "CubeOfAnnihilationMixin"
+  ],
+  "client": [
+    "ItemInHandRendererMixin"
+  ]
+}

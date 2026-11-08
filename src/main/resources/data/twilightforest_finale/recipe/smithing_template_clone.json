@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "T": {
+      "item": "twilightforest_finale:twilight_retrofitting_smithing_template"
+    },
+    "I": {
+      "item": "twilightforest:ironwood_ingot"
+    },
+    "M": {
+      "item": "twilightforest:knightmetal_ingot"
+    }
+  },
+  "pattern": [
+    "ITI",
+    "IMI",
+    "III"
+  ],
+  "result": {
+    "count": 2,
+    "id": "twilightforest_finale:twilight_retrofitting_smithing_template"
+  },
+  "show_notification": true
+}

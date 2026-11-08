@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "twilightforest_finale:transformation_root"
+  },
+  "base": {
+    "item": "twilightforest_finale:finalslayer_sword"
+  },
+  "result": {
+    "id": "twilightforest_finale:transformation_tool"
+  },
+  "template": {
+    "item": "twilightforest_finale:twilight_retrofitting_smithing_template"
+  }
+}

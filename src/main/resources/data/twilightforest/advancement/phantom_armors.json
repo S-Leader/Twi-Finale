@@ -1,0 +1,64 @@
+{
+  "parent": "twilightforest:progress_knights",
+  "criteria": {
+    "armor": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "twilightforest:phantom_chestplate"
+            ]
+          },
+          {
+            "items": [
+              "twilightforest_finale:phantom_leggings"
+            ]
+          },
+          {
+            "items": [
+              "twilightforest:phantom_helmet"
+            ]
+          },
+          {
+            "items": [
+              "twilightforest_finale:phantom_boots"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.twilightforest_finale.phantom_armors.desc",
+      "with": [
+        {
+          "translate": "item.twilightforest_finale.phantommetal_ingot"
+        }
+      ]
+    },
+    "frame": "challenge",
+    "hidden": false,
+    "icon": {
+      "id": "twilightforest:phantom_helmet",
+      "components": {
+        "minecraft:damage": 0
+      }
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.twilightforest_finale.phantom_armors"
+    }
+  },
+  "requirements": [
+    [
+      "armor"
+    ]
+  ],
+  "rewards": {
+    "experience": 25
+  },
+  "sends_telemetry_event": true
+}

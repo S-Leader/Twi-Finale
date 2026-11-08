@@ -1,0 +1,11 @@
+{
+  "type": "twilightforest:scepter_repair",
+  "durability": 9,
+  "repair_ingredients": [
+    {
+      "item": "minecraft:diamond_block"
+    }
+  ],
+  "scepter": "twilightforest_finale:force_field_scepter"
+}
+

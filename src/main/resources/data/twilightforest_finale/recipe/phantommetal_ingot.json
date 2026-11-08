@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "twilightforest:armor_shard_cluster"
+    },
+    {
+      "item": "twilightforest:ironwood_ingot"
+    },
+    {
+      "item": "twilightforest:steeleaf_ingot"
+    },
+    {
+      "item": "twilightforest:carminite"
+    }
+  ],
+  "result": {
+    "count": 2,
+    "id": "twilightforest_finale:phantommetal_ingot"
+  }
+}

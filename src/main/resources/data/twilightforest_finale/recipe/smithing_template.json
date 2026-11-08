@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": {
+      "item": "twilightforest:transformation_powder"
+    },
+    "I": {
+      "item": "twilightforest:ironwood_ingot"
+    },
+    "M": {
+      "item": "twilightforest:knightmetal_ingot"
+    }
+  },
+  "pattern": [
+    "IPI",
+    "IMI",
+    "III"
+  ],
+  "result": {
+    "id": "twilightforest_finale:twilight_retrofitting_smithing_template"
+  },
+  "show_notification": true
+}

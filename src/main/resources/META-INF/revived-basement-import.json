@@ -1,0 +1,80 @@
+{
+  "source_jar_sha256": "9e932b9bb99e36c7ae2579851dcc93ce873b0e5b74d7279542a6445607142535",
+  "source_mod": "Twilight Forest: Reviving Ancient Buildings 4.0",
+  "source_author": "moyan",
+  "original_building_credit": "特别感谢铃音的建筑",
+  "source_license": "All Rights Reserved",
+  "block_remaps": {
+    "alexscaves:radon_lamp_white": "minecraft:sea_lantern",
+    "minecraft:grass": "minecraft:short_grass"
+  },
+  "templates": [
+    {
+      "source": "chengbao3",
+      "destination": "revived_basement",
+      "size": [
+        150,
+        105,
+        150
+      ],
+      "source_block_records": 41799,
+      "block_records": 41799,
+      "chests": 12,
+      "spawners": 4,
+      "source_resource_sha256": "16719ceb5c01519949c35a34ab7c8c74cada3b2b346b9e6680785993f77bd67d"
+    }
+  ],
+  "foreign_end_battery_loot_pool_removed": true,
+  "source_jar_modified": false,
+  "furniture_relocations_for_randomized_ports": [
+    {
+      "from": [
+        118,
+        80,
+        112
+      ],
+      "to": [
+        118,
+        80,
+        115
+      ]
+    },
+    {
+      "from": [
+        86,
+        80,
+        50
+      ],
+      "to": [
+        87,
+        80,
+        48
+      ]
+    }
+  ],
+  "legacy_saved_pieces_only": true,
+  "legacy_port9_layout": {
+    "basement_levels": 2,
+    "mode": "independently_randomized_room_graphs",
+    "shared_room_source": "revived_basement",
+    "room_modules": 8,
+    "grid": [
+      5,
+      5
+    ],
+    "room_spacing": 24,
+    "floor_step": 48,
+    "reserved_cells_per_floor": 1,
+    "room_count_range": [
+      14,
+      18
+    ],
+    "extra_edges_range": [
+      2,
+      5
+    ],
+    "third_level": "original_finale_forge",
+    "end_cube_hall_imported": false,
+    "forge_attached_laterally": false
+  }
+}

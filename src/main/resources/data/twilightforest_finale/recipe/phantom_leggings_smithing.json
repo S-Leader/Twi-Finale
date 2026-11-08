@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "twilightforest_finale:phantommetal_ingot"
+  },
+  "base": {
+    "item": "twilightforest:knightmetal_leggings"
+  },
+  "result": {
+    "id": "twilightforest_finale:phantom_leggings"
+  },
+  "template": {
+    "item": "twilightforest_finale:twilight_retrofitting_smithing_template"
+  }
+}

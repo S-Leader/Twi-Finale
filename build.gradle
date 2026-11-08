@@ -1,0 +1,20 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.107'
+}
+group = 'show.twilight.finale'
+version = '0.1.5-port.17'
+base { archivesName = 'twilightforest_finale-1.21.1' }
+java { toolchain.languageVersion = JavaLanguageVersion.of(21) }
+neoForge {
+    version = '21.1.230'
+    accessTransformers.from file('src/main/resources/META-INF/accesstransformer.cfg')
+}
+dependencies { compileOnly fileTree('libs') { include '*.jar' } }
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Xmaxerrs', '1000', '-proc:none']
+}
+tasks.named('jar') {
+    manifest { attributes 'Implementation-Version': project.version, 'MixinConfigs': 'twilightforest_finale.mixins.json' }
+}

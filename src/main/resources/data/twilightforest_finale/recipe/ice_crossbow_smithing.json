@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "twilightforest:ice_bomb"
+  },
+  "base": {
+    "item": "twilightforest:ice_bow"
+  },
+  "result": {
+    "id": "twilightforest_finale:ice_crossbow"
+  },
+  "template": {
+    "item": "twilightforest_finale:twilight_retrofitting_smithing_template"
+  }
+}

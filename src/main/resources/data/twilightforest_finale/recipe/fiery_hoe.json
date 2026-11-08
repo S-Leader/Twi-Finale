@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "#": {
+      "tag": "c:ingots/fiery"
+    },
+    "X": {
+      "tag": "c:rods/blaze"
+    }
+  },
+  "pattern": [
+    "##",
+    " X",
+    " X"
+  ],
+  "result": {
+    "id": "twilightforest_finale:fiery_hoe"
+  },
+  "show_notification": true
+}

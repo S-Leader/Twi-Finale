@@ -1,0 +1,31 @@
+package show.twilight.finale.init;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import show.twilight.finale.entity.*;
+import show.twilight.finale.entity.projectile.AnnihilationBolt;
+import show.twilight.finale.entity.projectile.ProverbsBolt;
+
+import java.util.function.Supplier;
+
+public class ModEntity {
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE, (String) "twilightforest_finale");
+    public static final Supplier<EntityType<show.twilight.finale.entity.projectile.HierophantFragment>> HIEROPHANT_FRAGMENT = ENTITY_TYPES.register("hierophant_fragment", () ->
+            EntityType.Builder.<show.twilight.finale.entity.projectile.HierophantFragment>of(show.twilight.finale.entity.projectile.HierophantFragment::new, MobCategory.MISC)
+                    .sized(0.3F, 0.3F).clientTrackingRange(12).updateInterval(1).build("twilightforest_finale:hierophant_fragment"));
+    public static final Supplier<EntityType<show.twilight.finale.entity.RovingCubeBoss>> ROVING_CUBE = ENTITY_TYPES.register("roving_cube", () -> EntityType.Builder.<show.twilight.finale.entity.RovingCubeBoss>of(show.twilight.finale.entity.RovingCubeBoss::new, MobCategory.MONSTER).sized(1.2F, 2.1F).build("twilightforest_finale:roving_cube"));
+    public static final Supplier<EntityType<show.twilight.finale.entity.projectile.HomingVisShard>> HOMING_VIS_SHARD = ENTITY_TYPES.register("homing_vis_shard", () ->
+            EntityType.Builder.<show.twilight.finale.entity.projectile.HomingVisShard>of(show.twilight.finale.entity.projectile.HomingVisShard::new, MobCategory.MISC)
+                    .sized(0.25F, 0.25F).clientTrackingRange(8).updateInterval(1).build("twilightforest_finale:homing_vis_shard"));
+    public static final Supplier<EntityType<SeekerFireworkRocketEntity>> SEEKER_FIREWORK_ROCKET = ENTITY_TYPES.register("seeker_firework_rocket", () -> EntityType.Builder.<SeekerFireworkRocketEntity>of(SeekerFireworkRocketEntity::new, (MobCategory) MobCategory.MISC).sized(0.25f, 0.25f).build(ResourceLocation.fromNamespaceAndPath((String) "twilightforest_finale", (String) "seeker_firework_rocket").toString()));
+    public static final Supplier<EntityType<AdherentHighPriestEntity>> ADHERENT_HIGH_PRIEST = ENTITY_TYPES.register("adherent_high_priest", () -> EntityType.Builder.<AdherentHighPriestEntity>of(AdherentHighPriestEntity::new, (MobCategory) MobCategory.MONSTER).sized(0.8f, 2.25f).fireImmune().build(ResourceLocation.fromNamespaceAndPath((String) "twilightforest_finale", (String) "adherent_high_priest").toString()));
+    public static final Supplier<EntityType<TheTwilightHierophantEntity>> THE_TWILIGHT_HIEROPHANT = ENTITY_TYPES.register("the_twilight_hierophant", () -> EntityType.Builder.<TheTwilightHierophantEntity>of(TheTwilightHierophantEntity::new, (MobCategory) MobCategory.MONSTER).sized(0.9f, 1.95f).fireImmune().build(ResourceLocation.fromNamespaceAndPath((String) "twilightforest_finale", (String) "the_twilight_hierophant").toString()));
+    public static final Supplier<EntityType<LoyalWraithEntity>> LOYAL_WRAITH = ENTITY_TYPES.register("loyal_wraith", () -> EntityType.Builder.<LoyalWraithEntity>of(LoyalWraithEntity::new, (MobCategory) MobCategory.MONSTER).sized(0.6f, 1.8f).fireImmune().build(ResourceLocation.fromNamespaceAndPath((String) "twilightforest_finale", (String) "loyal_wraith").toString()));
+    public static final Supplier<EntityType<CastleGuardianEntity>> CASTLE_GUARDIAN = ENTITY_TYPES.register("castle_guardian", () -> EntityType.Builder.<CastleGuardianEntity>of(CastleGuardianEntity::new, (MobCategory) MobCategory.MONSTER).sized(2.0f, 2.0f).fireImmune().build(ResourceLocation.fromNamespaceAndPath((String) "twilightforest_finale", (String) "castle_guardian").toString()));
+    public static final Supplier<EntityType<AnnihilationHandEntity>> ANNIHILATION_HAND = ENTITY_TYPES.register("annihilation_hand", () -> EntityType.Builder.<AnnihilationHandEntity>of(AnnihilationHandEntity::new, (MobCategory) MobCategory.MONSTER).sized(0.4f, 0.4f).fireImmune().build(ResourceLocation.fromNamespaceAndPath((String) "twilightforest_finale", (String) "annihilation_hand").toString()));
+    public static final Supplier<EntityType<AnnihilationBolt>> ANNIHILATION_BOLT = ENTITY_TYPES.register("annihilation_bolt", () -> EntityType.Builder.<AnnihilationBolt>of(AnnihilationBolt::new, (MobCategory) MobCategory.MISC).sized(0.25f, 0.25f).build(ResourceLocation.fromNamespaceAndPath((String) "hadean_breathe", (String) "annihilation_bolt").toString()));
+    public static final Supplier<EntityType<ProverbsBolt>> PROVERBS_BOLT = ENTITY_TYPES.register("proverbs_bolt", () -> EntityType.Builder.<ProverbsBolt>of(ProverbsBolt::new, (MobCategory) MobCategory.MISC).sized(0.25f, 0.25f).build(ResourceLocation.fromNamespaceAndPath((String) "hadean_breathe", (String) "proverbs_bolt").toString()));
+}
+

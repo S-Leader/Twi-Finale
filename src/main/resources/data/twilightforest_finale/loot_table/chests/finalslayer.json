@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:chest",
+  "pools": [{"rolls": 1, "entries": [{
+    "type": "minecraft:item", "name": "twilightforest_finale:finalslayer_sword",
+    "functions": [{
+      "function": "minecraft:set_enchantments", "add": false,
+      "enchantments": {
+        "minecraft:sharpness": 4,
+        "minecraft:sweeping_edge": 2,
+        "minecraft:looting": 2,
+        "minecraft:unbreaking": 3
+      }
+    }]
+  }]}]
+}

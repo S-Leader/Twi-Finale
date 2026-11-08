@@ -1,0 +1,59 @@
+{
+  "parent": "twilightforest:progress_adherent",
+  "criteria": {
+    "scepters": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "twilightforest_finale:proverbs_scepter"
+            ]
+          },
+          {
+            "items": [
+              "twilightforest_finale:force_field_scepter"
+            ]
+          },
+          {
+            "items": [
+              "twilightforest_finale:wraith_scepter"
+            ]
+          },
+          {
+            "items": [
+              "twilightforest_finale:shadow_scepter"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.twilightforest_finale.adherent_scepters.desc"
+    },
+    "frame": "challenge",
+    "hidden": true,
+    "icon": {
+      "id": "twilightforest_finale:proverbs_scepter",
+      "components": {
+        "minecraft:damage": 0
+      }
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.twilightforest_finale.adherent_scepters"
+    }
+  },
+  "requirements": [
+    [
+      "scepters"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  },
+  "sends_telemetry_event": true
+}

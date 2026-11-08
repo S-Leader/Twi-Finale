@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "twilightforest:carminite"
+  },
+  "base": {
+    "item": "twilightforest:seeker_bow"
+  },
+  "result": {
+    "id": "twilightforest_finale:seeker_crossbow"
+  },
+  "template": {
+    "item": "twilightforest_finale:twilight_retrofitting_smithing_template"
+  }
+}

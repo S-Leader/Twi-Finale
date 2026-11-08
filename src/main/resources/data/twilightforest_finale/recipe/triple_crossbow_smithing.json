@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "twilightforest:raw_ironwood"
+  },
+  "base": {
+    "item": "twilightforest:triple_bow"
+  },
+  "result": {
+    "id": "twilightforest_finale:triple_crossbow"
+  },
+  "template": {
+    "item": "twilightforest_finale:twilight_retrofitting_smithing_template"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "profile": "Benimatic",
+  "uuid": "1d44f472-2722-44b9-97df-38742f874183",
+  "source": "https://textures.minecraft.net/texture/6e78935308b68a6b6b6926866ce518dfb365efe339fdb080ba1bda94b32da417",
+  "profile_endpoint": "https://sessionserver.mojang.com/session/minecraft/profile/1d44f472272244b997df38742f874183",
+  "model": "slim",
+  "use": "Hierophant trophy head; bundled unchanged, no network required at runtime"
+}

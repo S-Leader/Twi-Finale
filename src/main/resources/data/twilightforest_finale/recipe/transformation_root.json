@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": {
+      "item": "twilightforest:transformation_powder"
+    },
+    "R": {
+      "item": "twilightforest:liveroot"
+    },
+    "S": {
+      "item": "twilightforest_finale:transformation_stick"
+    }
+  },
+  "pattern": [
+    "RPR",
+    "PSP",
+    "RPR"
+  ],
+  "result": {
+    "id": "twilightforest_finale:transformation_root"
+  },
+  "show_notification": true
+}

@@ -1,0 +1,38 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "twilightforest_finale:item/transformation_tool_sword"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "twilightforest_finale:tool_type": 2.0
+      },
+      "model": "twilightforest_finale:item/transformation_tool_pickaxe"
+    },
+    {
+      "predicate": {
+        "twilightforest_finale:tool_type": 3.0
+      },
+      "model": "twilightforest_finale:item/transformation_tool_axe"
+    },
+    {
+      "predicate": {
+        "twilightforest_finale:tool_type": 4.0
+      },
+      "model": "twilightforest_finale:item/transformation_tool_shovel"
+    },
+    {
+      "predicate": {
+        "twilightforest_finale:tool_type": 5.0
+      },
+      "model": "twilightforest_finale:item/transformation_tool_hoe"
+    },
+    {
+      "predicate": {
+        "minecraft:blocking": 1.0
+      },
+      "model": "twilightforest_finale:item/transformation_tool_shield"
+    }
+  ]
+}

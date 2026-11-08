@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "twilightforest_finale:item/twilight_retrofitting_smithing_template"
+  }
+}
