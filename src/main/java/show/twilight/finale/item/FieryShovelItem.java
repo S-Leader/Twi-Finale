@@ -9,12 +9,12 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.List;
 
-@net.neoforged.fml.common.EventBusSubscriber(modid = "twilightforest")
-public class FieryShovelItem
-        extends ShovelItem {
+@EventBusSubscriber(modid = "twilightforest")
+public class FieryShovelItem extends ShovelItem {
     public FieryShovelItem(Tier toolMaterial, Item.Properties properties) {
         super(toolMaterial, properties.attributes(ShovelItem.createAttributes(toolMaterial, 1.0f, -3.0f)));
     }

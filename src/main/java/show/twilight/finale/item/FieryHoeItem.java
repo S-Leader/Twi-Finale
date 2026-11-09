@@ -9,10 +9,11 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.List;
 
-@net.neoforged.fml.common.EventBusSubscriber(modid = "twilightforest")
+@EventBusSubscriber(modid = "twilightforest")
 public class FieryHoeItem
         extends HoeItem {
     public FieryHoeItem(Tier toolMaterial, Item.Properties properties) {

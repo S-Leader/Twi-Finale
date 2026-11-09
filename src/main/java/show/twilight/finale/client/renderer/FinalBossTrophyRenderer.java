@@ -7,6 +7,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import show.twilight.finale.block.entity.FinalTrophyBlockEntity;
 import show.twilight.finale.client.model.TheTwilightHierophantModel;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
@@ -16,9 +19,9 @@ import show.twilight.finale.entity.TheTwilightHierophantEntity;
  */
 public final class FinalBossTrophyRenderer implements BlockEntityRenderer<FinalTrophyBlockEntity>, RenderWithoutEntity {
     private final ModelPart model;
-    private final RenderType type;
     private final ModelPart outer;
-    private final RenderType outerType;
+    private final RenderType normalOuterType;
+    private final RenderType slimOuterType;
 
     public FinalBossTrophyRenderer(EntityModelSet models) {
         // Reuse the boss's actual head mesh AND robe/hood layer, not a substitute
@@ -29,8 +32,8 @@ public final class FinalBossTrophyRenderer implements BlockEntityRenderer<FinalT
                 models.bakeLayer(TheTwilightHierophantModel.LAYER_LOCATION_OUTER_SLIM), true).getHead();
         model.setPos(0, 0, 0);
         outer.setPos(0, 0, 0);
-        type = RenderType.entityCutoutNoCull(ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "textures/entity/hierophant_benimatic.png"));
-        outerType = RenderType.entityCutoutNoCull(ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "textures/entity/the_twilight_hierophant_slim_outer.png"));
+        normalOuterType = RenderType.entityCutoutNoCull(ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "textures/entity/the_twilight_hierophant_outer.png"));
+        slimOuterType = RenderType.entityCutoutNoCull(ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "textures/entity/the_twilight_hierophant_slim_outer.png"));
     }
 
     @Override
@@ -43,8 +46,14 @@ public final class FinalBossTrophyRenderer implements BlockEntityRenderer<FinalT
         pose.pushPose();
         pose.translate(0.5, 0, 0.5);
         pose.scale(1, -1, -1);
+        // Same viewer-skin selection as the living Hierophant / TF giants.
+        var camera = Minecraft.getInstance().getCameraEntity();
+        ResourceLocation skin = camera instanceof AbstractClientPlayer player ? player.getSkin().texture() : DefaultPlayerSkin.getDefaultTexture();
+        RenderType type = RenderType.entityCutoutNoCull(skin);
+        boolean slim = camera instanceof AbstractClientPlayer player
+                && player.getSkin().model() == net.minecraft.client.resources.PlayerSkin.Model.SLIM;
         model.render(pose, buffers.getBuffer(type), light, overlay);
-        outer.render(pose, buffers.getBuffer(outerType), light, overlay);
+        outer.render(pose, buffers.getBuffer(slim ? slimOuterType : normalOuterType), light, overlay);
         pose.popPose();
     }
 }

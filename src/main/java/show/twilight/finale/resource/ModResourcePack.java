@@ -6,12 +6,13 @@ import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 
 import java.nio.file.Path;
 
-@net.neoforged.fml.common.EventBusSubscriber(modid = "twilightforest_finale", bus = net.neoforged.fml.common.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = "twilightforest_finale", bus = EventBusSubscriber.Bus.MOD)
 public class ModResourcePack {
     @SubscribeEvent
     public static void addPackFinders(AddPackFindersEvent event) {

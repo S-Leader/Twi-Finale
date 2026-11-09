@@ -12,10 +12,12 @@ import java.util.function.Supplier;
 
 public class ModEntity {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE, (String) "twilightforest_finale");
+    public static final Supplier<EntityType<show.twilight.finale.entity.projectile.HierophantThrownWeapon>> HIEROPHANT_THROWN_WEAPON = ENTITY_TYPES.register("hierophant_thrown_weapon", () ->
+            EntityType.Builder.<show.twilight.finale.entity.projectile.HierophantThrownWeapon>of(show.twilight.finale.entity.projectile.HierophantThrownWeapon::new, MobCategory.MISC)
+                    .sized(0.25F, 0.25F).clientTrackingRange(12).updateInterval(1).build("twilightforest_finale:hierophant_thrown_weapon"));
     public static final Supplier<EntityType<show.twilight.finale.entity.projectile.HierophantFragment>> HIEROPHANT_FRAGMENT = ENTITY_TYPES.register("hierophant_fragment", () ->
             EntityType.Builder.<show.twilight.finale.entity.projectile.HierophantFragment>of(show.twilight.finale.entity.projectile.HierophantFragment::new, MobCategory.MISC)
                     .sized(0.3F, 0.3F).clientTrackingRange(12).updateInterval(1).build("twilightforest_finale:hierophant_fragment"));
-    public static final Supplier<EntityType<show.twilight.finale.entity.RovingCubeBoss>> ROVING_CUBE = ENTITY_TYPES.register("roving_cube", () -> EntityType.Builder.<show.twilight.finale.entity.RovingCubeBoss>of(show.twilight.finale.entity.RovingCubeBoss::new, MobCategory.MONSTER).sized(1.2F, 2.1F).build("twilightforest_finale:roving_cube"));
     public static final Supplier<EntityType<show.twilight.finale.entity.projectile.HomingVisShard>> HOMING_VIS_SHARD = ENTITY_TYPES.register("homing_vis_shard", () ->
             EntityType.Builder.<show.twilight.finale.entity.projectile.HomingVisShard>of(show.twilight.finale.entity.projectile.HomingVisShard::new, MobCategory.MISC)
                     .sized(0.25F, 0.25F).clientTrackingRange(8).updateInterval(1).build("twilightforest_finale:homing_vis_shard"));

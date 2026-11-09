@@ -14,4 +14,8 @@ public interface ISkillEntity {
     int getSkillType();
 
     boolean isUsingSkill();
+
+    void beginSkill(int id);
+
+    void endSkill();
 }

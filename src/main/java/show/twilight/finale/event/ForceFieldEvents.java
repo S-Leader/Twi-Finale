@@ -8,6 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -17,7 +18,7 @@ import show.twilight.finale.entity.AdherentHighPriestEntity;
 import show.twilight.finale.entity.projectile.ProverbsBolt;
 import show.twilight.finale.network.UpdateForceFieldPacket;
 
-@net.neoforged.fml.common.EventBusSubscriber
+@EventBusSubscriber
 public class ForceFieldEvents {
     @SubscribeEvent
     public static void updateCaps(net.neoforged.neoforge.event.tick.EntityTickEvent.Post event) {
@@ -35,10 +36,9 @@ public class ForceFieldEvents {
                         cap.breakField();
                     } else {
                         cap.triggerShake();
-                        Entity patt1992$temp = source.getEntity();
-                        if (patt1992$temp instanceof ServerPlayer) {
-                            ServerPlayer player = (ServerPlayer) patt1992$temp;
-                            player.displayClientMessage((Component) Component.translatable((String) "message.twilight_finale.shield_no_break"), true);
+                        Entity sourceEntity = source.getEntity();
+                        if (sourceEntity instanceof ServerPlayer player) {
+                            player.displayClientMessage(Component.translatable("message.twilight_finale.shield_no_break"), true);
                         }
                     }
                 } else {
@@ -57,35 +57,31 @@ public class ForceFieldEvents {
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         Player player = event.getEntity();
-        if (player instanceof ServerPlayer) {
-            ServerPlayer player2 = (ServerPlayer) player;
-            ForceFieldEvents.updateCapabilities(player2, (Entity) player2);
+        if (player instanceof ServerPlayer player2) {
+            ForceFieldEvents.updateCapabilities(player2, player2);
         }
     }
 
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         Player player = event.getEntity();
-        if (player instanceof ServerPlayer) {
-            ServerPlayer player2 = (ServerPlayer) player;
-            ForceFieldEvents.updateCapabilities(player2, (Entity) player2);
+        if (player instanceof ServerPlayer player2) {
+            ForceFieldEvents.updateCapabilities(player2, player2);
         }
     }
 
     @SubscribeEvent
     public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         Player player = event.getEntity();
-        if (player instanceof ServerPlayer) {
-            ServerPlayer player2 = (ServerPlayer) player;
-            ForceFieldEvents.updateCapabilities(player2, (Entity) player2);
+        if (player instanceof ServerPlayer player2) {
+            ForceFieldEvents.updateCapabilities(player2, player2);
         }
     }
 
     @SubscribeEvent
     public static void onStartTracking(PlayerEvent.StartTracking event) {
         Player player = event.getEntity();
-        if (player instanceof ServerPlayer) {
-            ServerPlayer player2 = (ServerPlayer) player;
+        if (player instanceof ServerPlayer player2) {
             ForceFieldEvents.updateCapabilities(player2, event.getTarget());
         }
     }

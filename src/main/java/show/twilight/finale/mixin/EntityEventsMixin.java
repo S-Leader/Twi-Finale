@@ -15,8 +15,8 @@ import twilightforest.events.EntityEvents;
 public class EntityEventsMixin {
     @Redirect(method = {"alertPlayerCastleIsWIP"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;sendSystemMessage(Lnet/minecraft/network/chat/Component;)V"))
     private void redirectWIPMessage(Player player, Component originalComponent, AdvancementEvent.AdvancementEarnEvent event) {
-        if (event.getAdvancement().id().equals(TwilightForestMod.prefix((String) "progression_end"))) {
-            event.getEntity().sendSystemMessage((Component) Component.translatable((String) "gui.twilightforest_finale.progression_end.message", (Object[]) new Object[]{Component.translatable((String) "gui.twilightforest.progression_end.discord").withStyle(style -> style.withColor(ChatFormatting.BLUE).applyFormat(ChatFormatting.UNDERLINE).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.experiment115.com/")))}));
+        if (event.getAdvancement().id().equals(TwilightForestMod.prefix("progression_end"))) {
+            event.getEntity().sendSystemMessage(Component.translatable("gui.twilightforest_finale.progression_end.message", new Object[]{Component.translatable("gui.twilightforest.progression_end.discord").withStyle(style -> style.withColor(ChatFormatting.BLUE).applyFormat(ChatFormatting.UNDERLINE).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.experiment115.com/")))}));
         }
     }
 }

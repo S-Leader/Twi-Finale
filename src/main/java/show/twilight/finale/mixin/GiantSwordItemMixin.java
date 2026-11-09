@@ -1,7 +1,6 @@
 package show.twilight.finale.mixin;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,7 +19,6 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -52,7 +50,6 @@ public abstract class GiantSwordItemMixin extends SwordItem {
     }
 
     public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
-        var enchantments = book.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY);
         if (EnchantmentsUtil.hasStored(book, Enchantments.POWER) || EnchantmentsUtil.hasStored(book, Enchantments.PIERCING) || EnchantmentsUtil.hasStored(book, Enchantments.THORNS)) {
             return true;
         }
@@ -133,14 +130,13 @@ public abstract class GiantSwordItemMixin extends SwordItem {
 
     private static Predicate<LivingEntity> knockbackPredicate(Player player, Entity entity) {
         return p_344407_ -> {
-            ArmorStand armorstand;
             TamableAnimal tamableanimal;
             boolean flag = !p_344407_.isSpectator();
             boolean flag1 = p_344407_ != player && p_344407_ != entity;
             boolean flag2 = !player.isAlliedTo(p_344407_);
             boolean flag6 = p_344407_ instanceof TamableAnimal && (tamableanimal = (TamableAnimal) p_344407_).isTame() && player.getUUID().equals(tamableanimal.getOwnerUUID());
             boolean flag3 = !flag6;
-            boolean flag4 = !(p_344407_ instanceof ArmorStand) || !(armorstand = (ArmorStand) p_344407_).isMarker();
+            boolean flag4 = !(p_344407_ instanceof ArmorStand) || !((ArmorStand) p_344407_).isMarker();
             boolean flag5 = entity.distanceToSqr(p_344407_) <= Math.pow(3.5, 2.0);
             return flag && flag1 && flag2 && flag3 && flag4 && flag5;
         };

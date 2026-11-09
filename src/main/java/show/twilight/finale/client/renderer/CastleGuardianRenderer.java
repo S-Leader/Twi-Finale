@@ -1,6 +1,7 @@
 package show.twilight.finale.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -36,7 +37,7 @@ public class CastleGuardianRenderer extends MobRenderer<CastleGuardianEntity, Ca
         pose.translate(0, 1, 0);
         pose.mulPose(entity.getAttachFace().getOpposite().getRotation());
         pose.translate(0, -1, 0);
-        pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180));
+        pose.mulPose(Axis.YP.rotationDegrees(180));
     }
 
     @Override

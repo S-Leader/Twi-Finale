@@ -16,8 +16,7 @@ import show.twilight.finale.capabilities.ForceFieldCapabilityList;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class ForceFieldWandItem
-        extends FinaleScepterItem {
+public class ForceFieldWandItem extends FinaleScepterItem {
     public ForceFieldWandItem(Item.Properties properties) {
         super(properties);
     }
@@ -35,7 +34,7 @@ public class ForceFieldWandItem
             });
         }
         if (!player.isCreative()) {
-            player.getCooldowns().addCooldown((Item) this, 1200);
+            player.getCooldowns().addCooldown(this, 1200);
         }
         return InteractionResultHolder.success(stack);
     }
@@ -43,7 +42,7 @@ public class ForceFieldWandItem
     @OnlyIn(value = Dist.CLIENT)
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flags) {
         super.appendHoverText(stack, context, tooltip, flags);
-        tooltip.add((Component) Component.translatable((String) "item.twilightforest.scepter.desc", (Object[]) new Object[]{stack.getMaxDamage() - stack.getDamageValue()}).withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("item.twilightforest.scepter.desc", stack.getMaxDamage() - stack.getDamageValue()).withStyle(ChatFormatting.GRAY));
     }
 }
 

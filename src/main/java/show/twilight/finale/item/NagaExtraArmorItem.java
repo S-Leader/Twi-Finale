@@ -1,5 +1,6 @@
 package show.twilight.finale.item;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
@@ -13,8 +14,8 @@ public class NagaExtraArmorItem
         super(material, type, properties.durability(type.getDurability(21)));
     }
 
-    public net.minecraft.resources.ResourceLocation getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, ArmorMaterial.Layer layer, boolean innerModel) {
-        return net.minecraft.resources.ResourceLocation.parse("twilightforest_finale:textures/models/armor/naga_scale_layer_1.png");
+    public ResourceLocation getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, ArmorMaterial.Layer layer, boolean innerModel) {
+        return ResourceLocation.parse("twilightforest_finale:textures/models/armor/naga_scale_layer_1.png");
     }
 }
 

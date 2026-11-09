@@ -13,7 +13,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -21,7 +20,6 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -34,10 +32,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class TransformationRootItem
-        extends PickaxeItem
-        implements Equipable {
-    private static final Set<ItemAbility> ACTIONS = (Set) Util.make(Collections.newSetFromMap(new IdentityHashMap()), actions -> {
+public class TransformationRootItem extends PickaxeItem implements Equipable {
+    private static final Set<ItemAbility> ACTIONS = Util.make(Collections.newSetFromMap(new IdentityHashMap()), actions -> {
         actions.addAll(ItemAbilities.DEFAULT_SWORD_ACTIONS);
         actions.addAll(ItemAbilities.DEFAULT_PICKAXE_ACTIONS);
         actions.addAll(ItemAbilities.DEFAULT_AXE_ACTIONS);
@@ -56,7 +52,7 @@ public class TransformationRootItem
 
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
-        tooltip.add((Component) Component.translatable((String) "item.twilightforest_finale.transformation_tool.desc").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("item.twilightforest_finale.transformation_tool.desc").withStyle(ChatFormatting.GRAY));
     }
 
     public boolean isCorrectToolForDrops(@NotNull ItemStack stack, @NotNull BlockState state) {
@@ -94,30 +90,30 @@ public class TransformationRootItem
             if (player instanceof ServerPlayer) {
                 CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer) player, blockpos, itemstack);
             }
-            level.setBlock(blockpos, (BlockState) optional3.get(), 11);
-            level.gameEvent(GameEvent.BLOCK_CHANGE, blockpos, GameEvent.Context.of((Entity) player, (BlockState) ((BlockState) optional3.get())));
+            level.setBlock(blockpos, optional3.get(), 11);
+            level.gameEvent(GameEvent.BLOCK_CHANGE, blockpos, GameEvent.Context.of(player, optional3.get()));
             if (player != null) {
                 itemstack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
             }
-            return InteractionResult.sidedSuccess((boolean) level.isClientSide);
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         if (player != null) {
             if (player.isCrouching()) {
                 Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> pair;
                 BlockState toolModifiedState = level.getBlockState(blockpos).getToolModifiedState(context, ItemAbilities.HOE_TILL, false);
-                Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> pair2 = pair = toolModifiedState == null ? null : Pair.of(ctx -> true, HoeItem.changeIntoState((BlockState) toolModifiedState));
+                Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> pair2 = pair = toolModifiedState == null ? null : Pair.of(ctx -> true, HoeItem.changeIntoState(toolModifiedState));
                 if (pair == null) {
                     return InteractionResult.PASS;
                 }
-                Predicate predicate = (Predicate) pair.getFirst();
-                Consumer consumer = (Consumer) pair.getSecond();
+                Predicate predicate = pair.getFirst();
+                Consumer consumer = pair.getSecond();
                 if (predicate.test(context)) {
                     level.playSound(player, blockpos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0f, 1.0f);
                     if (!level.isClientSide) {
                         consumer.accept(context);
                         context.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
                     }
-                    return InteractionResult.sidedSuccess((boolean) level.isClientSide);
+                    return InteractionResult.sidedSuccess(level.isClientSide);
                 }
             } else {
                 if (context.getClickedFace() == Direction.DOWN) {
@@ -128,20 +124,20 @@ public class TransformationRootItem
                 if (blockstate1 != null && level.isEmptyBlock(blockpos.above())) {
                     level.playSound(player, blockpos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0f, 1.0f);
                     blockstate2 = blockstate1;
-                } else if (blockstate.getBlock() instanceof CampfireBlock && ((Boolean) blockstate.getValue(CampfireBlock.LIT)).booleanValue()) {
+                } else if (blockstate.getBlock() instanceof CampfireBlock && blockstate.getValue(CampfireBlock.LIT).booleanValue()) {
                     if (!level.isClientSide()) {
                         level.levelEvent(null, 1009, blockpos, 0);
                     }
-                    CampfireBlock.dowse((Entity) context.getPlayer(), (LevelAccessor) level, (BlockPos) blockpos, (BlockState) blockstate);
-                    blockstate2 = (BlockState) blockstate.setValue(CampfireBlock.LIT, Boolean.valueOf(false));
+                    CampfireBlock.dowse(context.getPlayer(), level, blockpos, blockstate);
+                    blockstate2 = blockstate.setValue(CampfireBlock.LIT, Boolean.valueOf(false));
                 }
                 if (blockstate2 != null) {
                     if (!level.isClientSide) {
                         level.setBlock(blockpos, blockstate2, 11);
-                        level.gameEvent(GameEvent.BLOCK_CHANGE, blockpos, GameEvent.Context.of((Entity) player, (BlockState) blockstate2));
+                        level.gameEvent(GameEvent.BLOCK_CHANGE, blockpos, GameEvent.Context.of(player, blockstate2));
                         context.getItemInHand().hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
                     }
-                    return InteractionResult.sidedSuccess((boolean) level.isClientSide);
+                    return InteractionResult.sidedSuccess(level.isClientSide);
                 }
             }
         }

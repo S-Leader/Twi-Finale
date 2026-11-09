@@ -2,18 +2,19 @@ package show.twilight.finale.init;
 
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import show.twilight.finale.client.model.LoyalWraithModel;
 import show.twilight.finale.client.renderer.*;
 import twilightforest.client.model.TFModelLayers;
 
-@net.neoforged.fml.common.EventBusSubscriber(bus = net.neoforged.fml.common.EventBusSubscriber.Bus.MOD, value = {Dist.CLIENT})
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = {Dist.CLIENT})
 public class ModRenderer {
     @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntity.HIEROPHANT_FRAGMENT.get(), show.twilight.finale.client.renderer.HierophantFragmentRenderer::new);
-        event.registerEntityRenderer(ModEntity.ROVING_CUBE.get(), twilightforest.client.renderer.entity.RovingCubeRenderer::new);
-        event.registerEntityRenderer(twilightforest.init.TFEntities.ADHERENT.get(), show.twilight.finale.client.renderer.ColoredAdherentRenderer::new);
+        event.registerEntityRenderer(ModEntity.HIEROPHANT_THROWN_WEAPON.get(), HierophantThrownWeaponRenderer::new);
+        event.registerEntityRenderer(ModEntity.HIEROPHANT_FRAGMENT.get(), HierophantFragmentRenderer::new);
+        event.registerEntityRenderer(twilightforest.init.TFEntities.ADHERENT.get(), ColoredAdherentRenderer::new);
         event.registerEntityRenderer(ModEntity.HOMING_VIS_SHARD.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntity.ADHERENT_HIGH_PRIEST.get(), AdherentHighPriestRenderer::new);
         event.registerEntityRenderer(ModEntity.CASTLE_GUARDIAN.get(), CastleGuardianRenderer::new);

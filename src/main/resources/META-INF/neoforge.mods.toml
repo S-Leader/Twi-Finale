@@ -1,13 +1,13 @@
 modLoader="javafml"
 loaderVersion="[4,)"
-license="Finale content: All Rights Reserved; Twilight Forest-derived castle code: LGPL-2.1-or-later"
+license="Finale: All Rights Reserved; Twilight Forest-derived code: LGPL-2.1-or-later; VzlingLib shadow port: MIT"
 
 [[mods]]
 modId="twilightforest_finale"
-version="0.1.5-port.17"
+version="0.1.5-port.18"
 displayName="Twilight Forest Finale (1.21.1 Port)"
 authors="Vzling, shuixingshow; local NeoForge port"
-description='''Twilight Forest Finale port without VzlingLib. Skylight Forest is excluded.'''
+description='''Twilight Forest Finale port without an external VzlingLib dependency. Includes a relocated MIT-licensed VzlingLib shadow implementation. Skylight Forest is excluded.'''
 
 [[dependencies.twilightforest_finale]]
 modId="minecraft"

@@ -10,8 +10,7 @@ import java.util.function.Supplier;
 
 public enum ModBossVariant implements StringRepresentable {
     ADHERENT(null, () -> ModBlocks.ADHERENT_SPAWNER.get()),
-    HIEROPHANT(null, () -> ModBlocks.HIEROPHANT_SPAWNER.get()),
-    ROVING_CUBE(null, () -> ModBlocks.ROVING_CUBE_SPAWNER.get());
+    HIEROPHANT(null, () -> ModBlocks.TWILIGHT_HIEROPHANT_SPAWNER.get());
 
     private final TrophyType trophyType;
     private final Supplier<BlockEntityType<? extends BossSpawnerBlockEntity<?>>> blockEntityType;

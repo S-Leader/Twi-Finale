@@ -12,8 +12,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,6 +22,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import net.neoforged.neoforge.common.ItemAbilities;
 import show.twilight.finale.compat.curios.ModCuriosCompat;
@@ -33,7 +32,7 @@ import show.twilight.finale.item.FinalTrophyItem;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-@net.neoforged.fml.common.EventBusSubscriber(modid = "twilightforest_finale", value = {Dist.CLIENT})
+@EventBusSubscriber(modid = "twilightforest_finale", value = {Dist.CLIENT})
 public class ModClientEvent {
     private static final Map<EntityModel<?>, HeadVisibility> HIDDEN_HEADS = new IdentityHashMap<>();
 
@@ -50,19 +49,17 @@ public class ModClientEvent {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
         ClientLevel level = minecraft.level;
-        if (player != null && level != null && ((stack = player.getMainHandItem()).is((Item) ModItem.TRANSFORMATION_ROOT.get()) || stack.is((Item) ModItem.TRANSFORMATION_TOOL.get()))) {
-            EntityHitResult entityHitResult;
+        if (player != null && level != null && ((stack = player.getMainHandItem()).is(ModItem.TRANSFORMATION_ROOT.get()) || stack.is(ModItem.TRANSFORMATION_TOOL.get()))) {
             Entity entity;
             HitResult result = minecraft.hitResult;
-            if (result instanceof BlockHitResult) {
-                BlockHitResult blockHitResult = (BlockHitResult) result;
+            if (result instanceof BlockHitResult blockHitResult) {
                 BlockState state = level.getBlockState(blockHitResult.getBlockPos());
                 if (state.is(BlockTags.MINEABLE_WITH_PICKAXE)) {
                     show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 2.0f);
                 } else if (state.is(BlockTags.MINEABLE_WITH_AXE)) {
                     show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 3.0f);
                 } else if (state.is(BlockTags.MINEABLE_WITH_SHOVEL)) {
-                    if (player.isCrouching() && state.getToolModifiedState(new UseOnContext((Player) player, InteractionHand.MAIN_HAND, blockHitResult), ItemAbilities.HOE_TILL, false) != null) {
+                    if (player.isCrouching() && state.getToolModifiedState(new UseOnContext(player, InteractionHand.MAIN_HAND, blockHitResult), ItemAbilities.HOE_TILL, false) != null) {
                         show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 5.0f);
                     } else {
                         show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 4.0f);
@@ -70,7 +67,7 @@ public class ModClientEvent {
                 } else if (state.is(BlockTags.MINEABLE_WITH_HOE)) {
                     show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 5.0f);
                 }
-            } else if (result instanceof EntityHitResult && (entity = (entityHitResult = (EntityHitResult) result).getEntity()) instanceof LivingEntity) {
+            } else if (result instanceof EntityHitResult && (entity = ((EntityHitResult) result).getEntity()) instanceof LivingEntity) {
                 LivingEntity entity2 = (LivingEntity) entity;
                 if (entity2.isBlocking()) {
                     show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 3.0f);

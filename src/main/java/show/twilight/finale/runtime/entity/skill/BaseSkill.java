@@ -1,8 +1,9 @@
 package show.twilight.finale.runtime.entity.skill;
 
-import show.twilight.finale.runtime.entity.AbstractSkillEntity;
+import net.minecraft.world.entity.monster.Monster;
+import show.twilight.finale.runtime.entity.ISkillEntity;
 
-public abstract class BaseSkill<T extends AbstractSkillEntity> {
+public abstract class BaseSkill<T extends Monster & ISkillEntity> {
     public final int id, duration, cooldown;
     public final double range;
 

@@ -2,9 +2,10 @@ package show.twilight.finale.runtime.client.model;
 
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.model.HierarchicalModel;
-import show.twilight.finale.runtime.entity.AbstractSkillEntity;
+import net.minecraft.world.entity.LivingEntity;
+import show.twilight.finale.runtime.animation.VzlingAnimatable;
 
-public abstract class AnimatableEntityModel<T extends AbstractSkillEntity> extends HierarchicalModel<T> {
+public abstract class AnimatableEntityModel<T extends LivingEntity & VzlingAnimatable> extends HierarchicalModel<T> {
     public abstract void setupWalkAnimation(T entity, float swing, float amount);
 
     @Override

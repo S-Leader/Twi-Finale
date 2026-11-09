@@ -13,6 +13,7 @@ import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import show.twilight.finale.capabilities.ForceFieldCapabilityList;
@@ -27,7 +28,7 @@ import twilightforest.util.TFItemStackUtils;
 
 import java.util.Optional;
 
-@net.neoforged.fml.common.EventBusSubscriber(modid = "twilightforest_finale")
+@EventBusSubscriber(modid = "twilightforest_finale")
 public class ExtraCharmEvents {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void applyDeathItems(LivingDeathEvent event) {

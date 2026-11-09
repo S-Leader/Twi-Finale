@@ -2,11 +2,8 @@ package show.twilight.finale.item;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -30,9 +27,9 @@ public class ProverbsWandItem
         if (stack.getDamageValue() == stack.getMaxDamage()) {
             return InteractionResultHolder.fail(player.getItemInHand(hand));
         }
-        player.playSound((SoundEvent) TFSounds.TWILIGHT_SCEPTER_USE.get(), 1.0f, (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * 0.2f + 1.0f);
+        player.playSound(TFSounds.TWILIGHT_SCEPTER_USE.get(), 1.0f, (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * 0.2f + 1.0f);
         if (!level.isClientSide()) {
-            level.addFreshEntity((Entity) new ProverbsBolt(level, (LivingEntity) player));
+            level.addFreshEntity(new ProverbsBolt(level, player));
             twilightforest.util.TFItemStackUtils.hurtButDontBreak(stack, 1, (net.minecraft.server.level.ServerLevel) level, player);
         }
         return InteractionResultHolder.success(player.getItemInHand(hand));
@@ -41,7 +38,7 @@ public class ProverbsWandItem
     @OnlyIn(value = Dist.CLIENT)
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
-        tooltip.add((Component) Component.translatable((String) "item.twilightforest.scepter.desc", (Object[]) new Object[]{stack.getMaxDamage() - stack.getDamageValue()}).withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("item.twilightforest.scepter.desc", new Object[]{stack.getMaxDamage() - stack.getDamageValue()}).withStyle(ChatFormatting.GRAY));
     }
 }
 

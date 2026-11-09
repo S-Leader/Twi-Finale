@@ -92,7 +92,8 @@ public final class HomingVisShard extends Projectile implements ItemSupplier {
 
     @Override
     protected boolean canHitEntity(Entity entity) {
-        return !(entity instanceof Adherent) && super.canHitEntity(entity);
+        return !(entity instanceof Adherent) && super.canHitEntity(entity)
+                && (getOwner() == null || !getOwner().isAlliedTo(entity));
     }
 
     @Override

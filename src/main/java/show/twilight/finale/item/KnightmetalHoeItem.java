@@ -17,7 +17,7 @@ public class KnightmetalHoeItem
     @OnlyIn(value = Dist.CLIENT)
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> list, TooltipFlag flags) {
         super.appendHoverText(stack, context, list, flags);
-        list.add((Component) Component.translatable((String) "item.twilightforest.knightmetal_pickaxe.desc").withStyle(ChatFormatting.GRAY));
+        list.add(Component.translatable("item.twilightforest.knightmetal_pickaxe.desc").withStyle(ChatFormatting.GRAY));
     }
 }
 

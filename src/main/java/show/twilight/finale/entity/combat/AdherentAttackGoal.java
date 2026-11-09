@@ -30,7 +30,7 @@ public final class AdherentAttackGoal extends Goal {
     @Override
     public boolean canUse() {
         LivingEntity target = mob.getTarget();
-        return target != null && target.isAlive() && !target.isSpectator();
+        return target != null && target.isAlive() && !target.isSpectator() && !mob.isAlliedTo(target);
     }
 
     @Override
@@ -49,8 +49,25 @@ public final class AdherentAttackGoal extends Goal {
     public void tick() {
         LivingEntity target = mob.getTarget();
         if (target == null || !(mob.level() instanceof ServerLevel level)) return;
+        if (mob.isAlliedTo(target)) {
+            mob.setTarget(null);
+            stop();
+            return;
+        }
         int color = ((ColoredAdherent) mob).finale$getColor();
         mob.getLookControl().setLookAt(target, active && color == ColoredAdherent.RED ? 3 : 20, 20);
+        if (color == ColoredAdherent.RED) {
+            // LookControl turns the head, whereas getLookAngle uses entity yaw.
+            // Keep both aligned before tracing this tick's breath, not next tick.
+            mob.lookAt(target, active ? 3F : 20F, 20F);
+            mob.setYHeadRot(mob.getYRot());
+            mob.setYBodyRot(mob.getYRot());
+            Vec3 facing = Vec3.directionFromRotation(mob.getXRot(), mob.getYHeadRot());
+            Vec3 look = mob.getEyePosition().add(facing.scale(16));
+            // LookControl runs after goals: reapply this exact orientation there
+            // instead of turning twice or resetting the flame's vertical pitch.
+            mob.getLookControl().setLookAt(look.x, look.y, look.z, 360F, 360F);
+        }
         boolean visible = mob.getSensing().hasLineOfSight(target);
         if (!active) {
             if (cooldown > 0) cooldown--;
@@ -119,7 +136,8 @@ public final class AdherentAttackGoal extends Goal {
 
     private void breathe(ServerLevel level) {
         Vec3 start = mob.getEyePosition();
-        var hit = CombatRay.trace(mob, start, start.add(mob.getLookAngle().scale(30)), 0.35);
+        Vec3 forward = Vec3.directionFromRotation(mob.getXRot(), mob.getYHeadRot());
+        var hit = CombatRay.trace(mob, start, start.add(forward.scale(30)), 0.35);
         Vec3 direction = hit.end().subtract(start).normalize();
         double length = start.distanceTo(hit.end());
         for (double distance = 0.5; distance < length; distance += 0.7) {

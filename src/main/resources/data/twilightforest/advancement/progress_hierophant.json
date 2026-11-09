@@ -1,0 +1,120 @@
+{
+  "parent": "twilightforest_finale:kill_adherent",
+  "criteria": {
+    "kill_hierophant": {
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "twilightforest_finale:the_twilight_hierophant"
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:player_killed_entity"
+    },
+    "castle": {
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type_specific": {
+                "type": "player",
+                "advancements": {
+                  "twilightforest:progress_castle": true
+                }
+              }
+            }
+          }
+        ]
+      },
+      "trigger": "minecraft:tick"
+    },
+    "cube_talisman": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "twilightforest:cube_talisman"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "trophy": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "twilightforest_finale:hierophant_trophy"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "was_in_fight": {
+      "conditions": {
+        "hurt_entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type": "twilightforest_finale:the_twilight_hierophant"
+            }
+          }
+        ]
+      },
+      "trigger": "twilightforest:hurt_boss"
+    },
+    "shadow_scepter": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "twilightforest_finale:shadow_scepter"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.twilightforest_finale.kill_hierophant.desc",
+      "with": [
+        {
+          "translate": "entity.twilightforest_finale.the_twilight_hierophant"
+        }
+      ]
+    },
+    "frame": "goal",
+    "hidden": false,
+    "icon": {
+      "id": "twilightforest_finale:hierophant_trophy"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.twilightforest_finale.kill_hierophant"
+    }
+  },
+  "requirements": [
+    [
+      "kill_hierophant",
+      "trophy",
+      "cube_talisman",
+      "was_in_fight"
+    ],
+    [
+      "castle"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

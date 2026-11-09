@@ -7,6 +7,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
@@ -24,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import show.twilight.finale.entity.combat.AdherentAttackGoal;
 import show.twilight.finale.entity.combat.ColoredAdherent;
 import twilightforest.entity.monster.Adherent;
+import show.twilight.finale.entity.TheTwilightHierophantEntity;
 
 /**
  * Preserve the original entity ID, eggs, loot, and structure spawn tables.
@@ -83,7 +86,23 @@ public abstract class AdherentMixin extends Monster implements ColoredAdherent {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
+        Entity attacker = source.getEntity();
+        if (attacker instanceof TheTwilightHierophantEntity) return false;
+        if (attacker != null && attacker.getPersistentData().hasUUID("FinaleHierophantOwner")
+                && level() instanceof net.minecraft.server.level.ServerLevel server
+                && server.getEntity(attacker.getPersistentData().getUUID("FinaleHierophantOwner")) instanceof TheTwilightHierophantEntity)
+            return false;
         return !(finale$getColor() == RED && source.is(DamageTypeTags.IS_FIRE)) && super.hurt(source, amount);
+    }
+
+    @Override
+    public boolean isAlliedTo(Entity entity) {
+        return entity instanceof TheTwilightHierophantEntity || super.isAlliedTo(entity);
+    }
+
+    @Override
+    public void setTarget(LivingEntity target) {
+        super.setTarget(target instanceof TheTwilightHierophantEntity ? null : target);
     }
 
     @Override

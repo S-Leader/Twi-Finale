@@ -9,10 +9,11 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import show.twilight.finale.client.model.*;
 
-@net.neoforged.fml.common.EventBusSubscriber(bus = net.neoforged.fml.common.EventBusSubscriber.Bus.MOD, value = {Dist.CLIENT})
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = {Dist.CLIENT})
 public class ModModelLayers {
     public static final ModelLayerLocation ADHERENT = ModModelLayers.register("adherent_high_priest", "head");
     public static final ModelLayerLocation ENFORCER = ModModelLayers.register("hadean_enforcer", "head");

@@ -7,13 +7,11 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CrossbowItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
@@ -31,7 +29,7 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;
 
-@net.neoforged.fml.common.EventBusSubscriber(modid = "twilightforest_finale", value = {Dist.CLIENT}, bus = net.neoforged.fml.common.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = "twilightforest_finale", value = {Dist.CLIENT}, bus = EventBusSubscriber.Bus.MOD)
 public class ModClientSetupEvent {
 
     @SubscribeEvent
@@ -44,27 +42,27 @@ public class ModClientSetupEvent {
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            ItemProperties.register((Item) ((Item) ModItem.TRIPLE_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "pull"), (stack, level, entity, time) -> entity != null ? (CrossbowItem.isCharged((ItemStack) stack) ? 0.0f : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / (float) CrossbowItem.getChargeDuration(stack, entity)) : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.TRIPLE_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "pulling"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack && !CrossbowItem.isCharged((ItemStack) stack) ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.TRIPLE_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "charged"), (stack, level, entity, time) -> CrossbowItem.isCharged((ItemStack) stack) ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.TRIPLE_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "firework"), (stack, level, entity, time) -> CrossbowItem.isCharged((ItemStack) stack) && stack.getOrDefault(net.minecraft.core.component.DataComponents.CHARGED_PROJECTILES, net.minecraft.world.item.component.ChargedProjectiles.EMPTY).contains(Items.FIREWORK_ROCKET) ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.ICE_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "pull"), (stack, level, entity, time) -> entity != null ? (CrossbowItem.isCharged((ItemStack) stack) ? 0.0f : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / (float) CrossbowItem.getChargeDuration(stack, entity)) : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.ICE_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "pulling"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack && !CrossbowItem.isCharged((ItemStack) stack) ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.ICE_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "charged"), (stack, level, entity, time) -> CrossbowItem.isCharged((ItemStack) stack) ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.ICE_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "firework"), (stack, level, entity, time) -> CrossbowItem.isCharged((ItemStack) stack) && stack.getOrDefault(net.minecraft.core.component.DataComponents.CHARGED_PROJECTILES, net.minecraft.world.item.component.ChargedProjectiles.EMPTY).contains(Items.FIREWORK_ROCKET) ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.ENDER_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "pull"), (stack, level, entity, time) -> entity != null ? (CrossbowItem.isCharged((ItemStack) stack) ? 0.0f : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / (float) CrossbowItem.getChargeDuration(stack, entity)) : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.ENDER_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "pulling"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack && !CrossbowItem.isCharged((ItemStack) stack) ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.ENDER_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "charged"), (stack, level, entity, time) -> CrossbowItem.isCharged((ItemStack) stack) ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.ENDER_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "firework"), (stack, level, entity, time) -> CrossbowItem.isCharged((ItemStack) stack) && stack.getOrDefault(net.minecraft.core.component.DataComponents.CHARGED_PROJECTILES, net.minecraft.world.item.component.ChargedProjectiles.EMPTY).contains(Items.FIREWORK_ROCKET) ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.SEEKER_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "pull"), (stack, level, entity, time) -> entity != null ? (CrossbowItem.isCharged((ItemStack) stack) ? 0.0f : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / (float) CrossbowItem.getChargeDuration(stack, entity)) : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.SEEKER_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "pulling"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack && !CrossbowItem.isCharged((ItemStack) stack) ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.SEEKER_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "charged"), (stack, level, entity, time) -> CrossbowItem.isCharged((ItemStack) stack) ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.SEEKER_CROSSBOW.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "firework"), (stack, level, entity, time) -> CrossbowItem.isCharged((ItemStack) stack) && stack.getOrDefault(net.minecraft.core.component.DataComponents.CHARGED_PROJECTILES, net.minecraft.world.item.component.ChargedProjectiles.EMPTY).contains(Items.FIREWORK_ROCKET) ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.TRANSFORMATION_ROOT.get()), (ResourceLocation) ResourceLocation.fromNamespaceAndPath((String) "twilightforest_finale", (String) "tool_type"), (stack, level, entity, time) -> show.twilight.finale.util.ItemData.getFloat(stack, "toolType"));
-            ItemProperties.register((Item) ((Item) ModItem.TRANSFORMATION_ROOT.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "blocking"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0f : 0.0f);
-            ItemProperties.register((Item) ((Item) ModItem.TRANSFORMATION_TOOL.get()), (ResourceLocation) ResourceLocation.fromNamespaceAndPath((String) "twilightforest_finale", (String) "tool_type"), (stack, level, entity, time) -> show.twilight.finale.util.ItemData.getFloat(stack, "toolType"));
-            ItemProperties.register((Item) ((Item) ModItem.TRANSFORMATION_TOOL.get()), (ResourceLocation) ResourceLocation.withDefaultNamespace((String) "blocking"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0f : 0.0f);
-            BlockEntityRenderers.register((BlockEntityType) ((BlockEntityType) ModBlocks.ADHERENT_TROPHY_ENTITY.get()), AdherentTrophyRenderer::new);
+            ItemProperties.register(ModItem.TRIPLE_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("pull"), (stack, level, entity, time) -> entity != null ? (CrossbowItem.isCharged(stack) ? 0.0f : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / (float) CrossbowItem.getChargeDuration(stack, entity)) : 0.0f);
+            ItemProperties.register(ModItem.TRIPLE_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("pulling"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack && !CrossbowItem.isCharged(stack) ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.TRIPLE_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("charged"), (stack, level, entity, time) -> CrossbowItem.isCharged(stack) ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.TRIPLE_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("firework"), (stack, level, entity, time) -> CrossbowItem.isCharged(stack) && stack.getOrDefault(net.minecraft.core.component.DataComponents.CHARGED_PROJECTILES, net.minecraft.world.item.component.ChargedProjectiles.EMPTY).contains(Items.FIREWORK_ROCKET) ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.ICE_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("pull"), (stack, level, entity, time) -> entity != null ? (CrossbowItem.isCharged(stack) ? 0.0f : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / (float) CrossbowItem.getChargeDuration(stack, entity)) : 0.0f);
+            ItemProperties.register(ModItem.ICE_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("pulling"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack && !CrossbowItem.isCharged(stack) ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.ICE_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("charged"), (stack, level, entity, time) -> CrossbowItem.isCharged(stack) ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.ICE_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("firework"), (stack, level, entity, time) -> CrossbowItem.isCharged(stack) && stack.getOrDefault(net.minecraft.core.component.DataComponents.CHARGED_PROJECTILES, net.minecraft.world.item.component.ChargedProjectiles.EMPTY).contains(Items.FIREWORK_ROCKET) ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.ENDER_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("pull"), (stack, level, entity, time) -> entity != null ? (CrossbowItem.isCharged(stack) ? 0.0f : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / (float) CrossbowItem.getChargeDuration(stack, entity)) : 0.0f);
+            ItemProperties.register(ModItem.ENDER_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("pulling"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack && !CrossbowItem.isCharged(stack) ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.ENDER_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("charged"), (stack, level, entity, time) -> CrossbowItem.isCharged(stack) ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.ENDER_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("firework"), (stack, level, entity, time) -> CrossbowItem.isCharged(stack) && stack.getOrDefault(net.minecraft.core.component.DataComponents.CHARGED_PROJECTILES, net.minecraft.world.item.component.ChargedProjectiles.EMPTY).contains(Items.FIREWORK_ROCKET) ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.SEEKER_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("pull"), (stack, level, entity, time) -> entity != null ? (CrossbowItem.isCharged(stack) ? 0.0f : (float) (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / (float) CrossbowItem.getChargeDuration(stack, entity)) : 0.0f);
+            ItemProperties.register(ModItem.SEEKER_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("pulling"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack && !CrossbowItem.isCharged(stack) ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.SEEKER_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("charged"), (stack, level, entity, time) -> CrossbowItem.isCharged(stack) ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.SEEKER_CROSSBOW.get(), ResourceLocation.withDefaultNamespace("firework"), (stack, level, entity, time) -> CrossbowItem.isCharged(stack) && stack.getOrDefault(net.minecraft.core.component.DataComponents.CHARGED_PROJECTILES, net.minecraft.world.item.component.ChargedProjectiles.EMPTY).contains(Items.FIREWORK_ROCKET) ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.TRANSFORMATION_ROOT.get(), ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "tool_type"), (stack, level, entity, time) -> show.twilight.finale.util.ItemData.getFloat(stack, "toolType"));
+            ItemProperties.register(ModItem.TRANSFORMATION_ROOT.get(), ResourceLocation.withDefaultNamespace("blocking"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0f : 0.0f);
+            ItemProperties.register(ModItem.TRANSFORMATION_TOOL.get(), ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "tool_type"), (stack, level, entity, time) -> show.twilight.finale.util.ItemData.getFloat(stack, "toolType"));
+            ItemProperties.register(ModItem.TRANSFORMATION_TOOL.get(), ResourceLocation.withDefaultNamespace("blocking"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0f : 0.0f);
+            BlockEntityRenderers.register(ModBlocks.ADHERENT_TROPHY_ENTITY.get(), AdherentTrophyRenderer::new);
             BlockEntityRenderers.register(ModBlocks.HIEROPHANT_TROPHY_ENTITY.get(), c -> new show.twilight.finale.client.renderer.FinalBossTrophyRenderer(c.getModelSet()));
             try {
                 Class.forName(AdherentTrophyRenderer.class.getName());
@@ -85,7 +83,7 @@ public class ModClientSetupEvent {
     private static void registerCuriosRenderers() {
         CuriosRendererRegistry.register(ModItem.CHARM_OF_LIFE_3.get(), () -> new twilightforest.compat.curios.renderer.CharmOfLifeNecklaceRenderer(0xFFFF8080));
         CuriosRendererRegistry.register(ModItem.GLASS_HEART.get(), () -> new twilightforest.compat.curios.renderer.CharmOfLifeNecklaceRenderer(0xFFFF8080));
-        CuriosRendererRegistry.register((Item) ((Item) ModItem.ADHERENT_TROPHY.get()), CurioHeadRenderer::new);
+        CuriosRendererRegistry.register(ModItem.ADHERENT_TROPHY.get(), CurioHeadRenderer::new);
         CuriosRendererRegistry.register(ModItem.HIEROPHANT_TROPHY.get(), CurioHeadRenderer::new);
         if (ModList.get().isLoaded("hadean_breathe")) {
             HadeanClientCompat.registerCuriosRenderers();

@@ -4,7 +4,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -18,9 +17,7 @@ import show.twilight.finale.init.ModWithoutLevelRenderer;
 
 import java.util.function.Consumer;
 
-public abstract class FinalTrophyItem
-        extends StandingAndWallBlockItem
-        implements CurioItem {
+public abstract class FinalTrophyItem extends StandingAndWallBlockItem implements CurioItem {
     protected FinalTrophyItem(Block floorBlock, Block wallBlock, Item.Properties properties) {
         super(floorBlock, wallBlock, properties, Direction.DOWN);
     }
@@ -37,10 +34,6 @@ public abstract class FinalTrophyItem
             return InteractionResultHolder.sidedSuccess(itemstack, (boolean) level.isClientSide());
         }
         return InteractionResultHolder.fail(itemstack);
-    }
-
-    public boolean canEquip(ItemStack stack, EquipmentSlot armorType, Entity entity) {
-        return armorType == EquipmentSlot.HEAD;
     }
 
     @Nullable
