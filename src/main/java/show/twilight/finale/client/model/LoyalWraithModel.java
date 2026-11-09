@@ -8,6 +8,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import show.twilight.finale.entity.LoyalWraithEntity;
 
@@ -36,7 +37,7 @@ public class LoyalWraithModel extends HumanoidModel<LoyalWraithEntity> {
 
     public void renderToBuffer(PoseStack stack, VertexConsumer buffer, int light, int overlay, float r, float g, float b, float alpha) {
         float finalAlpha = alpha >= 1.0f ? 0.6f : alpha;
-        super.renderToBuffer(stack, buffer, light, overlay, net.minecraft.util.FastColor.ARGB32.colorFromFloat(finalAlpha, r, g, b));
+        super.renderToBuffer(stack, buffer, light, overlay, FastColor.ARGB32.colorFromFloat(finalAlpha, r, g, b));
     }
 
     public void setupAnim(LoyalWraithEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {

@@ -28,6 +28,7 @@ import java.util.UUID;
  */
 public final class HierophantFragment extends Projectile {
     private static final EntityDataAccessor<Boolean> RETURNING = SynchedEntityData.defineId(HierophantFragment.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> EXPLOSIVE = SynchedEntityData.defineId(HierophantFragment.class, EntityDataSerializers.BOOLEAN);
     private Vec3 origin = Vec3.ZERO, direction = Vec3.ZERO;
     private int age, stage, stageTicks;
     private final Set<UUID> hitThisLeg = new HashSet<>();
@@ -50,10 +51,15 @@ public final class HierophantFragment extends Projectile {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder b) {
         b.define(RETURNING, false);
+        b.define(EXPLOSIVE, false);
     }
 
     public boolean returns() {
         return entityData.get(RETURNING);
+    }
+
+    public void setExplosive() {
+        entityData.set(EXPLOSIVE, true);
     }
 
     @Override
@@ -98,7 +104,8 @@ public final class HierophantFragment extends Projectile {
         EntityHitResult hit = ProjectileUtil.getEntityHitResult(level(), this, start, limited, getBoundingBox().expandTowards(getDeltaMovement()).inflate(0.2), this::canHitEntity);
         if (hit != null && hit.getEntity() instanceof LivingEntity victim) {
             hitThisLeg.add(victim.getUUID());
-            victim.hurt(damageSources().indirectMagic(this, boss), HierophantConfig.SHARD_DAMAGE.get().floatValue());
+            if (!entityData.get(EXPLOSIVE))
+                victim.hurt(damageSources().indirectMagic(this, boss), HierophantConfig.SHARD_DAMAGE.get().floatValue());
             if (!returns()) {
                 burst(hit.getLocation());
                 discard();
@@ -127,6 +134,12 @@ public final class HierophantFragment extends Projectile {
     }
 
     private void burst(Vec3 at) {
+        if (entityData.get(EXPLOSIVE)) {
+            level().explode(this, damageSources().explosion(this, getOwner()), null, at.x, at.y, at.z, 2, false,
+                    Level.ExplosionInteraction.NONE, TFParticleType.ANNIHILATE.get(), TFParticleType.ANNIHILATE.get(), net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE);
+            ((ServerLevel) level()).sendParticles(TFParticleType.ANNIHILATE.get(), at.x, at.y, at.z, 48, 0.7, 0.7, 0.7, 0.12);
+            return;
+        }
         ((ServerLevel) level()).sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, 6, 0.12, 0.12, 0.12, 0.01);
     }
 
@@ -140,6 +153,7 @@ public final class HierophantFragment extends Projectile {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("Returns", returns());
+        tag.putBoolean("Explosive", entityData.get(EXPLOSIVE));
         tag.putInt("Age", age);
         tag.putInt("Stage", stage);
         tag.putInt("StageTicks", stageTicks);
@@ -154,6 +168,7 @@ public final class HierophantFragment extends Projectile {
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         entityData.set(RETURNING, tag.getBoolean("Returns"));
+        entityData.set(EXPLOSIVE, tag.getBoolean("Explosive"));
         age = tag.getInt("Age");
         stage = tag.getInt("Stage");
         stageTicks = tag.getInt("StageTicks");

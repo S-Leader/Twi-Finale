@@ -3,17 +3,12 @@ package show.twilight.finale.init;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.LayerDefinitions;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import show.twilight.finale.TwilightFinaleMod;
 import show.twilight.finale.client.model.*;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = {Dist.CLIENT})
 public class ModModelLayers {
     public static final ModelLayerLocation ADHERENT = ModModelLayers.register("adherent_high_priest", "head");
     public static final ModelLayerLocation ENFORCER = ModModelLayers.register("hadean_enforcer", "head");
@@ -21,15 +16,14 @@ public class ModModelLayers {
     public static final ModelLayerLocation SMASHER = ModModelLayers.register("hadean_smasher", "head");
     public static final ModelLayerLocation DUCKENFORCER = ModModelLayers.register("duck_enforcer", "head");
 
-    private static ModelLayerLocation register(String p_171294_) {
-        return ModModelLayers.register(p_171294_, "main");
+    private static ModelLayerLocation register(String name) {
+        return ModModelLayers.register(name, "main");
     }
 
-    private static ModelLayerLocation register(String p_171301_, String p_171302_) {
-        return new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath((String) "twilightforest_finale", (String) p_171301_), p_171302_);
+    private static ModelLayerLocation register(String name, String varint) {
+        return new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TwilightFinaleMod.MOD_ID, name), varint);
     }
 
-    @SubscribeEvent
     public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(AdherentHighPriestTrophy.LAYER_LOCATION, AdherentHighPriestTrophy::createHead);
         event.registerLayerDefinition(HadeanEnforcerTropy.LAYER_LOCATION, HadeanEnforcerTropy::createHead);
@@ -48,11 +42,11 @@ public class ModModelLayers {
     }
 
     public static LayerDefinition createInnerArmourLayer() {
-        return LayerDefinition.create((MeshDefinition) HumanoidModel.createMesh((CubeDeformation) LayerDefinitions.INNER_ARMOR_DEFORMATION, (float) 0.0f), (int) 64, (int) 32);
+        return LayerDefinition.create(HumanoidModel.createMesh(LayerDefinitions.INNER_ARMOR_DEFORMATION, 0.0f), 64, 32);
     }
 
     public static LayerDefinition createOuterArmourLayer() {
-        return LayerDefinition.create((MeshDefinition) HumanoidModel.createMesh((CubeDeformation) LayerDefinitions.OUTER_ARMOR_DEFORMATION, (float) 0.0f), (int) 64, (int) 32);
+        return LayerDefinition.create(HumanoidModel.createMesh(LayerDefinitions.OUTER_ARMOR_DEFORMATION, 0.0f), 64, 32);
     }
 }
 

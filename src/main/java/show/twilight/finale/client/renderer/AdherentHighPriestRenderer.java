@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -104,7 +105,7 @@ public class AdherentHighPriestRenderer extends MobRenderer<AdherentHighPriestEn
                 this.model.setupAnim(entity, shadow2.limbSwing, shadow2.limbSwingAmount, shadow2.animationProgress, shadow2.yHeadRot - shadow2.yBodyRot, shadow2.xRot);
                 float alpha = Math.max(0.0f, 1.0f - shadowAge / 10.0f);
                 float color = 1.0f - 0.5f * (shadowAge / 10.0f);
-                this.getModel().renderToBuffer(stack, consumer, light, OverlayTexture.NO_OVERLAY, net.minecraft.util.FastColor.ARGB32.colorFromFloat(alpha, color, color, color));
+                this.getModel().renderToBuffer(stack, consumer, light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(alpha, color, color, color));
                 stack.popPose();
             }
         }

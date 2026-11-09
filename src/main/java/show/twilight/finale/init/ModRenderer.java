@@ -1,17 +1,13 @@
 package show.twilight.finale.init;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import show.twilight.finale.client.model.LoyalWraithModel;
 import show.twilight.finale.client.renderer.*;
 import twilightforest.client.model.TFModelLayers;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = {Dist.CLIENT})
 public class ModRenderer {
-    @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntity.HIEROPHANT_METEOR.get(), HierophantMeteorRenderer::new);
         event.registerEntityRenderer(ModEntity.HIEROPHANT_THROWN_WEAPON.get(), HierophantThrownWeaponRenderer::new);
         event.registerEntityRenderer(ModEntity.HIEROPHANT_FRAGMENT.get(), HierophantFragmentRenderer::new);
         event.registerEntityRenderer(twilightforest.init.TFEntities.ADHERENT.get(), ColoredAdherentRenderer::new);

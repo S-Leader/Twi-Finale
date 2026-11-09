@@ -1,10 +1,13 @@
 package show.twilight.finale.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import show.twilight.finale.client.model.CastleGuardianModel;
 import show.twilight.finale.entity.CastleGuardianEntity;
 import show.twilight.finale.runtime.client.layer.GlowLayer;
@@ -42,7 +45,7 @@ public class CastleGuardianRenderer extends MobRenderer<CastleGuardianEntity, Ca
 
     @Override
     public boolean shouldRender(CastleGuardianEntity entity, net.minecraft.client.renderer.culling.Frustum frustum, double x, double y, double z) {
-        return super.shouldRender(entity, frustum, x, y, z) || entity.getLaserPhase() > 0 && frustum.isVisible(new net.minecraft.world.phys.AABB(entity.getBeamOrigin(), entity.getBeamEnd()).inflate(0.3));
+        return super.shouldRender(entity, frustum, x, y, z) || entity.getLaserPhase() > 0 && frustum.isVisible(new AABB(entity.getBeamOrigin(), entity.getBeamEnd()).inflate(0.3));
     }
 
     @Override
@@ -52,8 +55,8 @@ public class CastleGuardianRenderer extends MobRenderer<CastleGuardianEntity, Ca
         var start = entity.getBeamOrigin().subtract(entity.position());
         var end = entity.getBeamEnd().subtract(entity.position());
         var direction = end.subtract(start).normalize();
-        var side = direction.cross(new net.minecraft.world.phys.Vec3(0, 1, 0));
-        if (side.lengthSqr() < 0.001) side = direction.cross(new net.minecraft.world.phys.Vec3(1, 0, 0));
+        var side = direction.cross(new Vec3(0, 1, 0));
+        if (side.lengthSqr() < 0.001) side = direction.cross(new Vec3(1, 0, 0));
         double width = entity.getLaserPhase() == 3 ? 0.16 : 0.012 + 0.018 * entity.getChargeProgress();
         side = side.normalize().scale(width);
         var up = direction.cross(side).normalize().scale(width);
@@ -63,8 +66,8 @@ public class CastleGuardianRenderer extends MobRenderer<CastleGuardianEntity, Ca
         beamQuad(pose, vertices, start, end, up, color);
     }
 
-    private static void beamQuad(PoseStack pose, com.mojang.blaze3d.vertex.VertexConsumer vertices, net.minecraft.world.phys.Vec3 start, net.minecraft.world.phys.Vec3 end, net.minecraft.world.phys.Vec3 side, int color) {
-        for (var point : new net.minecraft.world.phys.Vec3[]{start.subtract(side), end.subtract(side), end.add(side), start.add(side)})
+    private static void beamQuad(PoseStack pose, VertexConsumer vertices, Vec3 start, Vec3 end, Vec3 side, int color) {
+        for (var point : new Vec3[]{start.subtract(side), end.subtract(side), end.add(side), start.add(side)})
             vertices.addVertex(pose.last().pose(), (float) point.x, (float) point.y, (float) point.z).setColor(color);
     }
 }

@@ -33,7 +33,6 @@ import show.twilight.finale.init.ModItem;
 import twilightforest.block.ForceFieldBlock;
 import twilightforest.entity.projectile.ITFProjectile;
 import twilightforest.entity.projectile.TFThrowable;
-import twilightforest.init.TFBlocks;
 import twilightforest.init.TFDamageTypes;
 import twilightforest.init.TFParticleType;
 
@@ -58,8 +57,6 @@ public class ProverbsBolt extends TFThrowable implements ITFProjectile, ItemSupp
 
     public void tick() {
         if (!this.level().isClientSide()) {
-            // Treat a force-field cell as a full target, not the thin connecting arms.
-            // Respect solid occluders AND entities in front; never shoot through walls.
             Vec3 start = this.position(), end = start.add(this.getDeltaMovement());
             BlockHitResult field = BlockGetter.traverseBlocks(start, end, this, (bolt, pos) -> {
                 BlockState state = bolt.level().getBlockState(pos);
@@ -127,7 +124,7 @@ public class ProverbsBolt extends TFThrowable implements ITFProjectile, ItemSupp
             // The final boss's violet enclosure is deliberately not dispellable.
             // It still intercepts/consumes the bolt in tick(), so this cannot be
             // used to shoot through the field at the entity behind it.
-            if (state.getBlock() instanceof ForceFieldBlock && !state.is(TFBlocks.VIOLET_FORCE_FIELD.get())) {
+            if (state.getBlock() instanceof ForceFieldBlock) {
                 this.level().removeBlock(pos, false);
                 Level level = this.level();
                 if (level instanceof ServerLevel server) {

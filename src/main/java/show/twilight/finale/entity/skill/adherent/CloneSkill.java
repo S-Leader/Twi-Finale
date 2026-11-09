@@ -1,14 +1,12 @@
 package show.twilight.finale.entity.skill.adherent;
 
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import show.twilight.finale.entity.AdherentHighPriestEntity;
 import show.twilight.finale.runtime.entity.skill.BaseSkill;
 
-public class CloneSkill
-        extends BaseSkill<AdherentHighPriestEntity> {
+public class CloneSkill extends BaseSkill<AdherentHighPriestEntity> {
     public static final int ID = 3;
 
     public CloneSkill() {
@@ -39,11 +37,11 @@ public class CloneSkill
                     if (target != null) {
                         clone.setTarget(target);
                     }
-                    entity.level().addFreshEntity((Entity) clone);
+                    entity.level().addFreshEntity(clone);
                 }
             }
             if (entity.getSkillTick() == 60 && target != null) {
-                entity.teleportToTarget((Entity) target);
+                entity.teleportToTarget(target);
             }
         }
     }

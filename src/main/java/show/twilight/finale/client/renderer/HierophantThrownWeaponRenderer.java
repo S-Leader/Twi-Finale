@@ -11,7 +11,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import show.twilight.finale.entity.projectile.HierophantThrownWeapon;
 
-/** Keep a spinning weapon visual; only its movement is snowball-like. */
+/**
+ * Keep a spinning weapon visual; only its movement is snowball-like.
+ */
 public final class HierophantThrownWeaponRenderer extends EntityRenderer<HierophantThrownWeapon> {
     private final ItemRenderer items;
 
@@ -32,7 +34,8 @@ public final class HierophantThrownWeaponRenderer extends EntityRenderer<Hieroph
         super.render(weapon, yaw, partial, pose, buffers, light);
     }
 
-    @Override public ResourceLocation getTextureLocation(HierophantThrownWeapon weapon) {
+    @Override
+    public ResourceLocation getTextureLocation(HierophantThrownWeapon weapon) {
         return net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS;
     }
 }

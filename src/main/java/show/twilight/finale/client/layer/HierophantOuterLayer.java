@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import show.twilight.finale.client.model.TheTwilightHierophantModel;
@@ -41,7 +42,7 @@ public class HierophantOuterLayer<T extends TheTwilightHierophantEntity>
             model.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
             model.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
             VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(texture));
-            model.renderToBuffer(poseStack, consumer, packedLight, LivingEntityRenderer.getOverlayCoords(entity, 0.0f), net.minecraft.util.FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
+            model.renderToBuffer(poseStack, consumer, packedLight, LivingEntityRenderer.getOverlayCoords(entity, 0.0f), FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
         }
     }
 }

@@ -45,8 +45,7 @@ public class ContinuousSprintSkill extends BaseSkill<AdherentHighPriestEntity> {
             entity.invulnerableTime = 20;
             List<LivingEntity> targets = entity.level().getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(1.5, 0.0, 1.5));
             for (LivingEntity rangeTarget : targets) {
-                Player p;
-                if (rangeTarget == entity || entity.isAlliedTo(rangeTarget) || rangeTarget instanceof Player && (p = (Player) rangeTarget).isCrouching() || !entity.canAttack(rangeTarget) || !rangeTarget.hurt(entity.damageSources().mobAttack(entity), 5.5f))
+                if (rangeTarget == entity || entity.isAlliedTo(rangeTarget) || rangeTarget instanceof Player && rangeTarget.isCrouching() || !entity.canAttack(rangeTarget) || !rangeTarget.hurt(entity.damageSources().mobAttack(entity), 5.5f))
                     continue;
                 entity.playSound(SoundEvents.PLAYER_ATTACK_SWEEP);
             }

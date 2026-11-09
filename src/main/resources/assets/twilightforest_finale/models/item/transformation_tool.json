@@ -30,6 +30,12 @@
     },
     {
       "predicate": {
+        "twilightforest_finale:tool_type": 6.0
+      },
+      "model": "twilightforest_finale:item/transformation_tool_mace"
+    },
+    {
+      "predicate": {
         "minecraft:blocking": 1.0
       },
       "model": "twilightforest_finale:item/transformation_tool_shield"

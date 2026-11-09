@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -46,6 +47,7 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
         ghostOuterNormal = new TheTwilightHierophantModel<>(context.bakeLayer(TheTwilightHierophantModel.LAYER_LOCATION_OUTER), false);
         ghostOuterSlim = new TheTwilightHierophantModel<>(context.bakeLayer(TheTwilightHierophantModel.LAYER_LOCATION_OUTER_SLIM), true);
         this.addLayer(new show.twilight.finale.client.layer.HierophantHeldItemLayer<>(this, context.getItemInHandRenderer()));
+        this.addLayer(new show.twilight.finale.client.layer.HierophantRitualLayer<>(this, context.getItemRenderer()));
         HierophantArmorLayer.addCustomArmorLayers(this, context, TheTwilightHierophantModel.LAYER_LOCATION_I, TheTwilightHierophantModel.LAYER_LOCATION_O);
         this.addLayer(new HierophantOuterLayer(this, context.getModelSet()));
     }
@@ -77,18 +79,18 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
         }
         if (action == TheTwilightHierophantEntity.DEATH)
             alpha *= net.minecraft.util.Mth.clamp((125 - time - partialTicks) / 55F, 0, 1);
-        boolean afterimages = entity.getPhase() == 2 && (blur > 0.03F || action == TheTwilightHierophantEntity.SUMMON || action == TheTwilightHierophantEntity.BARRAGE || action == TheTwilightHierophantEntity.SMOKE_MOVE);
+        boolean afterimages = entity.getPhase() == 3 && action != TheTwilightHierophantEntity.REBIRTH;
         if (alpha > 0) {
             float opacity = alpha;
             super.render(entity, entityYaw, partialTicks, stack, type -> new AlphaVertexConsumer(bufferSource.getBuffer(type), opacity), light);
         }
         renderShadow(entity, partialTicks, stack, bufferSource, light, afterimages, alpha);
-        if (entity.hasShield() && action != TheTwilightHierophantEntity.DEATH && (action != TheTwilightHierophantEntity.INTRO || time >= 55)) {
-            float grow = action == TheTwilightHierophantEntity.INTRO ? smooth((time - 55 + partialTicks) / 25F) : 1;
+        if (entity.hasShield() && action != TheTwilightHierophantEntity.DEATH && (action != TheTwilightHierophantEntity.INTRO || time >= 20)) {
+            float grow = action == TheTwilightHierophantEntity.INTRO ? smooth((time - 20 + partialTicks) / 60F) : 1;
             stack.pushPose();
             if (entity.hurtTime > 0) {
                 stack.translate(Math.sin(age * 3.1) * 0.07, 0, Math.cos(age * 2.7) * 0.07);
-                stack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees((float) Math.sin(age * 3) * entity.hurtTime * 0.45F));
+                stack.mulPose(Axis.ZP.rotationDegrees((float) Math.sin(age * 3) * entity.hurtTime * 0.45F));
             }
             if (grow > 0)
                 cube.renderShield(stack, bufferSource, light, entity.getScale(), grow, entity.getShieldRotation(partialTicks), entity.getShieldOpacity(), entity.isShieldRed());
@@ -107,7 +109,7 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
      * Low health changes density/lifetime only, never adds artificial orbit/jitter.
      */
     private void renderShadow(T entity, float partial, PoseStack pose, MultiBufferSource buffers, int light, boolean active, float bodyAlpha) {
-        if (entity.getPhase() != 2 || entity.isDeadOrDying()) {
+        if (entity.getPhase() != 3 || entity.isDeadOrDying() || entity.getAction() == TheTwilightHierophantEntity.REBIRTH) {
             histories.remove(entity);
             return;
         }
@@ -132,11 +134,11 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
             try {
                 var offset = frame.sample().position().subtract(entity.getPosition(partial));
                 pose.translate(offset.x, offset.y, offset.z);
-                pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180 - frame.sample().yBodyRot()));
+                pose.mulPose(Axis.YP.rotationDegrees(180 - frame.sample().yBodyRot()));
                 pose.scale(-entity.getScale(), -entity.getScale(), entity.getScale());
                 scale(entity, pose, partial);
                 pose.translate(0, -1.501, 0);
-                int color = net.minecraft.util.FastColor.ARGB32.colorFromFloat(opacity, 1, 1, 1);
+                int color = FastColor.ARGB32.colorFromFloat(opacity, 1, 1, 1);
                 ghost.renderToBuffer(pose, buffers.getBuffer(net.minecraft.client.renderer.RenderType.entityTranslucent(getTextureLocation(entity))), light, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, color);
                 var texture = ResourceLocation.fromNamespaceAndPath("twilightforest_finale", frame.slim() ? "textures/entity/the_twilight_hierophant_slim_outer.png" : "textures/entity/the_twilight_hierophant_outer.png");
                 robe.renderToBuffer(pose, buffers.getBuffer(net.minecraft.client.renderer.RenderType.entityTranslucent(texture)), light, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, color);
@@ -148,7 +150,7 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
 
     @Override
     protected void setupRotations(T entity, PoseStack pose, float age, float yaw, float partial, float scale) {
-        // The custom kneeling death pose must not receive vanilla's sideways roll.
+        // The final curl/spread/dissolution must not receive vanilla's sideways roll.
         if (entity.isDeadOrDying()) pose.mulPose(Axis.YP.rotationDegrees(180 - yaw));
         else super.setupRotations(entity, pose, age, yaw, partial, scale);
     }

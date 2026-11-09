@@ -4,10 +4,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -23,10 +24,10 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.entity.combat.AdherentAttackGoal;
 import show.twilight.finale.entity.combat.ColoredAdherent;
 import twilightforest.entity.monster.Adherent;
-import show.twilight.finale.entity.TheTwilightHierophantEntity;
 
 /**
  * Preserve the original entity ID, eggs, loot, and structure spawn tables.
@@ -35,6 +36,8 @@ import show.twilight.finale.entity.TheTwilightHierophantEntity;
 public abstract class AdherentMixin extends Monster implements ColoredAdherent {
     @Unique
     private static final EntityDataAccessor<Integer> FINALE_COLOR = SynchedEntityData.defineId(Adherent.class, EntityDataSerializers.INT);
+    @Unique
+    private int finale$ownerMissingTicks;
 
     protected AdherentMixin(EntityType<? extends Monster> type, Level level) {
         super(type, level);
@@ -75,8 +78,46 @@ public abstract class AdherentMixin extends Monster implements ColoredAdherent {
     @Override
     public void aiStep() {
         if (!level().isClientSide() && entityData.get(FINALE_COLOR) < 0) finale$setColor(random.nextInt(4));
+        if (level() instanceof ServerLevel && isAlive() && getPersistentData().hasUUID("FinaleHierophantOwner")) {
+            TheTwilightHierophantEntity owner = finale$getSummoner();
+            if (owner != null) {
+                finale$ownerMissingTicks = 0;
+                if (!owner.trackSummonedAdherent((Adherent) (Object) this)) {
+                    // Includes a reloaded minion whose owner has already left phase two.
+                    kill();
+                    return;
+                }
+                setTarget(owner.getTarget());
+            } else if (++finale$ownerMissingTicks >= 40) {
+                // Allow entity-load ordering without keeping orphaned summons alive.
+                kill();
+                return;
+            }
+        }
         super.aiStep();
         if (finale$getColor() == RED) clearFire();
+    }
+
+    @Unique
+    private TheTwilightHierophantEntity finale$getSummoner() {
+        if (level() instanceof ServerLevel server && getPersistentData().hasUUID("FinaleHierophantOwner")
+                && server.getEntity(getPersistentData().getUUID("FinaleHierophantOwner")) instanceof TheTwilightHierophantEntity owner)
+            return owner;
+        return null;
+    }
+
+    @Override
+    public void die(DamageSource source) {
+        super.die(source);
+        TheTwilightHierophantEntity owner = finale$getSummoner();
+        if (owner != null && isDeadOrDying()) owner.forgetSummonedAdherent(getUUID());
+    }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        TheTwilightHierophantEntity owner = finale$getSummoner();
+        if (owner != null && reason.shouldDestroy()) owner.forgetSummonedAdherent(getUUID());
+        super.remove(reason);
     }
 
     @Override
@@ -102,6 +143,11 @@ public abstract class AdherentMixin extends Monster implements ColoredAdherent {
 
     @Override
     public void setTarget(LivingEntity target) {
+        TheTwilightHierophantEntity owner = finale$getSummoner();
+        if (owner != null && owner.isAlive() && owner.getPhase() == 2) {
+            LivingEntity ownerTarget = owner.getTarget();
+            if (ownerTarget != null && ownerTarget.isAlive() && !ownerTarget.isSpectator()) target = ownerTarget;
+        }
         super.setTarget(target instanceof TheTwilightHierophantEntity ? null : target);
     }
 

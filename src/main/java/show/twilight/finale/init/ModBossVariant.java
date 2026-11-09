@@ -15,7 +15,7 @@ public enum ModBossVariant implements StringRepresentable {
     private final TrophyType trophyType;
     private final Supplier<BlockEntityType<? extends BossSpawnerBlockEntity<?>>> blockEntityType;
 
-    private ModBossVariant(TrophyType trophyType, Supplier<BlockEntityType<? extends BossSpawnerBlockEntity<?>>> blockEntityType) {
+    ModBossVariant(TrophyType trophyType, Supplier<BlockEntityType<? extends BossSpawnerBlockEntity<?>>> blockEntityType) {
         this.trophyType = trophyType;
         this.blockEntityType = blockEntityType;
     }
@@ -33,14 +33,14 @@ public enum ModBossVariant implements StringRepresentable {
         return this.blockEntityType != null ? this.blockEntityType.get() : null;
     }
 
-    public static enum TrophyType {
+    public enum TrophyType {
         GOLD("trophy"),
         IRON("trophy_minor"),
         IRONWOOD("trophy_quest");
 
         private final String modelName;
 
-        private TrophyType(String modelName) {
+        TrophyType(String modelName) {
             this.modelName = modelName;
         }
     }

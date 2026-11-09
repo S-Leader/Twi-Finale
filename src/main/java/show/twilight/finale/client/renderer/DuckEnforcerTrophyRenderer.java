@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import show.twilight.finale.block.entity.FinalTrophyBlockEntity;
 import show.twilight.finale.client.model.DuckEnforcerTropy;
 import show.twilight.finale.init.ModModelLayers;
@@ -39,7 +40,7 @@ public class DuckEnforcerTrophyRenderer implements BlockEntityRenderer<FinalTrop
         poseStack.translate(0.5f, 1.5f, 0.5f);
         poseStack.scale(1.0f, 1.0f, 1.0f);
         poseStack.mulPose(Axis.XP.rotation((float) Math.PI));
-        this.enforcerModel.renderToBuffer(poseStack, bufferSource.getBuffer(this.enforcerRendertype), packedLight, overlay, net.minecraft.util.FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
+        this.enforcerModel.renderToBuffer(poseStack, bufferSource.getBuffer(this.enforcerRendertype), packedLight, overlay, FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
         poseStack.popPose();
     }
 }

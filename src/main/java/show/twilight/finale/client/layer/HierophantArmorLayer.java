@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
@@ -112,17 +113,17 @@ public class HierophantArmorLayer<T extends TheTwilightHierophantEntity, M exten
 
     private void renderModel(PoseStack stack, MultiBufferSource bufferSource, int light, Model model, float red, float green, float blue, ResourceLocation texture) {
         VertexConsumer consumer = bufferSource.getBuffer(RenderType.armorCutoutNoCull(texture));
-        model.renderToBuffer(stack, consumer, light, OverlayTexture.NO_OVERLAY, net.minecraft.util.FastColor.ARGB32.colorFromFloat(1.0f, red, green, blue));
+        model.renderToBuffer(stack, consumer, light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1.0f, red, green, blue));
     }
 
     private void renderTrim(net.minecraft.core.Holder<ArmorMaterial> material, PoseStack stack, MultiBufferSource bufferSource, int light, ArmorTrim trim, Model model, boolean innerModel) {
         TextureAtlasSprite sprite = this.armorTrimAtlas.getSprite(innerModel ? trim.innerTexture(material) : trim.outerTexture(material));
         VertexConsumer consumer = sprite.wrap(bufferSource.getBuffer(Sheets.armorTrimsSheet(trim.pattern().value().decal())));
-        model.renderToBuffer(stack, consumer, light, OverlayTexture.NO_OVERLAY, net.minecraft.util.FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
+        model.renderToBuffer(stack, consumer, light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
     }
 
     private void renderGlint(PoseStack stack, MultiBufferSource bufferSource, int light, Model model) {
-        model.renderToBuffer(stack, bufferSource.getBuffer(RenderType.armorEntityGlint()), light, OverlayTexture.NO_OVERLAY, net.minecraft.util.FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
+        model.renderToBuffer(stack, bufferSource.getBuffer(RenderType.armorEntityGlint()), light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
     }
 
     protected Model getArmorModelHook(T entity, ItemStack stack, EquipmentSlot slot, A model) {

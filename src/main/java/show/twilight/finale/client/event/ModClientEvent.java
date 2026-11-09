@@ -9,10 +9,10 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MaceItem;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -24,17 +24,24 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.ItemAbilities;
+import show.twilight.finale.TwilightFinaleMod;
 import show.twilight.finale.compat.curios.ModCuriosCompat;
 import show.twilight.finale.init.ModItem;
+import show.twilight.finale.init.ModWithoutLevelRenderer;
+import show.twilight.finale.item.AbstractTransformationItem;
 import show.twilight.finale.item.FinalTrophyItem;
+import show.twilight.finale.util.ItemData;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
-@EventBusSubscriber(modid = "twilightforest_finale", value = {Dist.CLIENT})
+@EventBusSubscriber(modid = TwilightFinaleMod.MOD_ID, value = Dist.CLIENT)
 public class ModClientEvent {
     private static final Map<EntityModel<?>, HeadVisibility> HIDDEN_HEADS = new IdentityHashMap<>();
+    private static final Map<ItemStack, Float> LAST_TOOL_FORMS = new WeakHashMap<>();
 
     private record HeadVisibility(ModelPart head, boolean headVisible, ModelPart hat, boolean hatVisible) {
         void restore() {
@@ -43,39 +50,54 @@ public class ModClientEvent {
         }
     }
 
-    @SubscribeEvent
-    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
-        ItemStack stack;
+    public static float getTransformationToolType(ItemStack stack, ClientLevel level, LivingEntity holder, int seed) {
+        float previous = LAST_TOOL_FORMS.getOrDefault(stack, ItemData.getFloat(stack, "toolType"));
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
-        ClientLevel level = minecraft.level;
-        if (player != null && level != null && ((stack = player.getMainHandItem()).is(ModItem.TRANSFORMATION_ROOT.get()) || stack.is(ModItem.TRANSFORMATION_TOOL.get()))) {
-            Entity entity;
-            HitResult result = minecraft.hitResult;
-            if (result instanceof BlockHitResult blockHitResult) {
-                BlockState state = level.getBlockState(blockHitResult.getBlockPos());
-                if (state.is(BlockTags.MINEABLE_WITH_PICKAXE)) {
-                    show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 2.0f);
-                } else if (state.is(BlockTags.MINEABLE_WITH_AXE)) {
-                    show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 3.0f);
-                } else if (state.is(BlockTags.MINEABLE_WITH_SHOVEL)) {
-                    if (player.isCrouching() && state.getToolModifiedState(new UseOnContext(player, InteractionHand.MAIN_HAND, blockHitResult), ItemAbilities.HOE_TILL, false) != null) {
-                        show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 5.0f);
-                    } else {
-                        show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 4.0f);
-                    }
-                } else if (state.is(BlockTags.MINEABLE_WITH_HOE)) {
-                    show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 5.0f);
-                }
-            } else if (result instanceof EntityHitResult && (entity = ((EntityHitResult) result).getEntity()) instanceof LivingEntity) {
-                LivingEntity entity2 = (LivingEntity) entity;
-                if (entity2.isBlocking()) {
-                    show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 3.0f);
-                } else {
-                    show.twilight.finale.util.ItemData.putFloat(stack, "toolType", 1.0f);
-                }
-            }
+        // Hand/GUI renderers can supply a copy of the held stack, or omit the
+        // holder. Object identity alone must not prevent tool selection.
+        if (holder == null && player != null && stack.getEntityRepresentation() == null && ItemStack.isSameItemSameComponents(stack, player.getMainHandItem()))
+            holder = player;
+        if (holder == null || !ItemStack.isSameItemSameComponents(stack, holder.getMainHandItem())) return previous;
+        boolean local = holder == player && minecraft.level != null;
+        HitResult result = local ? minecraft.hitResult : null;
+        if (local && (result == null || result.getType() == HitResult.Type.MISS))
+            result = player.pick(player.blockInteractionRange(), 1, false);
+
+        // Slider always takes the pickaxe form, even during a fall. Server-side
+        // hit handling uses the same target tag instead of mace-only effects.
+        if (result instanceof EntityHitResult hit && AbstractTransformationItem.isPickaxeTarget(hit.getEntity())) {
+            LAST_TOOL_FORMS.put(stack, 2.0F);
+            return 2;
         }
+        if (MaceItem.canSmashAttack(holder) || ItemData.getFloat(stack, AbstractTransformationItem.MACE_FORM_TAG) > 0)
+            return AbstractTransformationItem.MACE_FORM;
+        if (!local) return previous;
+        float form = previous;
+        if (result instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK) {
+            BlockState state = minecraft.level.getBlockState(hit.getBlockPos());
+            if (AbstractTransformationItem.isPickaxeBlock(state)) {
+                form = 2;
+            } else if (state.is(BlockTags.MINEABLE_WITH_AXE)) {
+                form = 3;
+            } else if (state.is(BlockTags.MINEABLE_WITH_SHOVEL)) {
+                form = player.isCrouching() && state.getToolModifiedState(new UseOnContext(player, InteractionHand.MAIN_HAND, hit), ItemAbilities.HOE_TILL, true) != null ? 5 : 4;
+            } else if (state.is(BlockTags.MINEABLE_WITH_HOE)) {
+                form = 5;
+            }
+        } else if (result instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity target) {
+            form = target.isBlocking() ? 3 : 1;
+        }
+        // Resolve at render time, without CUSTOM_DATA writes that fight server
+        // synchronization or trigger re-equip animations. Keep the last normal
+        // form while looking into air and restore it after a mace smash.
+        LAST_TOOL_FORMS.put(stack, form);
+        return form;
+    }
+
+    @SubscribeEvent
+    public static void registerExtensions(RegisterClientExtensionsEvent event) {
+        event.registerItem(ModWithoutLevelRenderer.ITEM_EXTENSION, ModItem.ADHERENT_TROPHY.get(), ModItem.HIEROPHANT_TROPHY.get());
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

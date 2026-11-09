@@ -35,6 +35,12 @@ public final class FinaleCastleTemplatePiece extends TemplateStructurePiece {
                 .setIgnoreEntities(false).addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
         // Do not transfer aquifer water into the forge's dry stairs during placement.
         if (dryForge) settings.setLiquidSettings(LiquidSettings.IGNORE_WATERLOGGING);
+        // The Hierophant is now the roof encounter, not a second copy in the forge.
+        settings.addProcessor(new net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor(java.util.List.of(
+                new net.minecraft.world.level.levelgen.structure.templatesystem.ProcessorRule(
+                        new net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest(show.twilight.finale.init.ModBlocks.TWILIGHT_HIEROPHANT_BOSS_SPAWNER.get()),
+                        net.minecraft.world.level.levelgen.structure.templatesystem.AlwaysTrueTest.INSTANCE,
+                        net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()))));
         return settings;
     }
 

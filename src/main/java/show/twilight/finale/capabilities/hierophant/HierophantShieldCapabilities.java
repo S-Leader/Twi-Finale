@@ -5,7 +5,9 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import show.twilight.finale.TwilightFinaleMod;
 import show.twilight.finale.init.ModEntity;
 
-/** Only a capability provider is registered; no new entity type or instance. */
+/**
+ * Only a capability provider is registered; no new entity type or instance.
+ */
 public final class HierophantShieldCapabilities {
     public static final EntityCapability<IHierophantShield, Void> SHIELD = EntityCapability.createVoid(
             TwilightFinaleMod.prefix("hierophant_shield"), IHierophantShield.class);

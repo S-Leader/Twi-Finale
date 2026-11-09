@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import show.twilight.finale.block.entity.FinalTrophyBlockEntity;
 import show.twilight.finale.client.model.HadeanBlasterTropy;
 import show.twilight.finale.init.ModModelLayers;
@@ -26,7 +27,7 @@ public class HadeanBlasterTrophyRenderer implements BlockEntityRenderer<FinalTro
 
     public HadeanBlasterTrophyRenderer(HadeanBlasterTropy blaster2Model) {
         this.blasterModel = blaster2Model;
-        this.blasterRendertype = this.blasterModel.renderType(ResourceLocation.fromNamespaceAndPath((String) "hadean_breathe", (String) "textures/entity/hadean_blaster.png"));
+        this.blasterRendertype = this.blasterModel.renderType(ResourceLocation.fromNamespaceAndPath("hadean_breathe", "textures/entity/hadean_blaster.png"));
     }
 
     public void render(FinalTrophyBlockEntity trophy, float partial, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int overlay) {
@@ -39,7 +40,7 @@ public class HadeanBlasterTrophyRenderer implements BlockEntityRenderer<FinalTro
         poseStack.translate(0.5f, 1.5f, 0.5f);
         poseStack.scale(1.0f, 1.0f, 1.0f);
         poseStack.mulPose(Axis.XP.rotation((float) Math.PI));
-        this.blasterModel.renderToBuffer(poseStack, bufferSource.getBuffer(this.blasterRendertype), packedLight, overlay, net.minecraft.util.FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
+        this.blasterModel.renderToBuffer(poseStack, bufferSource.getBuffer(this.blasterRendertype), packedLight, overlay, FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
         poseStack.popPose();
     }
 }

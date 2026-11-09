@@ -8,16 +8,15 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import show.twilight.finale.block.entity.FinalTrophyBlockEntity;
 import show.twilight.finale.client.model.AdherentHighPriestTrophy;
 import show.twilight.finale.init.ModModelLayers;
 
-public class AdherentTrophyRenderer
-        implements BlockEntityRenderer<FinalTrophyBlockEntity>,
-        RenderWithoutEntity {
+public class AdherentTrophyRenderer implements BlockEntityRenderer<FinalTrophyBlockEntity>, RenderWithoutEntity {
     private final AdherentHighPriestTrophy adherentModel;
     private final RenderType adherentRendertype;
-    private static final RenderType ADHERENT_GLOW = RenderType.eyes((ResourceLocation) ResourceLocation.fromNamespaceAndPath((String) "twilightforest_finale", (String) "textures/entity/adherent_high_priest.png"));
+    private static final RenderType ADHERENT_GLOW = RenderType.eyes(ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "textures/entity/adherent_high_priest.png"));
 
     public AdherentTrophyRenderer(BlockEntityRendererProvider.Context context) {
         this(new AdherentHighPriestTrophy(context.bakeLayer(ModModelLayers.ADHERENT)));
@@ -29,7 +28,7 @@ public class AdherentTrophyRenderer
 
     public AdherentTrophyRenderer(AdherentHighPriestTrophy adhModel) {
         this.adherentModel = adhModel;
-        ResourceLocation baseTexture = ResourceLocation.fromNamespaceAndPath((String) "twilightforest_finale", (String) "textures/entity/adherent_high_priest.png");
+        ResourceLocation baseTexture = ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "textures/entity/adherent_high_priest.png");
         this.adherentRendertype = this.adherentModel.renderType(baseTexture);
     }
 
@@ -43,8 +42,8 @@ public class AdherentTrophyRenderer
         poseStack.translate(0.5f, 1.5f, 0.5f);
         poseStack.scale(1.0f, 1.0f, 1.0f);
         poseStack.mulPose(Axis.XP.rotation((float) Math.PI));
-        this.adherentModel.renderToBuffer(poseStack, bufferSource.getBuffer(this.adherentRendertype), packedLight, overlay, net.minecraft.util.FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
-        this.adherentModel.renderToBuffer(poseStack, bufferSource.getBuffer(ADHERENT_GLOW), 0xF000F0, overlay, net.minecraft.util.FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
+        this.adherentModel.renderToBuffer(poseStack, bufferSource.getBuffer(this.adherentRendertype), packedLight, overlay, FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
+        this.adherentModel.renderToBuffer(poseStack, bufferSource.getBuffer(ADHERENT_GLOW), 0xF000F0, overlay, FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
         poseStack.popPose();
     }
 }

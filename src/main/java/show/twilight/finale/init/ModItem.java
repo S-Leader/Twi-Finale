@@ -1,11 +1,8 @@
 package show.twilight.finale.init;
 
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import show.twilight.finale.block.FloorAdherentTrophyBlock;
-import show.twilight.finale.block.WallAdherentTrophyBlock;
 import show.twilight.finale.item.*;
 import show.twilight.finale.item.SmithingTemplateItem;
 import twilightforest.init.TFArmorMaterials;

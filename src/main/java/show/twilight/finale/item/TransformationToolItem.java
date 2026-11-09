@@ -33,9 +33,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class TransformationToolItem
-        extends PickaxeItem
-        implements Equipable {
+public class TransformationToolItem extends AbstractTransformationItem implements Equipable {
     private static final Set<ItemAbility> ACTIONS = (Set) Util.make(Collections.newSetFromMap(new IdentityHashMap()), actions -> {
         actions.addAll(ItemAbilities.DEFAULT_SWORD_ACTIONS);
         actions.addAll(ItemAbilities.DEFAULT_PICKAXE_ACTIONS);

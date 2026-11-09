@@ -18,6 +18,8 @@ import twilightforest.init.TFDamageTypes;
 import java.util.EnumSet;
 
 public final class AdherentAttackGoal extends Goal {
+    private static final int CHARGE_TICKS = 40, RED_BREATH_TICKS = 100;
+    private static final float RED_BREATH_DAMAGE = 19F / 3F;
     private final Adherent mob;
     private int cooldown, casting;
     private boolean active;
@@ -84,7 +86,8 @@ public final class AdherentAttackGoal extends Goal {
         }
         mob.getNavigation().stop();
         casting++;
-        if (casting < 40) {
+        int chargeTicks = color == ColoredAdherent.RED ? CHARGE_TICKS * 2 : CHARGE_TICKS;
+        if (casting < chargeTicks) {
             if (casting % 4 == 0) {
                 int rgb = ColoredAdherent.tint(color);
                 level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, rgb),
@@ -93,17 +96,18 @@ public final class AdherentAttackGoal extends Goal {
             return;
         }
         if (color == ColoredAdherent.RED) {
-            // Hydra uses a 100-tick breath, 19 fire damage, and three seconds of burning.
-            if (casting < 140) breathe(level);
+            // Keep the five-second breath; red adherents now charge twice as
+            // long and deal one third of their former 19-point direct fire hit.
+            if (casting < chargeTicks + RED_BREATH_TICKS) breathe(level);
             else finish(80);
         } else if (color == ColoredAdherent.PURPLE) {
-            if (casting == 40 && visible) {
+            if (casting == chargeTicks && visible) {
                 for (int i = 0; i < 5; i++) level.addFreshEntity(new HomingVisShard(level, mob, target, i));
                 mob.playSound(SoundEvents.EVOKER_CAST_SPELL, 1, 0.8F);
             }
             finish(100);
         } else if (color == ColoredAdherent.YELLOW) {
-            if (casting == 40 && visible) {
+            if (casting == chargeTicks && visible) {
                 Vec3 start = mob.getEyePosition().add(mob.getLookAngle().scale(0.8));
                 Vec3 aim = target.getEyePosition().subtract(start).normalize();
                 LargeFireball fireball = new LargeFireball(level, mob, aim, 1);
@@ -114,7 +118,7 @@ public final class AdherentAttackGoal extends Goal {
             }
             finish(80);
         } else {
-            if ((casting == 40 || casting == 44 || casting == 48) && visible) {
+            if ((casting == chargeTicks || casting == chargeTicks + 4 || casting == chargeTicks + 8) && visible) {
                 Projectile bolt = color == ColoredAdherent.BLUE ? new AnnihilationBolt(level, mob) : new NatureBolt(level, mob);
                 Vec3 start = mob.getEyePosition().add(mob.getLookAngle().scale(0.5));
                 bolt.setPos(start);
@@ -123,7 +127,7 @@ public final class AdherentAttackGoal extends Goal {
                 level.addFreshEntity(bolt);
                 mob.playSound(SoundEvents.GHAST_SHOOT, 0.7F, 1.2F);
             }
-            if (casting >= 48) finish(60);
+            if (casting >= chargeTicks + 8) finish(60);
         }
     }
 
@@ -145,7 +149,7 @@ public final class AdherentAttackGoal extends Goal {
             level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 1, 0.15, 0.15, 0.15, 0.01);
         }
         if (casting % 10 == 0 && hit.victim() != null && !hit.victim().fireImmune()
-                && hit.victim().hurt(TFDamageTypes.getEntityDamageSource(level, TFDamageTypes.HYDRA_FIRE, mob), 19))
+                && hit.victim().hurt(TFDamageTypes.getEntityDamageSource(level, TFDamageTypes.HYDRA_FIRE, mob), RED_BREATH_DAMAGE))
             hit.victim().igniteForSeconds(3);
     }
 }

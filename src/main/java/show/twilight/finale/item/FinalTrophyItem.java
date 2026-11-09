@@ -11,11 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.Nullable;
-import show.twilight.finale.init.ModWithoutLevelRenderer;
-
-import java.util.function.Consumer;
 
 public abstract class FinalTrophyItem extends StandingAndWallBlockItem implements CurioItem {
     protected FinalTrophyItem(Block floorBlock, Block wallBlock, Item.Properties properties) {
@@ -31,7 +27,7 @@ public abstract class FinalTrophyItem extends StandingAndWallBlockItem implement
             if (!level.isClientSide()) {
                 player.awardStat(Stats.ITEM_USED.get(this));
             }
-            return InteractionResultHolder.sidedSuccess(itemstack, (boolean) level.isClientSide());
+            return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide());
         }
         return InteractionResultHolder.fail(itemstack);
     }
@@ -39,10 +35,6 @@ public abstract class FinalTrophyItem extends StandingAndWallBlockItem implement
     @Nullable
     public EquipmentSlot getEquipmentSlot(ItemStack stack) {
         return EquipmentSlot.HEAD;
-    }
-
-    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(ModWithoutLevelRenderer.ITEM_EXTENSION);
     }
 }
 

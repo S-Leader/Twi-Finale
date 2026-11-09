@@ -10,24 +10,64 @@ import show.twilight.finale.entity.TheTwilightHierophantEntity;
  */
 public final class HierophantShield implements IHierophantShield {
     private final TheTwilightHierophantEntity owner;
-    private float health = 50, maxHealth = 50, spinSpeed;
+    private float health = 200, maxHealth = 200, spinSpeed;
     private boolean rushing, physical;
     private int stopRemaining, stopDuration = DEFAULT_STOP_TICKS;
+    private int colourTicks;
 
     public HierophantShield(TheTwilightHierophantEntity owner) {
         this.owner = owner;
     }
 
-    @Override public float getHealth() { return health; }
-    @Override public float getMaxHealth() { return maxHealth; }
-    @Override public float getOpacity() { return isActive() ? Mth.clamp(health / maxHealth, 0.5F, 1) : 0; }
-    @Override public float getSpinSpeed() { return spinSpeed; }
-    @Override public boolean isActive() { return health > 0; }
-    @Override public boolean isRushing() { return rushing; }
-    @Override public boolean requiresPhysicalDamage() { return physical; }
-    @Override public boolean isStopped() { return stopRemaining > 0; }
-    @Override public int getStopTicksRemaining() { return stopRemaining; }
-    @Override public int getStopDuration() { return stopDuration; }
+    @Override
+    public float getHealth() {
+        return health;
+    }
+
+    @Override
+    public float getMaxHealth() {
+        return maxHealth;
+    }
+
+    @Override
+    public float getOpacity() {
+        return isActive() ? Mth.clamp(health / maxHealth, 0.5F, 1) : 0;
+    }
+
+    @Override
+    public float getSpinSpeed() {
+        return spinSpeed;
+    }
+
+    @Override
+    public boolean isActive() {
+        return health > 0;
+    }
+
+    @Override
+    public boolean isRushing() {
+        return rushing;
+    }
+
+    @Override
+    public boolean requiresPhysicalDamage() {
+        return physical;
+    }
+
+    @Override
+    public boolean isStopped() {
+        return stopRemaining > 0;
+    }
+
+    @Override
+    public int getStopTicksRemaining() {
+        return stopRemaining;
+    }
+
+    @Override
+    public int getStopDuration() {
+        return stopDuration;
+    }
 
     @Override
     public void stop(int ticks) {
@@ -45,7 +85,6 @@ public final class HierophantShield implements IHierophantShield {
             return 0;
         float absorbed = Math.min(health, amount);
         health -= absorbed;
-        physical = !physical;
         if (!isActive()) {
             stopRemaining = 0;
             spinSpeed = 0;
@@ -56,6 +95,11 @@ public final class HierophantShield implements IHierophantShield {
     }
 
     public void tick() {
+        if (!owner.level().isClientSide() && isActive() && owner.isSpawned() && ++colourTicks >= 200) {
+            colourTicks = 0;
+            physical = !physical;
+            changed();
+        }
         if (!owner.level().isClientSide() && stopRemaining > 0) {
             stopRemaining--;
             changed();
@@ -89,7 +133,7 @@ public final class HierophantShield implements IHierophantShield {
     }
 
     public void applySnapshot(float current, float maximum, float speed, boolean rushing, int remaining, int duration, boolean physical) {
-        maxHealth = Float.isFinite(maximum) ? Math.max(1, maximum) : 50;
+        maxHealth = Float.isFinite(maximum) ? Math.max(1, maximum) : 200;
         health = Float.isFinite(current) ? Mth.clamp(current, 0, maxHealth) : maxHealth;
         stopDuration = Mth.clamp(duration, MIN_STOP_TICKS, DEFAULT_STOP_TICKS);
         stopRemaining = isActive() ? Mth.clamp(remaining, 0, stopDuration) : 0;
@@ -106,19 +150,21 @@ public final class HierophantShield implements IHierophantShield {
         tag.putInt("StopRemaining", stopRemaining);
         tag.putInt("StopDuration", stopDuration);
         tag.putBoolean("RequiresPhysical", physical);
-        tag.putInt("PolarityVersion", 1);
+        tag.putInt("PolarityVersion", 2);
+        tag.putInt("ColourTicks", colourTicks);
         // A collision flight is cancelled on reload, never resumed into a wall.
         return tag;
     }
 
     public void deserializeNBT(CompoundTag tag) {
         float max = tag.getFloat("MaxHealth"), hp = tag.getFloat("Health");
-        if (!tag.contains("PolarityVersion")) {
+        if (tag.getInt("PolarityVersion") < 2) {
             float replacement = show.twilight.finale.config.HierophantConfig.SHIELD_HEALTH.get().floatValue();
             hp = max > 0 ? hp / max * replacement : 0;
             max = replacement;
         }
-        applySnapshot(hp, max, 0, false, tag.getInt("StopRemaining"), tag.getInt("StopDuration"), tag.getBoolean("RequiresPhysical"));
+        applySnapshot(hp, max, 0, false, 0, DEFAULT_STOP_TICKS, tag.getBoolean("RequiresPhysical"));
+        colourTicks = Mth.clamp(tag.getInt("ColourTicks"), 0, 199);
         changed();
     }
 

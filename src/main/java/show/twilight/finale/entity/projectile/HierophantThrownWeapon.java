@@ -16,7 +16,9 @@ import twilightforest.entity.monster.Adherent;
 import twilightforest.init.TFDamageTypes;
 import twilightforest.init.TFItems;
 
-/** Snowball movement/collision, with a knight weapon's item and impact damage. */
+/**
+ * Snowball movement/collision, with a knight weapon's item and impact damage.
+ */
 public final class HierophantThrownWeapon extends ThrowableItemProjectile {
     public HierophantThrownWeapon(EntityType<? extends HierophantThrownWeapon> type, Level level) {
         super(type, level);
@@ -27,7 +29,10 @@ public final class HierophantThrownWeapon extends ThrowableItemProjectile {
         setItem(item);
     }
 
-    @Override protected Item getDefaultItem() { return TFItems.KNIGHTMETAL_AXE.get(); }
+    @Override
+    protected Item getDefaultItem() {
+        return TFItems.KNIGHTMETAL_AXE.get();
+    }
 
     @Override
     public void tick() {

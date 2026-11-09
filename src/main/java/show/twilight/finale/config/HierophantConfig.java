@@ -14,7 +14,7 @@ public final class HierophantConfig {
     static {
         var b = new ModConfigSpec.Builder();
         b.push("hierophant");
-        SHIELD_HEALTH = b.comment("Alternating magic/physical shield HP; body remains 200 HP. Replaces the legacy 100 HP shield key.").defineInRange("alternatingShieldHealth", 50D, 1D, 100000D);
+        SHIELD_HEALTH = b.comment("Final Plateau shield HP; changes magic/physical polarity every ten seconds. New key migrates the former 50 HP default.").defineInRange("plateauShieldHealth", 200D, 1D, 100000D);
         SHIELD_STOP_SECONDS = b.comment("Shield-block stop/vulnerability window in seconds. Default 5; minimum 2, maximum 5.").defineInRange("shieldStopSeconds", 5, 2, 5);
         CHARGE_DAMAGE = b.defineInRange("chargeDamage", 10D, 0D, 1000D);
         SHARD_DAMAGE = b.defineInRange("fragmentDamage", 6D, 0D, 1000D);

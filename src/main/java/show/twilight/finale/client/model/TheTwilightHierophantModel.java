@@ -1,6 +1,7 @@
 package show.twilight.finale.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -12,6 +13,8 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import show.twilight.finale.client.animation.TheTwilightHierophantAnimation;
 import show.twilight.finale.client.layer.HierophantArmorLayer;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
@@ -37,7 +40,10 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
     private final ModelPart right_item;
     private final ModelPart right_leg;
     private final ModelPart left_leg;
+    private final ModelPart right_shin;
+    private final ModelPart left_shin;
     private final boolean slim;
+    private float swordPlantTime;
     private final java.util.Map<T, PoseTransition> transitions = new java.util.WeakHashMap<>();
 
     private static final class PoseTransition {
@@ -58,6 +64,8 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
         this.right_item = this.right_arm.getChild("right_item");
         this.right_leg = this.entity.getChild("right_leg");
         this.left_leg = this.entity.getChild("left_leg");
+        this.right_shin = this.right_leg.getChild("right_shin");
+        this.left_shin = this.left_leg.getChild("left_shin");
     }
 
     public static LayerDefinition createBodyLayer(boolean slim, float deformation) {
@@ -80,9 +88,28 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
             PartDefinition right_arm = body.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-2.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, new CubeDeformation(0.0f)).texOffs(40, 32).addBox(-2.0f, -2.0f, -2.0f, 3.0f, 12.0f, 4.0f, new CubeDeformation(0.25f)).mirror(false), PartPose.offset(-5.0f, -10.0f, 0.0f));
             PartDefinition partDefinition = right_arm.addOrReplaceChild("right_item", CubeListBuilder.create().texOffs(0, 0).addBox(-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, new CubeDeformation(0.0f)), PartPose.offset(0.0f, 8.0f, 0.0f));
         }
-        PartDefinition right_leg = entity.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 16).addBox(-2.1f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, new CubeDeformation(deformation)).texOffs(0, 48).mirror().addBox(-2.1f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, new CubeDeformation(deformation + 0.25f)), PartPose.offset(-1.9f, 6.0f, 0.0f));
-        PartDefinition left_leg = entity.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(16, 48).addBox(-1.9f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, new CubeDeformation(deformation)).texOffs(0, 48).addBox(-1.9f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, new CubeDeformation(deformation + 0.25f)), PartPose.offset(1.9f, 6.0f, 0.0f));
+        addJointedLeg(entity, "right", -1.9F, -2.1F, 0, 16, true, deformation);
+        addJointedLeg(entity, "left", 1.9F, -1.9F, 16, 48, false, deformation);
         return LayerDefinition.create(meshdefinition, 64, 64);
+    }
+
+    private static void addJointedLeg(PartDefinition entity, String side, float hipX, float boxX,
+                                      int skinU, int skinV, boolean mirrorOuter, float deformation) {
+        // Keep the existing hip names for walking/keyframes. In the neutral
+        // pose the two six-pixel segments still form the original straight leg;
+        // their side UVs continue at the exact original skin/robe texture rows.
+        PartDefinition thigh = entity.addOrReplaceChild(side + "_leg",
+                legSegment(boxX, skinU, skinV, 48, mirrorOuter, deformation), PartPose.offset(hipX, 6, 0));
+        thigh.addOrReplaceChild(side + "_shin",
+                legSegment(boxX, skinU, skinV + 6, 54, mirrorOuter, deformation), PartPose.offset(0, 6, 0));
+    }
+
+    private static CubeListBuilder legSegment(float boxX, int skinU, int skinV, int outerV,
+                                              boolean mirrorOuter, float deformation) {
+        return CubeListBuilder.create().texOffs(skinU, skinV)
+                .addBox(boxX, 0, -2, 4, 6, 4, new CubeDeformation(deformation))
+                .texOffs(0, outerV).mirror(mirrorOuter)
+                .addBox(boxX, 0, -2, 4, 6, 4, new CubeDeformation(deformation + 0.25F));
     }
 
     public ModelPart root() {
@@ -120,7 +147,7 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
     }
 
     public void setupWalkAnimation(T entity, float limbSwing, float limbSwingAmount) {
-        if (entity.getAction() == TheTwilightHierophantEntity.IDLE_ACTION && !entity.hasShield())
+        if (entity.getAction() == TheTwilightHierophantEntity.IDLE_ACTION || entity.getAction() == TheTwilightHierophantEntity.SHIELD_CAST)
             this.animateWalk(TheTwilightHierophantAnimation.WALK, limbSwing, limbSwingAmount, 1.5f, 2.0f);
     }
 
@@ -129,12 +156,9 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
         super.setupAnim(boss, swing, amount, age, yaw, pitch);
         int action = boss.getAction();
         float t = boss.getActionTime() + Mth.clamp(age - boss.tickCount, 0, 1);
+        swordPlantTime = t;
         head.yRot = yaw * Mth.DEG_TO_RAD;
         head.xRot += pitch * Mth.DEG_TO_RAD;
-        // The first phase remains curled inside the shield, including recovery
-        // between attacks. The intro starts upright and transitions INTO this pose.
-        if (boss.hasShield() && action != TheTwilightHierophantEntity.INTRO && action != TheTwilightHierophantEntity.DEATH)
-            applyCurledPose(1);
         if (action == TheTwilightHierophantEntity.IDLE_ACTION) {
             blendActionChange(boss, action, age);
             return;
@@ -143,14 +167,75 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
         float weight = motionWindow(t, TheTwilightHierophantEntity.getActionDuration(action), 12, 20);
         switch (action) {
             case TheTwilightHierophantEntity.INTRO -> {
-                float curl = smooth((t - 30) / 35F);
-                applyCurledPose(curl);
-                float wand = smooth((t - 18) / 20F) * (1 - smooth((t - 50) / 20F));
-                boolean leftHanded = boss.getMainArm() == HumanoidArm.LEFT;
-                ModelPart wandArm = leftHanded ? left_arm : right_arm;
-                wandArm.xRot = Mth.lerp(wand, wandArm.xRot, -1.5F);
-                wandArm.yRot = (leftHanded ? 1 : -1) * 0.25F * wand;
+                float wand = smooth(t / 24F) * (1 - smooth((t - 82) / 18F));
+                left_arm.xRot = right_arm.xRot = -1.5F * wand;
+                left_arm.yRot = 0.3F * wand;
+                right_arm.yRot = -0.3F * wand;
                 weight = 1;
+            }
+            case TheTwilightHierophantEntity.SHIELD_CAST -> {
+                float raise = smooth((t - 10) / 15F) * (1 - smooth((t - 34) / 15F));
+                ModelPart casting = boss.getMainArm() == HumanoidArm.LEFT ? left_arm : right_arm;
+                casting.xRot = Mth.lerp(raise, casting.xRot, -Mth.HALF_PI);
+                casting.yRot = casting.zRot = 0;
+                weight = 1;
+            }
+            case TheTwilightHierophantEntity.REBIRTH -> {
+                float reach = smooth((t - 60) / 30F);
+                ModelPart swordArm = boss.getMainArm() == HumanoidArm.LEFT ? left_arm : right_arm;
+                swordArm.xRot = -1.3F * reach;
+                left_arm.zRot = -0.35F;
+                right_arm.zRot = 0.35F;
+                body.xRot = -0.12F;
+                left_leg.xRot = right_leg.xRot = 0.1F;
+                weight = smooth(t / 12F);
+            }
+            case TheTwilightHierophantEntity.METEORS -> {
+                ModelPart swordArm = boss.getMainArm() == HumanoidArm.LEFT ? left_arm : right_arm;
+                swordArm.xRot = -3.0F;
+                swordArm.zRot = 0;
+                body.xRot = -0.12F;
+                left_leg.xRot = right_leg.xRot = 0.2F;
+                weight = motionWindow(t, TheTwilightHierophantEntity.METEOR_DURATION, 24, 40);
+            }
+            case TheTwilightHierophantEntity.FIERY_QUAKE -> {
+                float press = swordPress(t);
+                float lower = 1.5F * press;
+                entity.y += 4 + lower;
+                body.xRot = 0.15F + 0.08F * press;
+                body.yRot = body.zRot = 0;
+                // Main-side knee touches the floor, its shin folds backwards;
+                // the other foot remains planted in front. As the sword is
+                // pressed deeper, both joint angles compensate for the lower
+                // pelvis instead of sinking the knee or front foot underground.
+                ModelPart kneeling = boss.getMainArm() == HumanoidArm.LEFT ? left_leg : right_leg;
+                ModelPart kneelingShin = boss.getMainArm() == HumanoidArm.LEFT ? left_shin : right_shin;
+                ModelPart forward = boss.getMainArm() == HumanoidArm.LEFT ? right_leg : left_leg;
+                ModelPart forwardShin = boss.getMainArm() == HumanoidArm.LEFT ? right_shin : left_shin;
+                kneeling.xRot = (float) Math.acos((6 - lower) / 6F);
+                kneelingShin.xRot = Mth.HALF_PI - kneeling.xRot;
+                forward.xRot = -(float) Math.acos((2 - lower) / 6F);
+                forwardShin.xRot = -forward.xRot;
+                left_leg.yRot = right_leg.yRot = left_leg.zRot = right_leg.zRot = 0;
+                PoseStack torso = new PoseStack();
+                entity.translateAndRotate(torso);
+                body.translateAndRotate(torso);
+                Matrix4f inverse = new Matrix4f(torso.last().pose()).invert();
+                float gripY = 14 + press * 2.5F;
+                aimHandAt(left_arm, inverse, 1.2F, gripY, -6);
+                aimHandAt(right_arm, inverse, -1.2F, gripY, -6);
+                head.xRot = pitch * Mth.DEG_TO_RAD - body.xRot;
+                weight = swordKneel(t);
+            }
+            case TheTwilightHierophantEntity.FIERY_THRUST -> {
+                float thrust = smooth((t - 18) / 4F);
+                body.xRot = Mth.lerp(thrust, 0.1F, 0.7F);
+                left_arm.xRot = right_arm.xRot = Mth.lerp(thrust, -1.9F, -Mth.HALF_PI);
+                left_arm.yRot = Mth.lerp(thrust, 0.8F, 0.15F);
+                right_arm.yRot = -left_arm.yRot;
+                left_leg.xRot = -0.7F * thrust;
+                right_leg.xRot = 0.8F * thrust;
+                weight = motionWindow(t, TheTwilightHierophantEntity.FIERY_THRUST_DURATION, 8, 18);
             }
             case TheTwilightHierophantEntity.SUMMON -> {
                 left_arm.zRot = -1.25F;
@@ -260,22 +345,65 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
                 left_arm.xRot = right_arm.xRot = -1.1F;
             }
             case TheTwilightHierophantEntity.SHIELD_BREAK -> {
-                applyCurledPose(1 - smooth(t / TheTwilightHierophantEntity.BREAK_DURATION));
+                left_arm.zRot = -0.7F * (1 - smooth(t / TheTwilightHierophantEntity.BREAK_DURATION));
+                right_arm.zRot = -left_arm.zRot;
                 weight = 1;
             }
             case TheTwilightHierophantEntity.DEATH -> {
-                float kneel = smooth((t - 35) / 35F);
-                entity.y += kneel * 7;
-                body.xRot = kneel * 0.7F;
-                head.xRot = kneel * 0.7F;
-                left_leg.xRot = right_leg.xRot = -kneel * 1.5F;
-                left_arm.xRot = right_arm.xRot = -kneel * 0.35F;
-                entity.zRot = Mth.sin(age * 1.8F) * (0.01F + Math.min(t, 55) / 700F) * (1 - kneel * 0.8F) * smooth(t / 12F);
+                float curl = smooth(t / 26F) * (1 - smooth((t - 36) / 5F));
+                applyCurledPose(curl);
+                float spread = smooth((t - 36) / 5F);
+                left_arm.zRot = -1.5F * spread;
+                right_arm.zRot = 1.5F * spread;
+                left_arm.xRot = right_arm.xRot = -0.25F * spread;
+                left_leg.zRot = -0.35F * spread;
+                right_leg.zRot = 0.35F * spread;
+                head.xRot = -0.45F * spread;
+                entity.y -= spread * 2;
                 weight = 1;
             }
         }
         blendFromRest(restPose, weight);
         blendActionChange(boss, action, age);
+    }
+
+    private static float swordPress(float time) {
+        return smooth((time - TheTwilightHierophantEntity.FIRST_FIERY_QUAKE_TICK) / 8F);
+    }
+
+    private static float swordKneel(float time) {
+        return motionWindow(time, TheTwilightHierophantEntity.FIERY_QUAKE_DURATION,
+                TheTwilightHierophantEntity.SWORD_PLANT_TICK, 14);
+    }
+
+    private static void aimHandAt(ModelPart arm, Matrix4f inverseTorso, float x, float y, float z) {
+        Vector3f grip = inverseTorso.transformPosition(new Vector3f(x / 16, y / 16, z / 16));
+        float dx = grip.x * 16 - arm.x, dy = grip.y * 16 - arm.y, dz = grip.z * 16 - arm.z;
+        float length = Mth.sqrt(dx * dx + dy * dy + dz * dz);
+        arm.xRot = (float) Math.asin(Mth.clamp(dz / Math.max(0.001F, length), -1, 1));
+        arm.yRot = 0;
+        arm.zRot = (float) Math.atan2(-dx, dy);
+    }
+
+    public void translateToPlantedSword(PoseStack stack) {
+        // Sample the already blended hands, so the prop follows the exact same
+        // kneel/press/recovery (including partial ticks) as the skin and robe.
+        PoseStack hands = new PoseStack();
+        entity.translateAndRotate(hands);
+        body.translateAndRotate(hands);
+        hands.pushPose();
+        left_arm.translateAndRotate(hands);
+        Vector3f grip = hands.last().pose().transformPosition(new Vector3f(0, 9 / 16F, 0));
+        hands.popPose();
+        right_arm.translateAndRotate(hands);
+        grip.add(hands.last().pose().transformPosition(new Vector3f(0, 9 / 16F, 0))).mul(0.5F);
+        root.translateAndRotate(stack);
+        stack.translate(grip.x, grip.y, grip.z);
+        stack.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(swordKneel(swordPlantTime), 225, 45)));
+        stack.scale(0.85F, 0.85F, 0.85F);
+        // Render the untransformed item about its handle, not the sprite centre.
+        // At full insertion the blade points down the model's +Y into the floor.
+        stack.translate(0.25, 0.25, 0);
     }
 
     private void applyCurledPose(float curl) {

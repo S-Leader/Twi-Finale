@@ -1,7 +1,7 @@
 package show.twilight.finale.block;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -13,11 +13,10 @@ import show.twilight.finale.block.entity.FinalTrophyBlockEntity;
 
 import java.util.function.Supplier;
 
-public abstract class AbstractFinalTrophyBlock
-        extends BaseEntityBlock {
+public abstract class AbstractFinalTrophyBlock extends BaseEntityBlock {
     @Override
-    protected com.mojang.serialization.MapCodec<? extends BaseEntityBlock> codec() {
-        return com.mojang.serialization.MapCodec.unit(this);
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return MapCodec.unit(this);
     }
 
     public final Supplier<BlockEntityType<FinalTrophyBlockEntity>> blockEntityType;
@@ -27,7 +26,8 @@ public abstract class AbstractFinalTrophyBlock
         this.blockEntityType = blockEntityType;
     }
 
-    public boolean isPathfindable(BlockState p_60475_, BlockGetter p_60476_, BlockPos p_60477_, PathComputationType p_60478_) {
+    @Override
+    protected boolean isPathfindable(BlockState state, PathComputationType type) {
         return false;
     }
 

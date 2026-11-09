@@ -2,20 +2,20 @@ package show.twilight.finale.init;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import show.twilight.finale.TwilightFinaleMod;
 import twilightforest.config.TFConfig;
 import twilightforest.init.TFItems;
 
 import java.util.function.Supplier;
 
 public class ModTab {
-    public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create((ResourceKey) Registries.CREATIVE_MODE_TAB, "twilightforest_finale");
+    public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, TwilightFinaleMod.MOD_ID);
     public static final Supplier<CreativeModeTab> ITEMS = TABS.register("items", () -> CreativeModeTab.builder().title(Component.translatable("itemGroup.twilightforest_finale.items")).icon(() -> new ItemStack(TFItems.CUBE_OF_ANNIHILATION.get())).displayItems((parameters, output) -> {
         output.accept(ModItem.KNIGHTMETAL_SHOVEL.get());
         output.accept(ModItem.KNIGHTMETAL_HOE.get());
@@ -45,8 +45,6 @@ public class ModTab {
         output.accept(ModItem.CHARM_OF_LIFE_3.get());
         output.accept(ModItem.ADHERENT_BOSS_SPAWNER.get());
         output.accept(ModItem.TWILIGHT_HIEROPHANT_BOSS_SPAWNER.get());
-        output.accept(TFItems.CUBE_OF_ANNIHILATION.get());
-        output.accept(TFItems.CUBE_TALISMAN.get());
         output.accept(ModItem.ADHERENT_TROPHY.get());
         output.accept(ModItem.HIEROPHANT_TROPHY.get());
         output.accept(ModItem.ADHERENT_SPAWN_EGG.get());

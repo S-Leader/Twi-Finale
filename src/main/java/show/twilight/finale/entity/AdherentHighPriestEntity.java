@@ -3,12 +3,14 @@ package show.twilight.finale.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -40,6 +42,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.loading.FMLLoader;
@@ -329,7 +333,7 @@ public class AdherentHighPriestEntity extends BossEntity implements EnforcedHome
                 double dx = this.getX() + (double) Mth.cos(currentAngle) * 0.65;
                 double dz = this.getZ() + (double) Mth.sin(currentAngle) * 0.65;
                 for (int j1 = 0; j1 < particles; ++j1) {
-                    this.level().addParticle(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, red, grn, blu), dx + this.getRandom().nextGaussian() * 0.025, dy + this.getRandom().nextGaussian() * 0.025, dz + this.getRandom().nextGaussian() * 0.025, 0.0, 0.0, 0.0);
+                    this.level().addParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, red, grn, blu), dx + this.getRandom().nextGaussian() * 0.025, dy + this.getRandom().nextGaussian() * 0.025, dz + this.getRandom().nextGaussian() * 0.025, 0.0, 0.0, 0.0);
                 }
             }
         }
@@ -409,7 +413,7 @@ public class AdherentHighPriestEntity extends BossEntity implements EnforcedHome
     }
 
     @Override
-    protected void dropCustomDeathLoot(net.minecraft.server.level.ServerLevel level, DamageSource source, boolean hitByPlayer) {
+    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean hitByPlayer) {
     }
 
     public void startSeenByPlayer(ServerPlayer player) {
@@ -623,8 +627,8 @@ public class AdherentHighPriestEntity extends BossEntity implements EnforcedHome
         return this.isShadowClone() ? this.cloneSkillManager : this.skillManager;
     }
 
-    public net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> getDefaultLootTable() {
-        return !this.isShadowClone() ? super.getDefaultLootTable() : net.minecraft.world.level.storage.loot.BuiltInLootTables.EMPTY;
+    public ResourceKey<LootTable> getDefaultLootTable() {
+        return !this.isShadowClone() ? super.getDefaultLootTable() : BuiltInLootTables.EMPTY;
     }
 
     public NonNullList<ItemStack> getItemStacks() {

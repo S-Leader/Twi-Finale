@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -53,14 +54,17 @@ import show.twilight.finale.capabilities.hierophant.IHierophantShield;
 import show.twilight.finale.client.animation.TheTwilightHierophantAnimation;
 import show.twilight.finale.config.HierophantConfig;
 import show.twilight.finale.entity.projectile.HierophantFragment;
+import show.twilight.finale.entity.projectile.HierophantMeteor;
 import show.twilight.finale.entity.projectile.HierophantThrownWeapon;
 import show.twilight.finale.init.ModBlocks;
 import show.twilight.finale.init.ModItem;
+import show.twilight.finale.init.ModParticle;
 import show.twilight.finale.runtime.animation.VzlingAnimatable;
 import show.twilight.finale.runtime.animation.VzlingAnimation;
 import show.twilight.finale.runtime.entity.ISkillEntity;
 import show.twilight.finale.runtime.entity.skill.BaseSkill;
 import show.twilight.finale.runtime.entity.skill.SkillManager;
+import show.twilight.finale.world.HierophantArena;
 import show.twilight.finale.world.castle.FinalCastleBossGazeboComponent;
 import show.twilight.finale.world.castle.FinalCastleDungeonForgeRoomComponent;
 import twilightforest.entity.boss.BaseTFBoss;
@@ -79,6 +83,10 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     public static final int IDLE_ACTION = 0, CHARGE = 1, RETURN_FRAGMENTS = 2, FORMATION = 3, SUMMON = 5, BARRAGE = 6, SMOKE_MOVE = 7;
     public static final int INTRO = -1, SHIELD_BREAK = -2, DEATH = -3;
     public static final int SHIELD_STUN = 8, FAN = 9, ICE_BOMB = 10, WEAPON_VOLLEY = 11, CHUCKLE = 12, AXE_SLAM = 13;
+    public static final int SHIELD_CAST = 14, METEORS = 15, FIERY_QUAKE = 16, FIERY_THRUST = 17, REBIRTH = -4;
+    public static final int SWORD_PLANT_TICK = 12;
+    public static final int FIRST_FIERY_QUAKE_TICK = SWORD_PLANT_TICK + 20, SECOND_FIERY_QUAKE_TICK = SWORD_PLANT_TICK + 60;
+    public static final int REBIRTH_DURATION = 140, SHIELD_CAST_DURATION = 200, METEOR_DURATION = 180, FIERY_QUAKE_DURATION = SWORD_PLANT_TICK + 100, FIERY_THRUST_DURATION = 60;
     public static final int INTRO_DURATION = 100, BREAK_DURATION = 40, DEATH_DURATION = 160, BARRAGE_FIRE_TICKS = 100;
     public static final float BARRAGE_SPREAD_DEGREES = 5F;
     public static final float SHIELD_SIZE = 2.6F, SHIELD_MAX_SPIN = 84F;
@@ -86,6 +94,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     public static final int SHIELD_SPIN_UP_TICKS = 100, SHIELD_STUN_TICKS = IHierophantShield.DEFAULT_STOP_TICKS;
     public static final int BARRAGE_RAMP_TICKS = 160, BARRAGE_INITIAL_INTERVAL = 12, BARRAGE_MIN_INTERVAL = 2, BARRAGE_FAST_PROJECTILES = 50;
     public static final int SUMMON_DELAY_TICKS = 60, FAN_DURATION = 24;
+    public static final String ICE_BOMB_NO_SNOW_TAG = "FinaleHierophantIceBomb";
     public static final int ICE_THROW_TICK = 30, ICE_BOMB_DURATION = 54, WEAPON_THROW_COUNT = 30, AXE_WINDUP_TICKS = 40, CHUCKLE_DURATION = 40;
     public static final int AXE_SLAM_DURATION = 64, WEAPON_INITIAL_INTERVAL = 10, WEAPON_MIN_INTERVAL = 3;
     public static final float WEAPON_SPEED = 1.6F, AXE_SLAM_RADIUS = 7, AXE_SLAM_DAMAGE = 20;
@@ -99,6 +108,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     private static final EntityDataAccessor<Boolean> SHIELD_RED = data(EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> SHIELD_STOP_REMAINING = data(EntityDataSerializers.INT), SHIELD_STOP_DURATION = data(EntityDataSerializers.INT);
     private static final EntityDataAccessor<Vector3f> AIM = data(EntityDataSerializers.VECTOR3);
+    private static final EntityDataAccessor<Integer> REBIRTH_TIME = data(EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> ARENA_READY = data(EntityDataSerializers.BOOLEAN);
 
     private static <T> EntityDataAccessor<T> data(EntityDataSerializer<T> serializer) {
         return SynchedEntityData.defineId(TheTwilightHierophantEntity.class, serializer);
@@ -116,8 +127,14 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     private int nextAttack = BARRAGE, nextMissileTick = 1, fastMissiles, barrageTicks;
     private int introSyncTick, breakSyncTick, deathSyncTick, attackSyncTick, stopSyncTick;
     private int skillTick, lastPhaseTwoAttack = -1, feedbackTick = -20;
+    private int rebirthSyncTick, emptyArenaTicks, shieldShotTick, queuedThirdAttack = METEORS;
+    private int shieldBurstRemaining, shieldNextBurstTick;
+    private boolean bypassRebirth, thirdPhaseUnlocked;
+    private HierophantArena.Lift roofLift;
+    private Vec3 paceDestination = Vec3.ZERO;
     private final List<VzlingAnimation> animations = new ArrayList<>();
     private final Set<UUID> chargeHits = new HashSet<>();
+    private final Set<UUID> summonedAdherents = new LinkedHashSet<>();
 
     private static final class SummoningCircle {
         final Vec3 position;
@@ -131,13 +148,18 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
 
     private final List<SummoningCircle> summoningCircles = new ArrayList<>();
     public final VzlingAnimation IDLE = new VzlingAnimation(this, TwilightFinaleMod.prefix("the_twilight_hierophant"));
-    public final SkillManager<TheTwilightHierophantEntity> skillManager = new SkillManager<>(this, List.of(attack(CHARGE, 0), attack(SHIELD_STUN, 0), attack(BARRAGE, 0), attack(SMOKE_MOVE, 0), attack(FAN, 0), attack(ICE_BOMB, 0), attack(WEAPON_VOLLEY, 0), attack(CHUCKLE, 0), attack(AXE_SLAM, 0)));
+    public final SkillManager<TheTwilightHierophantEntity> skillManager = new SkillManager<>(this, List.of(attack(SHIELD_CAST, 0), attack(BARRAGE, 0), attack(SMOKE_MOVE, 0), attack(FAN, 0), attack(ICE_BOMB, 0), attack(WEAPON_VOLLEY, 0), attack(CHUCKLE, 0), attack(AXE_SLAM, 0), attack(METEORS, 0), attack(FIERY_QUAKE, 0), attack(FIERY_THRUST, 0)));
 
     public static int getActionDuration(int action) {
         return switch (action) {
             case INTRO -> INTRO_DURATION;
             case SHIELD_BREAK -> BREAK_DURATION;
             case DEATH -> DEATH_DURATION;
+            case REBIRTH -> REBIRTH_DURATION;
+            case SHIELD_CAST -> SHIELD_CAST_DURATION;
+            case METEORS -> METEOR_DURATION;
+            case FIERY_QUAKE -> FIERY_QUAKE_DURATION;
+            case FIERY_THRUST -> FIERY_THRUST_DURATION;
             case CHARGE -> 600;
             case SHIELD_STUN -> SHIELD_STUN_TICKS;
             case FAN -> FAN_DURATION;
@@ -245,14 +267,16 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         b.define(BREAK_TIME, 0);
         b.define(DEATH_TIME, 0);
         b.define(ATTACK_TIME, 0);
-        b.define(SHIELD, 50F);
-        b.define(SHIELD_MAX, 50F);
+        b.define(SHIELD, 200F);
+        b.define(SHIELD_MAX, 200F);
         b.define(SHIELD_RED, false);
         b.define(SPIN_SPEED, 0F);
         b.define(RUSHING, false);
         b.define(SHIELD_STOP_REMAINING, 0);
         b.define(SHIELD_STOP_DURATION, SHIELD_STUN_TICKS);
         b.define(AIM, new Vector3f());
+        b.define(REBIRTH_TIME, 0);
+        b.define(ARENA_READY, false);
     }
 
     @Override
@@ -268,8 +292,9 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
 
     @Override
     public List<Integer> getSkillPool() {
-        if (!isSpawned() || entityData.get(BREAK_TIME) > 0 || !validTarget(getTarget())) return List.of();
-        return List.of(hasShield() ? (cubeShield.isStopped() ? SHIELD_STUN : CHARGE) : nextAttack);
+        if (!isSpawned() || !entityData.get(ARENA_READY) || entityData.get(REBIRTH_TIME) > 0 || entityData.get(BREAK_TIME) > 0 || !validTarget(getTarget()))
+            return List.of();
+        return hasShield() ? List.of() : List.of(nextAttack);
     }
 
     @Override
@@ -311,6 +336,11 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             pendingRelocation = false;
             moveOrigin = position();
             moveCirclePlaced = false;
+            if (getPhase() == 3) queuedThirdAttack = switch (random.nextInt(3)) {
+                case 0 -> METEORS;
+                case 1 -> FIERY_QUAKE;
+                default -> FIERY_THRUST;
+            };
             chooseMoveDestination();
         }
         if (id == FAN) {
@@ -325,6 +355,12 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         }
         if (id == CHUCKLE) playSound(SoundEvents.WITCH_CELEBRATE, 1, 0.9F);
         if (id == AXE_SLAM) setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(TFItems.DIAMOND_MINOTAUR_AXE.get()));
+        if (getPhase() == 3) setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(TFItems.FIERY_SWORD.get()));
+        if (id == FIERY_THRUST) {
+            dashDirection = Vec3.ZERO;
+            chargeHits.clear();
+        }
+        if (id == SHIELD_CAST) paceDestination = position();
         if (id == BARRAGE || id == ICE_BOMB || id == WEAPON_VOLLEY || id == CHUCKLE || id == AXE_SLAM)
             lastPhaseTwoAttack = id;
     }
@@ -337,7 +373,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         cubeShield.resetMotion();
         setNoGravity(false);
         setDeltaMovement(0, getDeltaMovement().y, 0);
-        setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        setItemInHand(InteractionHand.MAIN_HAND, getPhase() == 3 && thirdPhaseUnlocked && (entityData.get(REBIRTH_TIME) == 0 || entityData.get(REBIRTH_TIME) >= 110) && isAlive() ? new ItemStack(TFItems.FIERY_SWORD.get()) : ItemStack.EMPTY);
         setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
     }
 
@@ -347,15 +383,14 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             ensureArena();
             if (isAlive()) {
                 cubeShield.tick();
-                if (!hasShield() && getPhase() != 2) onShieldBroken();
-                if (cubeShield.isStopped() && isUsingSkill() && getSkillType() != SHIELD_STUN) beginSkill(SHIELD_STUN);
+                if (!hasShield() && getPhase() == 1) onShieldBroken();
             }
             if (getTarget() != null && !validTarget(getTarget())) {
                 setTarget(null);
                 if (isUsingSkill()) endSkill();
             }
             if (getTarget() == null && isAlive()) setTarget(nearestArenaPlayer());
-            if (pendingRelocation && isSpawned() && !hasShield() && entityData.get(BREAK_TIME) == 0 && getAction() != SMOKE_MOVE && getAction() != FAN && validTarget(getTarget())) {
+            if (pendingRelocation && getPhase() == 2 && isSpawned() && !hasShield() && entityData.get(BREAK_TIME) == 0 && getAction() != SMOKE_MOVE && getAction() != FAN && validTarget(getTarget())) {
                 resumeBarrage |= isUsingSkill() && getSkillType() == BARRAGE;
                 beginSkill(SMOKE_MOVE);
             }
@@ -363,31 +398,49 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         super.tick();
         if (isRemoved()) return;
         if (isUsingSkill()) skillTick++;
-        if (!level().isClientSide() && isAlive()) skillManager.tick();
+        if (!level().isClientSide() && isAlive() && entityData.get(ARENA_READY) && entityData.get(REBIRTH_TIME) == 0)
+            skillManager.tick();
         if (level().isClientSide()) {
             shieldAngleO = shieldAngle;
             shieldAngle += getShieldSpinSpeed();
         }
         if (isAlive()) IDLE.state.startIfStopped(tickCount);
         if (level() instanceof ServerLevel server && isAlive()) {
+            if (roofLift != null && !roofLift.ready()) {
+                endSkill();
+                setDeltaMovement(Vec3.ZERO);
+                updateBars();
+                return;
+            }
+            if (entityData.get(REBIRTH_TIME) > 0) {
+                tickRebirth(server);
+                updateBars();
+                return;
+            }
             int intro = entityData.get(INTRO_TIME);
             if (intro < INTRO_DURATION) {
                 entityData.set(INTRO_TIME, intro + 1);
                 getNavigation().stop();
                 setDeltaMovement(0, getDeltaMovement().y, 0);
-                if (intro == 30)
-                    setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItem.FORCE_FIELD_SCEPTER.get()));
+                if (intro == 1) {
+                    setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(TFItems.FORTIFICATION_SCEPTER.get()));
+                    setItemInHand(InteractionHand.OFF_HAND, new ItemStack(ModItem.FORCE_FIELD_SCEPTER.get()));
+                }
                 if (intro >= 55 && intro < 85) smoke(server, 8, 1.2);
                 if (intro == 60) updateShieldCollision();
-                if (intro == INTRO_DURATION - 1) setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                if (intro == INTRO_DURATION - 1) {
+                    setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                    setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+                }
             }
             if (entityData.get(BREAK_TIME) > 0) {
                 entityData.set(BREAK_TIME, entityData.get(BREAK_TIME) - 1);
                 smoke(server, 6, 1.2);
             }
-            entityData.set(ATTACK_TIME, isUsingSkill() ? getSkillTick() : 0);
+            if (hasShield() && isSpawned()) tickShieldCasting(server, ++shieldShotTick);
+            entityData.set(ATTACK_TIME, hasShield() && isSpawned() ? shieldShotTick % 60 : isUsingSkill() ? getSkillTick() : 0);
             if (getAction() == SMOKE_MOVE) smoke(server, 10, 0.6);
-            if (getPhase() == 2 && tickCount % 3 == 0 && random.nextFloat() < getBlur()) smoke(server, 2, 0.4);
+            if (getPhase() == 3 && tickCount % 3 == 0 && random.nextFloat() < getBlur()) smoke(server, 2, 0.4);
             tickSummoningCircles(server);
             if (!isUsingSkill() && isSpawned() && entityData.get(BREAK_TIME) == 0 && validTarget(getTarget())) {
                 faceTarget();
@@ -395,12 +448,20 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             }
             constrainMovement();
             updateBars();
+            // Native reset and rewards keep the stationary arena's home.
+            // Reopening the encounter reuses the same floor and home.
+            if (isSpawned() && nearestArenaPlayer() == null) {
+                if (++emptyArenaTicks >= 200 && getRestrictionPoint() != null) {
+                    placeSpawner(getRestrictionPoint().pos());
+                    discard();
+                }
+            } else emptyArenaTicks = 0;
         }
     }
 
     @Override
     protected float tickHeadTurn(float yaw, float movement) {
-        if (isUsingSkill()) {
+        if (isUsingSkill() || hasShield() && isSpawned()) {
             // Keep the client body aligned too; the idle body controller can
             // otherwise leave a stationary caster facing its previous heading.
             setYBodyRot(getYRot());
@@ -419,11 +480,11 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     }
 
     private boolean validTarget(LivingEntity target) {
-        return level().getDifficulty() != Difficulty.PEACEFUL && target != null && target.isAlive() && !target.isSpectator() && !(target instanceof Player p && p.isCreative()) && (arena == null || arena.inflate(0, 1, 0).contains(target.position()));
+        return level().getDifficulty() != Difficulty.PEACEFUL && target != null && target.isAlive() && !target.isSpectator() && !(target instanceof Player p && p.isCreative()) && insideArena(target.position());
     }
 
     public boolean isSpawned() {
-        return entityData.get(INTRO_TIME) >= INTRO_DURATION;
+        return entityData.get(ARENA_READY) && entityData.get(INTRO_TIME) >= INTRO_DURATION;
     }
 
     public boolean hasShield() {
@@ -484,18 +545,22 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
 
     public int getAction() {
         if (isDeadOrDying()) return DEATH;
+        if (!entityData.get(ARENA_READY)) return INTRO;
+        if (entityData.get(REBIRTH_TIME) > 0) return REBIRTH;
         if (!isSpawned()) return INTRO;
+        if (hasShield()) return SHIELD_CAST;
         if (entityData.get(BREAK_TIME) > 0) return SHIELD_BREAK;
-        if (cubeShield.isStopped()) return SHIELD_STUN;
         return isUsingSkill() ? getSkillType() : IDLE_ACTION;
     }
 
     public int getActionTime() {
         int action = getAction();
+        if (action == INTRO && !entityData.get(ARENA_READY)) return 0;
         int time = switch (action) {
             case INTRO -> predictedTime(entityData.get(INTRO_TIME), introSyncTick);
             case SHIELD_BREAK -> predictedTime(BREAK_DURATION - entityData.get(BREAK_TIME), breakSyncTick);
             case DEATH -> predictedTime(entityData.get(DEATH_TIME), deathSyncTick);
+            case REBIRTH -> predictedTime(entityData.get(REBIRTH_TIME), rebirthSyncTick);
             case SHIELD_STUN ->
                     predictedTime(getShieldStopDuration() - cubeShield.getStopTicksRemaining(), stopSyncTick);
             default -> predictedTime(entityData.get(ATTACK_TIME), attackSyncTick);
@@ -510,7 +575,11 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     }
 
     public float getBlur() {
-        return getPhase() == 2 ? Mth.clamp(1 - getHealth() / getMaxHealth(), 0, 1) : 0;
+        return getPhase() == 3 && entityData.get(REBIRTH_TIME) == 0 ? Mth.clamp(1 - getHealth() / getMaxHealth(), 0, 1) : 0;
+    }
+
+    public boolean hasThirdPhaseSword() {
+        return getPhase() == 3 && (getAction() != REBIRTH || getActionTime() >= 110);
     }
 
     public Vec3 getBeamOrigin() {
@@ -540,6 +609,10 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     @Override
     public void setHealth(float hp) {
         if (!routeShieldDamage) {
+            if (!level().isClientSide() && hp <= 0 && getPhase() == 2 && !bypassRebirth && !thirdPhaseUnlocked && getHealth() > 0) {
+                startThirdPhase();
+                return;
+            }
             super.setHealth(hp);
             return;
         }
@@ -551,6 +624,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     }
 
     private void onShieldBroken() {
+        shieldBurstRemaining = 0;
         endSkill();
         setPhase(2);
         nextAttack = SMOKE_MOVE;
@@ -566,7 +640,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         Entity attacker = source.getEntity();
         if (attacker == this || attacker instanceof Adherent || attacker != null && attacker.getPersistentData().hasUUID("FinaleHierophantOwner") && getUUID().equals(attacker.getPersistentData().getUUID("FinaleHierophantOwner")))
             return false;
-        if (!isSpawned() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return false;
+        if ((!isSpawned() || entityData.get(REBIRTH_TIME) > 0 || !entityData.get(ARENA_READY)) && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY))
+            return false;
         if (hasShield() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             boolean magic = source.is(Tags.DamageTypes.IS_MAGIC) || source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC);
             if (magic == isShieldRed()) {
@@ -587,8 +662,14 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             if (getShieldSpinSpeed() > 0.01F) return false;
         }
         boolean shielded = hasShield();
-        boolean hurt = super.hurt(source, amount);
-        if (hurt && !shielded && isAlive() && getAction() != SMOKE_MOVE) pendingRelocation = true;
+        boolean hurt;
+        bypassRebirth = source.is(DamageTypeTags.BYPASSES_INVULNERABILITY);
+        try {
+            hurt = super.hurt(source, amount);
+        } finally {
+            bypassRebirth = false;
+        }
+        if (hurt && !shielded && getPhase() == 2 && isAlive() && getAction() != SMOKE_MOVE) pendingRelocation = true;
         return hurt;
     }
 
@@ -634,6 +715,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             if (key.equals(BREAK_TIME)) breakSyncTick = tickCount;
             if (key.equals(DEATH_TIME)) deathSyncTick = tickCount;
             if (key.equals(ATTACK_TIME)) attackSyncTick = tickCount;
+            if (key.equals(REBIRTH_TIME)) rebirthSyncTick = tickCount;
         }
         if (key.equals(SHIELD) || key.equals(INTRO_TIME) || key.equals(DEATH_TIME)) updateShieldCollision();
     }
@@ -647,7 +729,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         faceTarget();
         // All second-phase actions can be interrupted by a close player,
         // except the harmless chuckle and a fan gust already in progress.
-        if (!hasShield() && id != CHUCKLE && id != FAN) {
+        if (getPhase() == 2 && !hasShield() && id != CHUCKLE && id != FAN) {
             Player nearest = nearestArenaPlayer();
             if (nearest != null && distanceToSqr(nearest) < 3.5 * 3.5 && hasLineOfSight(nearest)) {
                 setTarget(nearest);
@@ -655,8 +737,19 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                 return;
             }
         }
-        if (id != CHARGE && id != SMOKE_MOVE) setDeltaMovement(0, getDeltaMovement().y, 0);
+        if (id != CHARGE && id != SHIELD_CAST && id != SMOKE_MOVE && id != METEORS && id != FIERY_THRUST)
+            setDeltaMovement(0, getDeltaMovement().y, 0);
         switch (id) {
+            case SHIELD_CAST -> tickShieldCasting(server, t);
+            case METEORS -> tickMeteors(server, t);
+            case FIERY_QUAKE -> {
+                if (t == FIRST_FIERY_QUAKE_TICK) fieryGroundShock(server, 10);
+                if (t == SECOND_FIERY_QUAKE_TICK) fieryGroundShock(server, 15);
+                if (t >= SWORD_PLANT_TICK && t % 4 == 0)
+                    server.sendParticles(ParticleTypes.LAVA, getX(), groundAt(position()).y + 0.1, getZ(), 5, 1.2, 0, 1.2, 0);
+                if (t >= FIERY_QUAKE_DURATION - 1) finishAction(SMOKE_MOVE);
+            }
+            case FIERY_THRUST -> tickFieryThrust(server, t);
             case CHARGE -> tickShieldRush(server, t);
             case SHIELD_STUN -> {
                 cubeShield.setSpinSpeed(0);
@@ -678,16 +771,21 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                 }
             }
             case SMOKE_MOVE -> {
-                if (!moveCirclePlaced && position().subtract(moveOrigin).horizontalDistanceSqr() > 0.04) {
-                    summoningCircles.add(new SummoningCircle(groundAt(moveOrigin), SUMMON_DELAY_TICKS));
+                if (getPhase() == 2 && !moveCirclePlaced && position().subtract(moveOrigin).horizontalDistanceSqr() > 0.04) {
                     moveCirclePlaced = true;
+                    pruneSummonedAdherents(server);
+                    if (summonedAdherents.size() + summoningCircles.size() < getSummonedAdherentLimit())
+                        summoningCircles.add(new SummoningCircle(groundAt(moveOrigin), SUMMON_DELAY_TICKS));
                 }
                 setNoGravity(t < 30);
                 fallDistance = 0;
                 if (t < 30) {
                     Vec3 to = moveDestination.subtract(position());
                     if (to.lengthSqr() > 0.4) {
-                        Vec3 velocity = to.normalize().scale(Math.min(0.9, to.length()));
+                        // Keep the larger arena's third-phase corner destinations
+                        // reachable in the same flight window; phase two is unchanged.
+                        double speed = getPhase() == 3 && roofLift != null ? 0.9 * roofLift.radius / 10D : 0.9;
+                        Vec3 velocity = to.normalize().scale(Math.min(speed, to.length()));
                         if (insideArena(position().add(velocity)) && isAreaLoaded(getBoundingBox().move(velocity)) && server.noCollision(this, getBoundingBox().move(velocity)))
                             setDeltaMovement(velocity);
                         else setDeltaMovement(Vec3.ZERO);
@@ -695,7 +793,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                 } else setDeltaMovement(0, getDeltaMovement().y, 0);
                 if (t >= getActionDuration(SMOKE_MOVE) - 1) {
                     resumeBarrage = false;
-                    finishAction(choosePhaseTwoAttack());
+                    finishAction(getPhase() == 3 ? queuedThirdAttack : choosePhaseTwoAttack());
                 }
             }
             case FAN -> {
@@ -705,6 +803,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             case ICE_BOMB -> {
                 if (t == ICE_THROW_TICK) {
                     IceBomb bomb = new IceBomb(TFEntities.THROWN_ICE.get(), server, this);
+                    bomb.getPersistentData().putBoolean(ICE_BOMB_NO_SNOW_TAG, true);
                     Vec3 start = getBeamOrigin().add(getLookAngle().scale(0.5)).add(0, 0.45, 0);
                     bomb.setPos(start);
                     Vec3 aim = getTarget().getEyePosition().subtract(start);
@@ -735,6 +834,171 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             case 3 -> AXE_SLAM;
             default -> CHUCKLE;
         };
+    }
+
+    private void tickShieldCasting(ServerLevel server, int clock) {
+        cubeShield.resetMotion();
+        setNoGravity(false);
+        // Slow, continuous pacing rather than a charge or a curled pose.
+        if (clock % 80 == 1 || position().subtract(paceDestination).horizontalDistanceSqr() < 0.4) {
+            double angle = random.nextDouble() * Mth.TWO_PI;
+            GlobalPos home = getRestrictionPoint();
+            Vec3 candidate = groundAt(Vec3.atBottomCenterOf(home.pos()).add(Math.cos(angle) * 6, 0, Math.sin(angle) * 6));
+            paceDestination = canStandAt(candidate) ? candidate : position();
+        }
+        Vec3 pace = paceDestination.subtract(position()).multiply(1, 0, 1);
+        Vec3 velocity = pace.lengthSqr() < 0.1 ? Vec3.ZERO : pace.normalize().scale(0.075);
+        if (server.noCollision(this, getBoundingBox().move(velocity)))
+            setDeltaMovement(velocity.x, getDeltaMovement().y, velocity.z);
+        else paceDestination = position();
+        faceTarget();
+        boolean explosive = false;
+        if (clock % 60 == 30) {
+            // A blue cast starts a three-shot burst, not a three-way spread.
+            explosive = isShieldRed();
+            if (!explosive) {
+                shieldBurstRemaining = 3;
+                shieldNextBurstTick = clock;
+            }
+        }
+        boolean normal = shieldBurstRemaining > 0 && clock >= shieldNextBurstTick;
+        if (!explosive && !normal) return;
+        if (normal) {
+            shieldBurstRemaining--;
+            shieldNextBurstTick = clock + 4; // 0.2 seconds between successive shots.
+        }
+        Player nearest = nearestArenaPlayer();
+        if (nearest == null) return;
+        setTarget(nearest);
+        faceTarget();
+        Vec3 forward = nearest.getEyePosition().subtract(getBeamOrigin()).normalize();
+        if (explosive) {
+            HierophantFragment fragment = new HierophantFragment(server, this, forward, false);
+            fragment.setExplosive();
+            server.addFreshEntity(fragment);
+        } else {
+            server.addFreshEntity(new HierophantFragment(server, this, forward, false));
+        }
+    }
+
+    private void startThirdPhase() {
+        endSkill();
+        thirdPhaseUnlocked = true;
+        setPhase(3);
+        super.setHealth(getMaxHealth()); // No die(), loot roll, advancement or conquered flag at phase two's end.
+        entityData.set(REBIRTH_TIME, 1);
+        setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        pendingRelocation = false;
+        summoningCircles.clear();
+        setNoGravity(true);
+        setDeltaMovement(Vec3.ZERO);
+        if (level() instanceof ServerLevel server) {
+            killSummonedAdherents(server);
+            server.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(ModItem.GLASS_HEART.get())), getX(), getY() + 1.1, getZ(), 40, 0.45, 0.6, 0.45, 0.15);
+            playSound(SoundEvents.GLASS_BREAK, 2, 0.8F);
+        }
+    }
+
+    private void tickRebirth(ServerLevel server) {
+        int t = entityData.get(REBIRTH_TIME);
+        getNavigation().stop();
+        faceTarget();
+        setNoGravity(true);
+        fallDistance = 0;
+        double baseY = getRestrictionPoint() == null ? getY() : getRestrictionPoint().pos().getY();
+        double desired = baseY + 2.5 * Mth.clamp(t / 70D, 0, 1);
+        setDeltaMovement(0, Mth.clamp(desired - getY(), -0.06, 0.06), 0);
+        if (t < 100 && t % 2 == 0) {
+            double angle = t * 0.15;
+            server.sendParticles(ParticleTypes.HEART, getX() + Math.cos(angle), getY() + 1.1 + Math.sin(angle * 2) * 0.25, getZ() + Math.sin(angle), 1, 0, 0, 0, 0);
+        }
+        if (t == 110) {
+            setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(TFItems.FIERY_SWORD.get()));
+            playSound(SoundEvents.WITHER_SPAWN, 2, 1);
+        }
+        if (t >= REBIRTH_DURATION) {
+            entityData.set(REBIRTH_TIME, 0);
+            endSkill();
+            nextAttack = METEORS;
+        } else entityData.set(REBIRTH_TIME, t + 1);
+    }
+
+    private void tickMeteors(ServerLevel server, int t) {
+        double floor = getRestrictionPoint().pos().getY();
+        setNoGravity(t < 130);
+        fallDistance = 0;
+        if (t < 130) {
+            double desired = floor + 3 + Math.sin(t * 0.12) * 0.12;
+            setDeltaMovement(0, Mth.clamp(desired - getY(), -0.16, 0.22), 0);
+        } else setDeltaMovement(0, Math.max(-0.25, getDeltaMovement().y), 0);
+        if (t >= 40 && t <= 100 && (t - 40) % 20 == 0) {
+            List<ServerPlayer> players = server.players().stream().filter(this::validTarget).toList();
+            if (!players.isEmpty()) {
+                Player target = players.get(((t - 40) / 20) % players.size());
+                Vec3 at = target.position().add(0, target.getBbHeight() + 3, 0);
+                HierophantMeteor meteor = new HierophantMeteor(server, this, at);
+                server.addFreshEntity(meteor);
+            }
+        }
+        if (t >= METEOR_DURATION - 1) finishAction(SMOKE_MOVE);
+    }
+
+    private void fieryGroundShock(ServerLevel server, int radius) {
+        Vec3 centre = groundAt(position());
+        playSound(TFSounds.MINOSHROOM_SLAM.get(), 2, 0.8F);
+        for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(radius, 2, radius), this::canAttackVictim)) {
+            if (victim.position().subtract(centre).horizontalDistanceSqr() > radius * radius || !victim.onGround())
+                continue;
+            if (victim.hurt(TFDamageTypes.getEntityDamageSource(server, TFDamageTypes.SLAM, this), 12)) {
+                victim.push(0, 0.55, 0);
+                victim.hurtMarked = true;
+            }
+        }
+        ParticlePacket packet = new ParticlePacket();
+        for (int x = -radius; x <= radius; x++)
+            for (int z = -radius; z <= radius; z++) {
+                if (x * x + z * z > radius * radius) continue;
+                BlockPos floor = BlockPos.containing(centre).offset(x, -1, z);
+                if (!server.hasChunkAt(floor) || !insideArena(Vec3.atCenterOf(floor.above()))) continue;
+                var state = server.getBlockState(floor);
+                if (state.isAir()) continue;
+                Vec3 at = Vec3.atBottomCenterOf(floor.above()).add(0, 0.05, 0);
+                packet.queueParticle(new BlockParticleOption(ParticleTypes.BLOCK, state), false, at, new Vec3(0, 0.18, 0));
+                packet.queueParticle(ParticleTypes.LAVA, false, at, Vec3.ZERO);
+                // Break sound/particles only: not a single arena floor block is removed.
+                if ((x + z) % 4 == 0)
+                    server.playSound(null, floor, state.getSoundType(server, floor, this).getBreakSound(), net.minecraft.sounds.SoundSource.HOSTILE, 0.35F, 0.9F);
+            }
+        PacketDistributor.sendToPlayersTrackingEntity(this, packet);
+    }
+
+    private void tickFieryThrust(ServerLevel server, int t) {
+        if (t < 20) {
+            lockedAim = getTarget().position();
+            setDeltaMovement(0, getDeltaMovement().y, 0);
+            return;
+        }
+        if (t == 20) dashDirection = lockedAim.subtract(position()).multiply(1, 0, 1).normalize();
+        if (t >= 20 && t < 36) {
+            setYRot((float) Math.toDegrees(Math.atan2(-dashDirection.x, dashDirection.z)));
+            setYBodyRot(getYRot());
+            setYHeadRot(getYRot());
+            Vec3 velocity = dashDirection.scale(1.35);
+            if (insideArena(position().add(velocity)) && isAreaLoaded(getBoundingBox().expandTowards(velocity)) && server.noCollision(this, getBoundingBox().move(velocity)))
+                setDeltaMovement(velocity.x, getDeltaMovement().y, velocity.z);
+            else setDeltaMovement(0, getDeltaMovement().y, 0);
+            server.sendParticles(ParticleTypes.FLAME, getX(), getY() + 0.5, getZ(), 12, 0.35, 0.35, 0.35, 0.03);
+            AABB sweep = getBoundingBox().expandTowards(velocity).inflate(0.4);
+            for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class, sweep, this::canAttackVictim)) {
+                if (!chargeHits.add(victim.getUUID())) continue;
+                if (victim.hurt(damageSources().mobAttack(this), 14)) {
+                    victim.igniteForSeconds(5);
+                    victim.push(dashDirection.x * 1.6, 0.55, dashDirection.z * 1.6);
+                    victim.hurtMarked = true;
+                }
+            }
+        } else setDeltaMovement(0, getDeltaMovement().y, 0);
+        if (t >= FIERY_THRUST_DURATION - 1) finishAction(SMOKE_MOVE);
     }
 
     public int getWeaponCount() {
@@ -829,17 +1093,32 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                 if (server.getBlockState(ceiling).getCollisionShape(server, ceiling).isEmpty() || !server.getBlockState(spawn).isAir() || !server.getBlockState(spawn.below()).isAir())
                     continue;
                 if (used.add(spawn)) {
-                    // Spawn in AIR below the ceiling. Never remove the actual roof.
-                    FallingBlockEntity brick = FallingBlockEntity.fall(server, spawn, TFBlocks.CASTLE_BRICK.get().defaultBlockState());
-                    brick.disableDrop(); // Neither place blocks on landing nor drop brick items.
-                    brick.dropItem = false;
-                    brick.setHurtsEntities(2, 20);
-                    brick.getPersistentData().putBoolean("FinaleCeilingDebris", true);
-                    brick.getPersistentData().putUUID("FinaleHierophantOwner", getUUID());
+                    spawnCeilingBrick(server, spawn);
                 }
                 break;
             }
         }
+        if (used.isEmpty() && roofLift != null && roofLift.ready()) {
+            // The roof arena is open after its force-field removal. Keep
+            // phase two's existing falling-brick attack instead of silently losing it.
+            for (int attempt = 0; attempt < 48 && used.size() < 12; attempt++) {
+                double angle = random.nextDouble() * Math.PI * 2, radius = Math.sqrt(random.nextDouble()) * AXE_SLAM_RADIUS;
+                BlockPos spawn = BlockPos.containing(centre.x + Math.cos(angle) * radius, roofLift.home().getY() + 12, centre.z + Math.sin(angle) * radius);
+                if (!insideArena(Vec3.atCenterOf(spawn)) || !server.hasChunkAt(spawn) || !server.getBlockState(spawn).isAir() || !used.add(spawn))
+                    continue;
+                spawnCeilingBrick(server, spawn);
+            }
+        }
+    }
+
+    private void spawnCeilingBrick(ServerLevel server, BlockPos spawn) {
+        // Virtual debris in AIR: no real ceiling is removed, and nothing is placed/dropped on landing.
+        FallingBlockEntity brick = FallingBlockEntity.fall(server, spawn, TFBlocks.CASTLE_BRICK.get().defaultBlockState());
+        brick.disableDrop();
+        brick.dropItem = false;
+        brick.setHurtsEntities(2, 20);
+        brick.getPersistentData().putBoolean("FinaleCeilingDebris", true);
+        brick.getPersistentData().putUUID("FinaleHierophantOwner", getUUID());
     }
 
     private void finishAction(int next) {
@@ -939,30 +1218,120 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
 
     private void chooseMoveDestination() {
         moveDestination = position();
-        if (getTarget() == null) return;
-        for (int i = 0; i < 16; i++) {
-            double angle = random.nextDouble() * Math.PI * 2;
-            double radius = 7 + random.nextDouble() * 3;
-            Vec3 candidate = groundAt(clampToArena(getTarget().position().add(Math.cos(angle) * radius, 0, Math.sin(angle) * radius)));
-            if (!canStandAt(candidate) || candidate.distanceToSqr(position()) < 16 || candidate.distanceToSqr(getTarget().position()) < 25)
-                continue;
+        if (getTarget() == null || !(level() instanceof ServerLevel server)) return;
+        List<LivingEntity> threats = new ArrayList<>();
+        for (Player player : server.players()) if (validTarget(player)) threats.add(player);
+        if (!threats.contains(getTarget())) threats.add(getTarget());
+        Vec3 nearest = threats.stream().min(Comparator.comparingDouble(e -> e.position().subtract(position()).horizontalDistanceSqr()))
+                .orElse(getTarget()).position();
+        Vec3 away = position().subtract(nearest).multiply(1, 0, 1);
+        double initialDistance = nearestThreatDistanceSqr(position(), threats);
+        double bestDistance = initialDistance + 0.25;
+        double pathMinimum = Math.pow(Math.max(0, Math.sqrt(initialDistance) - 0.5), 2);
+        double radius = roofLift == null ? Math.max(2, HierophantConfig.ARENA_RADIUS.get() - 2) : roofLift.radius - 2;
+        double maxTravel = (getPhase() == 3 && roofLift != null ? 0.9 * roofLift.radius / 10D : 0.9) * 29;
+        Vec3 centre = getRestrictionPoint() == null ? arena == null ? position() : arena.getCenter() : Vec3.atBottomCenterOf(getRestrictionPoint().pos());
+        double awayAngle = away.lengthSqr() < 1.0E-6 ? random.nextDouble() * Math.PI * 2 : Math.atan2(away.z, away.x);
+        boolean corner = getPhase() == 3 && queuedThirdAttack == FIERY_THRUST;
+        for (int i = 0; i < (corner ? 4 : 49); i++) {
+            Vec3 seed;
+            if (corner) {
+                double angle = Math.PI / 4 + i * Math.PI / 2;
+                seed = centre.add(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+            } else if (i == 0) {
+                seed = position().add(Math.cos(awayAngle) * maxTravel, 0, Math.sin(awayAngle) * maxTravel);
+            } else {
+                double angle = awayAngle + (i - 1) * Math.PI * 2 / 32;
+                double ring = i <= 32 ? radius : radius * (0.35 + random.nextDouble() * 0.45);
+                seed = centre.add(Math.cos(angle) * ring, 0, Math.sin(angle) * ring);
+            }
+            Vec3 candidate = groundAt(clampToArena(seed));
             Vec3 delta = candidate.subtract(position());
+            if (delta.lengthSqr() > maxTravel * maxTravel)
+                candidate = groundAt(clampToArena(position().add(delta.normalize().scale(maxTravel))));
+            double separation = nearestThreatDistanceSqr(candidate, threats);
+            if (separation <= bestDistance || separation < 25 || candidate.subtract(position()).horizontalDistanceSqr() < 16
+                    || !canStandAt(candidate)) continue;
+            delta = candidate.subtract(position());
             boolean clear = true;
-            for (double f = 0.1; f <= 1; f += 0.1) {
+            int steps = Mth.ceil(delta.length() / 0.75);
+            for (int stepIndex = 1; stepIndex <= steps; stepIndex++) {
+                double f = stepIndex / (double) steps;
                 AABB step = getBoundingBox().move(delta.scale(f));
-                if (!isAreaLoaded(step) || !level().noCollision(this, step)) {
+                if (nearestThreatDistanceSqr(position().add(delta.scale(f)), threats) < pathMinimum
+                        || !isAreaLoaded(step) || !level().noCollision(this, step)) {
                     clear = false;
                     break;
                 }
             }
             if (clear) {
                 moveDestination = candidate;
-                break;
+                bestDistance = separation;
             }
         }
     }
 
+    private static double nearestThreatDistanceSqr(Vec3 at, List<LivingEntity> threats) {
+        double distance = Double.POSITIVE_INFINITY;
+        for (LivingEntity threat : threats)
+            distance = Math.min(distance, at.subtract(threat.position()).horizontalDistanceSqr());
+        return distance;
+    }
+
+    public int getSummonedAdherentLimit() {
+        return switch (level().getDifficulty()) {
+            case PEACEFUL -> 0;
+            case EASY, NORMAL -> 3;
+            case HARD -> 5;
+        };
+    }
+
+    private void pruneSummonedAdherents(ServerLevel server) {
+        summonedAdherents.removeIf(id -> {
+            Entity entity = server.getEntity(id);
+            // Missing entities may be in unloaded chunks: keep their reserved
+            // slot so unloading a minion cannot bypass the simultaneous cap.
+            return entity != null && (!(entity instanceof Adherent) || !entity.isAlive() || entity.isRemoved());
+        });
+    }
+
+    public boolean trackSummonedAdherent(Adherent minion) {
+        if (getPhase() != 2 || !isAlive() || !(level() instanceof ServerLevel server)) return false;
+        pruneSummonedAdherents(server);
+        int limit = getSummonedAdherentLimit();
+        if (summonedAdherents.contains(minion.getUUID())) {
+            int index = 0;
+            for (UUID id : summonedAdherents) {
+                if (id.equals(minion.getUUID())) return index < limit;
+                index++;
+            }
+        }
+        if (summonedAdherents.size() >= limit) return false;
+        summonedAdherents.add(minion.getUUID());
+        return true;
+    }
+
+    public void forgetSummonedAdherent(UUID id) {
+        summonedAdherents.remove(id);
+    }
+
+    private void killSummonedAdherents(ServerLevel server) {
+        summoningCircles.clear();
+        List<Adherent> owned = new ArrayList<>();
+        // Include all loaded owned minions, not only those still within 48 blocks.
+        for (Entity entity : server.getAllEntities())
+            if (entity instanceof Adherent minion && minion.isAlive()
+                    && minion.getPersistentData().hasUUID("FinaleHierophantOwner")
+                    && getUUID().equals(minion.getPersistentData().getUUID("FinaleHierophantOwner"))) owned.add(minion);
+        for (Adherent minion : owned) minion.kill();
+        summonedAdherents.clear();
+    }
+
     private void tickSummoningCircles(ServerLevel server) {
+        if (getPhase() != 2 || !isAlive()) {
+            summoningCircles.clear();
+            return;
+        }
         var iterator = summoningCircles.iterator();
         while (iterator.hasNext()) {
             SummoningCircle circle = iterator.next();
@@ -979,6 +1348,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     }
 
     private boolean spawnCircleAdherent(ServerLevel server, Vec3 origin) {
+        pruneSummonedAdherents(server);
+        if (getPhase() != 2 || !isAlive() || summonedAdherents.size() >= getSummonedAdherentLimit()) return true;
         var minion = TFEntities.ADHERENT.get().create(server);
         if (minion == null) return true;
         for (int i = 0; i < 9; i++) {
@@ -989,15 +1360,40 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                 continue;
             minion.finalizeSpawn(server, server.getCurrentDifficultyAt(BlockPos.containing(at)), MobSpawnType.MOB_SUMMONED, null);
             minion.getPersistentData().putUUID("FinaleHierophantOwner", getUUID());
-            minion.setTarget(validTarget(getTarget()) ? getTarget() : nearestArenaPlayer());
+            LivingEntity initialTarget = getTarget() != null && getTarget().isAlive() ? getTarget() : nearestArenaPlayer();
+            minion.setTarget(initialTarget);
+            if (initialTarget != null) minion.getLookControl().setLookAt(initialTarget, 360, 360);
             minion.setPersistenceRequired();
             minion.setCanPickUpLoot(false);
-            return server.addFreshEntity(minion);
+            if (!trackSummonedAdherent(minion)) return true;
+            if (server.addFreshEntity(minion)) {
+                // Reapply after join events, before the first AI tick.
+                minion.setTarget(initialTarget);
+                return true;
+            }
+            forgetSummonedAdherent(minion.getUUID());
+            return false;
         }
         return false;
     }
 
     private void ensureArena() {
+        if (level() instanceof ServerLevel server) {
+            GlobalPos home = getRestrictionPoint();
+            if (home == null || !home.dimension().equals(level().dimension())) {
+                home = GlobalPos.of(level().dimension(), blockPosition());
+                setRestrictionPoint(home);
+            }
+            if (roofLift == null) roofLift = HierophantArena.get(server).attach(server, this, home.pos());
+            if (roofLift != null) {
+                arena = roofLift.bounds();
+                entityData.set(ARENA_READY, roofLift.ready());
+                return;
+            }
+            // Wait for arena preparation rather than starting an unbounded fight.
+            entityData.set(ARENA_READY, false);
+            return;
+        }
         if (arena != null) return;
         GlobalPos home = getRestrictionPoint();
         if (home == null || !home.dimension().equals(level().dimension())) {
@@ -1034,7 +1430,13 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     }
 
     public boolean insideArena(Vec3 at) {
-        return arena == null || arena.contains(at);
+        if (arena == null) return true;
+        if (!arena.contains(at)) return false;
+        if (roofLift == null) return true;
+        // Match the actual circular set of floor cells, including their outer edges.
+        BlockPos column = BlockPos.containing(at);
+        double dx = column.getX() - roofLift.sourceHome.getX(), dz = column.getZ() - roofLift.sourceHome.getZ();
+        return dx * dx + dz * dz <= roofLift.radius * roofLift.radius;
     }
 
     public boolean isAreaLoaded(AABB box) {
@@ -1065,7 +1467,17 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     private Vec3 clampToArena(Vec3 at) {
         if (arena == null) return at;
         double margin = getBbWidth() / 2 + 0.2;
-        return new Vec3(Mth.clamp(at.x, arena.minX + margin, arena.maxX - margin), Mth.clamp(at.y, arena.minY, arena.maxY - getBbHeight()), Mth.clamp(at.z, arena.minZ + margin, arena.maxZ - margin));
+        double x = Mth.clamp(at.x, arena.minX + margin, arena.maxX - margin), z = Mth.clamp(at.z, arena.minZ + margin, arena.maxZ - margin);
+        if (roofLift != null) {
+            double cx = roofLift.sourceHome.getX() + 0.5, cz = roofLift.sourceHome.getZ() + 0.5;
+            double dx = x - cx, dz = z - cz, distance = Math.sqrt(dx * dx + dz * dz);
+            double radius = roofLift.radius - margin;
+            if (distance > radius) {
+                x = cx + dx / distance * radius;
+                z = cz + dz / distance * radius;
+            }
+        }
+        return new Vec3(x, Mth.clamp(at.y, arena.minY, arena.maxY - getBbHeight()), z);
     }
 
     private void constrainMovement() {
@@ -1118,8 +1530,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     private void updateBars() {
         // The visual never fades below 50%, but the HP bar must still reach zero.
         shieldBar.setProgress(Mth.clamp(getShieldHealth() / cubeShield.getMaxHealth(), 0, 1));
-        shieldBar.setColor(isShieldRed() ? BossEvent.BossBarColor.RED : BossEvent.BossBarColor.WHITE);
-        shieldBar.setVisible(hasShield() && entityData.get(INTRO_TIME) >= 60 && isAlive());
+        shieldBar.setColor(isShieldRed() ? BossEvent.BossBarColor.RED : BossEvent.BossBarColor.BLUE);
+        shieldBar.setVisible(entityData.get(ARENA_READY) && hasShield() && entityData.get(INTRO_TIME) >= 20 && isAlive());
     }
 
     @Override
@@ -1138,6 +1550,12 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     @Override
     public void remove(RemovalReason reason) {
         shieldBar.removeAllPlayers();
+        if (reason == RemovalReason.DISCARDED && level() instanceof ServerLevel server) {
+            summoningCircles.clear();
+            for (Adherent minion : server.getEntitiesOfClass(Adherent.class, getBoundingBox().inflate(48),
+                    e -> e.getPersistentData().hasUUID("FinaleHierophantOwner") && getUUID().equals(e.getPersistentData().getUUID("FinaleHierophantOwner"))))
+                minion.discard();
+        }
         super.remove(reason);
     }
 
@@ -1165,8 +1583,11 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     public void die(DamageSource source) {
         super.die(source);
         if (!dead) return;
+        if (level() instanceof ServerLevel server && getRestrictionPoint() != null)
+            HierophantArena.get(server).defeated(getRestrictionPoint().pos());
         endSkill();
         setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         updateShieldCollision();
         shieldBar.setVisible(false);
         if (level() instanceof ServerLevel server)
@@ -1181,7 +1602,11 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         entityData.set(DEATH_TIME, deathTime);
         setDeltaMovement(0, getDeltaMovement().y, 0);
         getNavigation().stop();
-        if (deathTime >= 50 && deathTime < 125) smoke(server, 4 + (deathTime - 50) / 10, 0.65);
+        if (deathTime == 40) playSound(SoundEvents.ENDERMAN_SCREAM, 3, 0.8F);
+        if (deathTime >= 50 && deathTime < 150) {
+            smoke(server, 4 + (deathTime - 50) / 10, 0.65);
+            server.sendParticles(ParticleTypes.ASH, getX(), getY() + 1, getZ(), 8, 0.6, 0.8, 0.6, 0.04);
+        }
     }
 
     @Override
@@ -1213,18 +1638,12 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             return;
         }
         Vec3 start = position().add(0, 0.9, 0), end = Vec3.atCenterOf(chest).add(0, 0.3, 0);
-        int points = Mth.clamp(Mth.ceil(start.distanceTo(end) * 10), 20, 96);
         ParticlePacket trail = new ParticlePacket();
-        for (int i = 0; i <= points; i++) {
-            double fraction = i / (double) points;
-            Vec3 point = start.lerp(end, fraction).add(0, Math.sin(fraction * Math.PI) * 1.2, 0);
-            Vec3 velocity = end.subtract(point).normalize().scale(0.08);
-            trail.queueParticle(ParticleTypes.TOTEM_OF_UNDYING, false, point, velocity);
-        }
-        for (int i = 0; i < 20; i++) {
-            double angle = i * Math.PI / 10;
-            trail.queueParticle(ParticleTypes.TOTEM_OF_UNDYING, false, end.add(Math.cos(angle) * 0.3, 0, Math.sin(angle) * 0.3), new Vec3(0, 0.04, 0));
-        }
+        // Spawn one travelling cluster at the body, never the entire route at
+        // once. The packet preserves this destination offset exactly; clients
+        // animate the spiral even after the native boss entity has been removed.
+        for (int i = 0; i < 48; i++)
+            trail.queueParticle(ModParticle.HIEROPHANT_REWARD.get(), false, start, end.subtract(start));
         PacketDistributor.sendToPlayersTrackingEntity(this, trail);
     }
 
@@ -1249,10 +1668,23 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         super.addAdditionalSaveData(tag);
         tag.putInt("FinalePhase", getPhase());
         tag.putInt("HierophantHealthVersion", 2);
+        tag.putBoolean("HierophantThirdUnlocked", thirdPhaseUnlocked);
+        tag.putInt("HierophantRebirth", entityData.get(REBIRTH_TIME));
+        tag.putInt("HierophantShieldClock", shieldShotTick);
+        tag.putInt("HierophantShieldBurstRemaining", shieldBurstRemaining);
+        tag.putInt("HierophantShieldNextBurst", shieldNextBurstTick);
+        tag.putInt("HierophantEmptyArena", emptyArenaTicks);
         tag.putInt("HierophantLastAttack", lastPhaseTwoAttack);
         tag.putInt("HierophantIntro", entityData.get(INTRO_TIME));
         tag.put("HierophantShieldCapability", cubeShield.serializeNBT());
         tag.putInt("HierophantBreakTime", entityData.get(BREAK_TIME));
+        ListTag savedMinions = new ListTag();
+        for (UUID id : summonedAdherents) {
+            CompoundTag saved = new CompoundTag();
+            saved.putUUID("UUID", id);
+            savedMinions.add(saved);
+        }
+        tag.put("HierophantAdherents", savedMinions);
         ListTag savedCircles = new ListTag();
         for (SummoningCircle circle : summoningCircles) {
             CompoundTag saved = new CompoundTag();
@@ -1275,6 +1707,12 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         if (!tag.contains("HierophantHealthVersion") && previousMax > 0)
             setHealth(previousHealth / previousMax * getMaxHealth());
         setPhase(tag.contains("FinalePhase") ? tag.getInt("FinalePhase") : 1);
+        thirdPhaseUnlocked = tag.getBoolean("HierophantThirdUnlocked") || getPhase() == 3;
+        entityData.set(REBIRTH_TIME, Mth.clamp(tag.getInt("HierophantRebirth"), 0, REBIRTH_DURATION));
+        shieldShotTick = Math.max(0, tag.getInt("HierophantShieldClock"));
+        shieldBurstRemaining = Mth.clamp(tag.getInt("HierophantShieldBurstRemaining"), 0, 3);
+        shieldNextBurstTick = Math.max(shieldShotTick, tag.getInt("HierophantShieldNextBurst"));
+        emptyArenaTicks = Mth.clamp(tag.getInt("HierophantEmptyArena"), 0, 199);
         lastPhaseTwoAttack = tag.contains("HierophantLastAttack") ? tag.getInt("HierophantLastAttack") : -1;
         // Migrate the old custom loot inventory once; native BaseTFBoss owns it now.
         if (!tag.contains("Items") && tag.contains("HierophantRewards"))
@@ -1287,16 +1725,24 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         } else {
             // Preserve partially depleted shields from pre-capability saves.
             float max = tag.contains("HierophantShieldMax") ? tag.getFloat("HierophantShieldMax") : HierophantConfig.SHIELD_HEALTH.get().floatValue();
-            float hp = tag.contains("HierophantShield") ? tag.getFloat("HierophantShield") : getPhase() == 2 ? 0 : max;
+            float hp = tag.contains("HierophantShield") ? tag.getFloat("HierophantShield") : getPhase() >= 2 ? 0 : max;
             float replacement = HierophantConfig.SHIELD_HEALTH.get().floatValue();
             cubeShield.restore(replacement, max > 0 ? hp / max * replacement : 0);
         }
         var bounds = tag.getList("HierophantArena", net.minecraft.nbt.Tag.TAG_DOUBLE);
         if (bounds.size() == 6 && bounds.getDouble(3) > bounds.getDouble(0) && bounds.getDouble(5) > bounds.getDouble(2))
             arena = new AABB(bounds.getDouble(0), bounds.getDouble(1), bounds.getDouble(2), bounds.getDouble(3), bounds.getDouble(4), bounds.getDouble(5));
+        summonedAdherents.clear();
+        var savedMinions = tag.getList("HierophantAdherents", net.minecraft.nbt.Tag.TAG_COMPOUND);
+        if (getPhase() == 2)
+            for (int i = 0; i < Math.min(savedMinions.size(), 256); i++) {
+                CompoundTag saved = savedMinions.getCompound(i);
+                if (saved.hasUUID("UUID")) summonedAdherents.add(saved.getUUID("UUID"));
+            }
         summoningCircles.clear();
         var savedCircles = tag.getList("HierophantSummonCircles", net.minecraft.nbt.Tag.TAG_COMPOUND);
-        for (int i = 0; i < Math.min(savedCircles.size(), 256); i++) {
+        int availableCircles = getPhase() == 2 ? Math.max(0, getSummonedAdherentLimit() - summonedAdherents.size()) : 0;
+        for (int i = 0; i < Math.min(savedCircles.size(), availableCircles); i++) {
             CompoundTag saved = savedCircles.getCompound(i);
             var pos = saved.getList("Pos", net.minecraft.nbt.Tag.TAG_DOUBLE);
             if (pos.size() != 3) continue;
@@ -1304,15 +1750,21 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             if (Double.isFinite(at.x) && Double.isFinite(at.y) && Double.isFinite(at.z) && insideArena(at))
                 summoningCircles.add(new SummoningCircle(at, Mth.clamp(saved.getInt("Delay"), 0, SUMMON_DELAY_TICKS)));
         }
-        nextAttack = BARRAGE;
+        nextAttack = getPhase() == 3 ? METEORS : BARRAGE;
         pendingRelocation = false;
         resumeBarrage = false;
         endSkill(); // Cancel casts on reload; native BaseTFBoss restores home and loot.
-        if (!hasShield()) setPhase(2);
+        if (!hasShield() && getPhase() == 1) setPhase(2);
         entityData.set(DEATH_TIME, deathTime);
         updateShieldCollision();
         setCanPickUpLoot(false);
-        if (entityData.get(INTRO_TIME) >= 30 && !isSpawned())
-            setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItem.FORCE_FIELD_SCEPTER.get()));
+        if (entityData.get(INTRO_TIME) < INTRO_DURATION && getPhase() == 1) {
+            setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(TFItems.FORTIFICATION_SCEPTER.get()));
+            setItemInHand(InteractionHand.OFF_HAND, new ItemStack(ModItem.FORCE_FIELD_SCEPTER.get()));
+        }
+        if (getPhase() == 3 && entityData.get(REBIRTH_TIME) > 0) {
+            setNoGravity(true);
+            if (entityData.get(REBIRTH_TIME) < 110) setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        }
     }
 }

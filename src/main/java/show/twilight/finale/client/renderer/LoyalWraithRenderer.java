@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -61,7 +62,7 @@ public class LoyalWraithRenderer
                 this.model.setupAnim(entity, shadow.limbSwing, shadow.limbSwingAmount, shadow.animationProgress, shadow.yHeadRot - shadow.yBodyRot, shadow.xRot);
                 float alpha = Math.max(0.0f, 1.0f - (ageInTicks - shadow.age) / 10.0f);
                 float color = 1.0f - 0.5f * ((ageInTicks - shadow.age) / 10.0f);
-                this.getModel().renderToBuffer(stack, consumer, light, OverlayTexture.NO_OVERLAY, net.minecraft.util.FastColor.ARGB32.colorFromFloat(alpha, color, color, color));
+                this.getModel().renderToBuffer(stack, consumer, light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(alpha, color, color, color));
                 stack.popPose();
             }
         }

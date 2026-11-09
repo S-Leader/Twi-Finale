@@ -1,9 +1,10 @@
 package show.twilight.finale.entity.skill.adherent;
 
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import show.twilight.finale.entity.AdherentHighPriestEntity;
 import show.twilight.finale.entity.LoyalWraithEntity;
@@ -26,9 +27,9 @@ public class SummonSkill
             double dy = entity.getY() + (double) entity.getBbHeight() * 0.94;
             for (int side = 0; side < 2; ++side) {
                 float currentAngle = angle + (float) side * (float) Math.PI;
-                double dx = entity.getX() + (double) Mth.cos((float) currentAngle) * 0.65;
-                double dz = entity.getZ() + (double) Mth.sin((float) currentAngle) * 0.65;
-                ((net.minecraft.server.level.ServerLevel) entity.level()).sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, red, grn, blu), dx, dy, dz, 1, 0.0, 0.0, 0.0, 0.0);
+                double dx = entity.getX() + (double) Mth.cos(currentAngle) * 0.65;
+                double dz = entity.getZ() + (double) Mth.sin(currentAngle) * 0.65;
+                ((ServerLevel) entity.level()).sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, red, grn, blu), dx, dy, dz, 1, 0.0, 0.0, 0.0, 0.0);
             }
         }
     }
@@ -51,7 +52,7 @@ public class SummonSkill
                     if (target != null) {
                         minion.setTarget(target);
                     }
-                    entity.level().addFreshEntity((Entity) minion);
+                    entity.level().addFreshEntity(minion);
                 }
             }
         }

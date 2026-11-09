@@ -28,8 +28,7 @@ public class SprintSkill extends BaseSkill<AdherentHighPriestEntity> {
             }
             if (entity.getSkillTick() >= 10 && entity.getSkillTick() < 15) {
                 for (LivingEntity rangeTarget : entity.level().getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(1.5, 0.0, 1.5))) {
-                    Player p;
-                    if (rangeTarget == entity || entity.isAlliedTo(rangeTarget) || !entity.canAttack(rangeTarget) || rangeTarget instanceof Player && (p = (Player) rangeTarget).isCrouching() || !rangeTarget.hurt(entity.damageSources().mobAttack(entity), 6.5f))
+                    if (rangeTarget == entity || entity.isAlliedTo(rangeTarget) || !entity.canAttack(rangeTarget) || rangeTarget instanceof Player && rangeTarget.isCrouching() || !rangeTarget.hurt(entity.damageSources().mobAttack(entity), 6.5f))
                         continue;
                     entity.playSound(SoundEvents.PLAYER_ATTACK_SWEEP);
                 }

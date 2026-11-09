@@ -2,7 +2,6 @@ package show.twilight.finale.entity.skill.adherent;
 
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import show.twilight.finale.entity.AdherentHighPriestEntity;
 import show.twilight.finale.entity.projectile.ProverbsBolt;
@@ -35,9 +34,9 @@ public class ProverbsBallSkill
             double d1 = target.getX() - entity.getX();
             double d2 = d0 - natureBolt.getY();
             double d3 = target.getZ() - entity.getZ();
-            float f = Mth.sqrt((float) ((float) (d1 * d1 + d3 * d3))) * 0.2f;
+            float f = Mth.sqrt((float) (d1 * d1 + d3 * d3)) * 0.2f;
             natureBolt.shoot(d1, d2 + (double) f, d3, 0.6f, 10 - entity.level().getDifficulty().getId() * 4);
-            entity.level().addFreshEntity((Entity) natureBolt);
+            entity.level().addFreshEntity(natureBolt);
         }
     }
 }

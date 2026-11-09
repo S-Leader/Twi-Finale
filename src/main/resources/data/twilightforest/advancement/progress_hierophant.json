@@ -1,5 +1,5 @@
 {
-  "parent": "twilightforest_finale:kill_adherent",
+  "parent": "twilightforest:progress_adherent",
   "criteria": {
     "kill_hierophant": {
       "conditions": {

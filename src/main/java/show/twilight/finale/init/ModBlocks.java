@@ -1,10 +1,12 @@
 package show.twilight.finale.init;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import show.twilight.finale.TwilightFinaleMod;
 import show.twilight.finale.block.FinaleBossSpawnerBlock;
 import show.twilight.finale.block.FloorAdherentTrophyBlock;
 import show.twilight.finale.block.WallAdherentTrophyBlock;
@@ -15,8 +17,8 @@ import show.twilight.finale.block.entity.HierophantSpawnerBlockEntity;
 import java.util.function.Supplier;
 
 public class ModBlocks {
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.BLOCK, "twilightforest_finale");
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE, "twilightforest_finale");
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, TwilightFinaleMod.MOD_ID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, "twilightforest_finale");
     public static final Supplier<FloorAdherentTrophyBlock> ADHERENT_TROPHY_BLOCK = BLOCKS.register("adherent_trophy", () -> new FloorAdherentTrophyBlock(BlockBehaviour.Properties.of().instabreak(), ModBlocks.ADHERENT_TROPHY_ENTITY));
     public static final Supplier<WallAdherentTrophyBlock> ADHERENT_WALL_TROPHY_BLOCK = BLOCKS.register("adherent_wall_trophy", () -> new WallAdherentTrophyBlock(BlockBehaviour.Properties.of().instabreak(), ModBlocks.ADHERENT_TROPHY_ENTITY));
     public static final Supplier<BlockEntityType<FinalTrophyBlockEntity>> ADHERENT_TROPHY_ENTITY = BLOCK_ENTITIES.register("adherent_trophy", () -> BlockEntityType.Builder.of(FinalTrophyBlockEntity::adherent, new Block[]{ADHERENT_TROPHY_BLOCK.get(), ADHERENT_WALL_TROPHY_BLOCK.get()}).build(null));

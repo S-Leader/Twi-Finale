@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import show.twilight.finale.capabilities.ForceFieldCapabilityList;
@@ -51,7 +52,7 @@ public class ForceFieldLayer<T extends LivingEntity, M extends EntityModel<T>>
         stack.translate(sx, 1.5 + (double) sy, sz);
         stack.scale(bS * breath, bS * breath, bS * breath);
         stack.translate(0.0, -1.5, 0.0);
-        part.render(stack, vc, light, OverlayTexture.NO_OVERLAY, net.minecraft.util.FastColor.ARGB32.colorFromFloat(alpha, 1.0f, 1.0f, 1.0f));
+        part.render(stack, vc, light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(alpha, 1.0f, 1.0f, 1.0f));
         stack.popPose();
     }
 

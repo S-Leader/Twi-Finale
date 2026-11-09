@@ -10,8 +10,8 @@
     "FinalCastleStructureMixin",
     "ForceFieldBlockMixin",
     "AdherentMixin",
-    "FinaleScepterRepairMixin",
-    "CubeOfAnnihilationMixin"
+    "HierophantIceBombMixin",
+    "FinaleScepterRepairMixin"
   ],
   "client": [
     "ItemInHandRendererMixin"

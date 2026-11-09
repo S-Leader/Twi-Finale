@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:mineable/pickaxe",
+    "#minecraft:base_stone_overworld",
+    "#minecraft:base_stone_nether",
+    "#minecraft:stone_bricks",
+    "#minecraft:stone_ore_replaceables",
+    "#minecraft:deepslate_ore_replaceables",
+    { "id": "#c:stones", "required": false },
+    { "id": "#c:cobblestones", "required": false },
+    { "id": "#c:ores", "required": false },
+    { "id": "#aether:holystone", "required": false },
+    { "id": "#aether:holystone_ore_replaceables", "required": false }
+  ]
+}

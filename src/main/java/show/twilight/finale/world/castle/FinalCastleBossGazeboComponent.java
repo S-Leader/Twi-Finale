@@ -76,8 +76,10 @@ public class FinalCastleBossGazeboComponent extends TFStructureComponentOld {
         this.placeBlock(world, (BlockState) ((BlockState) blockState.setValue(StairBlock.FACING, Direction.WEST)).setValue(StairBlock.SHAPE, StairsShape.OUTER_LEFT), 9, 0, 11, sbb);
         this.placeBlock(world, (BlockState) ((BlockState) blockState.setValue(StairBlock.FACING, Direction.SOUTH)).setValue(StairBlock.SHAPE, StairsShape.STRAIGHT), 10, 0, 11, sbb);
         this.placeBlock(world, (BlockState) ((BlockState) blockState.setValue(StairBlock.FACING, Direction.SOUTH)).setValue(StairBlock.SHAPE, StairsShape.OUTER_LEFT), 11, 0, 11, sbb);
-        this.placeBlock(world, ((Block) TFBlocks.CASTLE_ROOF_TILE.get()).defaultBlockState(), 10, 0, 10, sbb);
-        this.placeBlock(world, ((Block) TFBlocks.FINAL_BOSS_BOSS_SPAWNER.get()).defaultBlockState(), 10, 1, 10, sbb);
+        this.placeBlock(world, TFBlocks.CASTLE_BRICK.get().defaultBlockState(), 10, 0, 10, sbb);
+        // Native spawning/reset uses this raised home, above a single castle-brick pedestal.
+        // The arena itself remains stationary; activation only opens the violet fields.
+        this.placeBlock(world, show.twilight.finale.init.ModBlocks.TWILIGHT_HIEROPHANT_BOSS_SPAWNER.get().defaultBlockState(), 10, 1, 10, sbb);
 
     }
 
