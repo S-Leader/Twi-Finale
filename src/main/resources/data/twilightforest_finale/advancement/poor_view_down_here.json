@@ -1,0 +1,63 @@
+{
+  "parent": "twilightforest_finale:alohomora",
+  "criteria": {
+    "roving_cube": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "twilightforest:roving_cube"
+        }
+      }
+    },
+    "cube_talisman": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "twilightforest:cube_talisman"
+            ]
+          }
+        ]
+      }
+    },
+    "previous_progression": {
+      "trigger": "minecraft:tick",
+      "conditions": {
+        "player": {
+          "type_specific": {
+            "type": "minecraft:player",
+            "advancements": {
+              "twilightforest_finale:alohomora": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "twilightforest:cube_talisman"
+    },
+    "title": {
+      "translate": "advancement.twilightforest_finale.poor_view_down_here"
+    },
+    "description": {
+      "translate": "advancement.twilightforest_finale.poor_view_down_here.desc"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "requirements": [
+    [
+      "roving_cube",
+      "cube_talisman"
+    ],
+    [
+      "previous_progression"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

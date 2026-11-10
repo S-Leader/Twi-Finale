@@ -3,7 +3,6 @@ package show.twilight.finale.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
 import show.twilight.finale.block.FloorFinalTrophyBlock;
@@ -18,7 +17,7 @@ public interface RenderWithoutEntity {
         }
         BlockState state = trophy.getBlockState();
         boolean isWall = state.getBlock() instanceof WallFinalTrophyBlock;
-        float rotation = RotationSegment.convertToDegrees((int) (isWall ? RotationSegment.convertToSegment((Direction) ((Direction) state.getValue(WallFinalTrophyBlock.FACING)).getOpposite()) : (Integer) state.getValue(FloorFinalTrophyBlock.ROTATION)));
+        float rotation = RotationSegment.convertToDegrees(isWall ? RotationSegment.convertToSegment(state.getValue(WallFinalTrophyBlock.FACING).getOpposite()) : state.getValue(FloorFinalTrophyBlock.ROTATION));
         poseStack.pushPose();
         poseStack.translate(0.5, 0.0, 0.5);
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0f - rotation));
@@ -30,6 +29,6 @@ public interface RenderWithoutEntity {
         poseStack.popPose();
     }
 
-    public void render(PoseStack var1, MultiBufferSource var2, int var3, int var4);
+    void render(PoseStack var1, MultiBufferSource var2, int var3, int var4);
 }
 

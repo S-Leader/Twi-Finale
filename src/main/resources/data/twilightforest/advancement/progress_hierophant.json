@@ -1,5 +1,5 @@
 {
-  "parent": "twilightforest:progress_adherent",
+  "parent": "twilightforest_finale:poor_view_down_here",
   "criteria": {
     "kill_hierophant": {
       "conditions": {
@@ -25,7 +25,7 @@
               "type_specific": {
                 "type": "player",
                 "advancements": {
-                  "twilightforest:progress_castle": true
+                  "twilightforest_finale:poor_view_down_here": true
                 }
               }
             }

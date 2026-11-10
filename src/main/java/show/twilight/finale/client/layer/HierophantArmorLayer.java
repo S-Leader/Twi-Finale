@@ -85,28 +85,28 @@ public class HierophantArmorLayer<T extends TheTwilightHierophantEntity, M exten
         model.setAllVisible(false);
         switch (part) {
             case HEAD: {
-                ((HumanoidModel) model).head.visible = true;
-                ((HumanoidModel) model).hat.visible = true;
+                model.head.visible = true;
+                model.hat.visible = true;
                 break;
             }
             case BODY: {
-                ((HumanoidModel) model).body.visible = true;
+                model.body.visible = true;
                 break;
             }
             case RIGHT_ARM: {
-                ((HumanoidModel) model).rightArm.visible = true;
+                model.rightArm.visible = true;
                 break;
             }
             case LEFT_ARM: {
-                ((HumanoidModel) model).leftArm.visible = true;
+                model.leftArm.visible = true;
                 break;
             }
             case RIGHT_LEG: {
-                ((HumanoidModel) model).rightLeg.visible = true;
+                model.rightLeg.visible = true;
                 break;
             }
             case LEFT_LEG: {
-                ((HumanoidModel) model).leftLeg.visible = true;
+                model.leftLeg.visible = true;
             }
         }
     }
@@ -131,15 +131,15 @@ public class HierophantArmorLayer<T extends TheTwilightHierophantEntity, M exten
     }
 
     public static <T extends TheTwilightHierophantEntity, M extends TheTwilightHierophantModel<T>> void addCustomArmorLayers(LivingEntityRenderer<T, M> renderer, EntityRendererProvider.Context context, ModelLayerLocation innerLayer, ModelLayerLocation outerLayer) {
-        renderer.addLayer(new HierophantArmorLayer<T, M, HumanoidModel<T>>(renderer, new HumanoidModel(context.bakeLayer(innerLayer)), ArmorModelPart.BODY, true, EquipmentSlot.LEGS, context.getModelManager()));
-        renderer.addLayer(new HierophantArmorLayer<T, M, HumanoidModel<T>>(renderer, new HumanoidModel(context.bakeLayer(innerLayer)), ArmorModelPart.RIGHT_LEG, true, EquipmentSlot.LEGS, context.getModelManager()));
-        renderer.addLayer(new HierophantArmorLayer<T, M, HumanoidModel<T>>(renderer, new HumanoidModel(context.bakeLayer(innerLayer)), ArmorModelPart.LEFT_LEG, true, EquipmentSlot.LEGS, context.getModelManager()));
-        renderer.addLayer(new HierophantArmorLayer<T, M, HumanoidModel<T>>(renderer, new HumanoidModel(context.bakeLayer(outerLayer)), ArmorModelPart.HEAD, false, EquipmentSlot.HEAD, context.getModelManager()));
-        renderer.addLayer(new HierophantArmorLayer<T, M, HumanoidModel<T>>(renderer, new HumanoidModel(context.bakeLayer(outerLayer)), ArmorModelPart.BODY, false, EquipmentSlot.CHEST, context.getModelManager()));
-        renderer.addLayer(new HierophantArmorLayer<T, M, HumanoidModel<T>>(renderer, new HumanoidModel(context.bakeLayer(outerLayer)), ArmorModelPart.RIGHT_ARM, false, EquipmentSlot.CHEST, context.getModelManager()));
-        renderer.addLayer(new HierophantArmorLayer<T, M, HumanoidModel<T>>(renderer, new HumanoidModel(context.bakeLayer(outerLayer)), ArmorModelPart.LEFT_ARM, false, EquipmentSlot.CHEST, context.getModelManager()));
-        renderer.addLayer(new HierophantArmorLayer<T, M, HumanoidModel<T>>(renderer, new HumanoidModel(context.bakeLayer(outerLayer)), ArmorModelPart.RIGHT_LEG, false, EquipmentSlot.FEET, context.getModelManager()));
-        renderer.addLayer(new HierophantArmorLayer<T, M, HumanoidModel<T>>(renderer, new HumanoidModel(context.bakeLayer(outerLayer)), ArmorModelPart.LEFT_LEG, false, EquipmentSlot.FEET, context.getModelManager()));
+        renderer.addLayer(new HierophantArmorLayer<>(renderer, new HumanoidModel<>(context.bakeLayer(innerLayer)), ArmorModelPart.BODY, true, EquipmentSlot.LEGS, context.getModelManager()));
+        renderer.addLayer(new HierophantArmorLayer<>(renderer, new HumanoidModel<>(context.bakeLayer(innerLayer)), ArmorModelPart.RIGHT_LEG, true, EquipmentSlot.LEGS, context.getModelManager()));
+        renderer.addLayer(new HierophantArmorLayer<>(renderer, new HumanoidModel<>(context.bakeLayer(innerLayer)), ArmorModelPart.LEFT_LEG, true, EquipmentSlot.LEGS, context.getModelManager()));
+        renderer.addLayer(new HierophantArmorLayer<>(renderer, new HumanoidModel<>(context.bakeLayer(outerLayer)), ArmorModelPart.HEAD, false, EquipmentSlot.HEAD, context.getModelManager()));
+        renderer.addLayer(new HierophantArmorLayer<>(renderer, new HumanoidModel<>(context.bakeLayer(outerLayer)), ArmorModelPart.BODY, false, EquipmentSlot.CHEST, context.getModelManager()));
+        renderer.addLayer(new HierophantArmorLayer<>(renderer, new HumanoidModel<>(context.bakeLayer(outerLayer)), ArmorModelPart.RIGHT_ARM, false, EquipmentSlot.CHEST, context.getModelManager()));
+        renderer.addLayer(new HierophantArmorLayer<>(renderer, new HumanoidModel<>(context.bakeLayer(outerLayer)), ArmorModelPart.LEFT_ARM, false, EquipmentSlot.CHEST, context.getModelManager()));
+        renderer.addLayer(new HierophantArmorLayer<>(renderer, new HumanoidModel<>(context.bakeLayer(outerLayer)), ArmorModelPart.RIGHT_LEG, false, EquipmentSlot.FEET, context.getModelManager()));
+        renderer.addLayer(new HierophantArmorLayer<>(renderer, new HumanoidModel<>(context.bakeLayer(outerLayer)), ArmorModelPart.LEFT_LEG, false, EquipmentSlot.FEET, context.getModelManager()));
     }
 
     public enum ArmorModelPart {

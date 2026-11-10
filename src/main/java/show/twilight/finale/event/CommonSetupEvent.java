@@ -1,7 +1,10 @@
 package show.twilight.finale.event;
 
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
-import show.twilight.finale.entity.*;
+import show.twilight.finale.entity.AdherentHighPriestEntity;
+import show.twilight.finale.entity.CastleGuardianEntity;
+import show.twilight.finale.entity.LoyalWraithEntity;
+import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.init.ModEntity;
 
 public class CommonSetupEvent {
@@ -11,7 +14,6 @@ public class CommonSetupEvent {
         event.put(ModEntity.THE_TWILIGHT_HIEROPHANT.get(), TheTwilightHierophantEntity.createAttributes().build());
         event.put(ModEntity.LOYAL_WRAITH.get(), LoyalWraithEntity.createAttributes().build());
         event.put(ModEntity.CASTLE_GUARDIAN.get(), CastleGuardianEntity.createAttributes().build());
-        event.put(ModEntity.ANNIHILATION_HAND.get(), AnnihilationHandEntity.createAttributes().build());
     }
 }
 

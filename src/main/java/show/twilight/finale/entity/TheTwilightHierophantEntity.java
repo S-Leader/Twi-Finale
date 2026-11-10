@@ -38,6 +38,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
@@ -81,7 +82,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     public static final int SHIELD_STUN = 8, FAN = 9, ICE_BOMB = 10, WEAPON_VOLLEY = 11, CHUCKLE = 12, AXE_SLAM = 13;
     public static final int SHIELD_CAST = 14, METEORS = 15, FIERY_QUAKE = 16, FIERY_THRUST = 17, REBIRTH = -4;
     public static final int SWORD_RISE = 0, SWORD_HOLD = 1, SWORD_DIVE = 2, SWORD_SMOKE = 3, SWORD_PLANTED = 4, SWORD_FINISH = 5;
-    public static final int SWORD_COMBO_HITS = 5, SWORD_RISE_TICKS = 20, SWORD_HOLD_TICKS = 6, SWORD_SMOKE_TICKS = 6, SWORD_BLAST_DELAY = 20;
+    public static final int SWORD_IMPACT_HOLD_TICKS = 4;
+    public static final int SWORD_COMBO_HITS = 5, SWORD_RISE_TICKS = 20, SWORD_HOLD_TICKS = 6, SWORD_SMOKE_TICKS = SWORD_IMPACT_HOLD_TICKS + 6, SWORD_BLAST_DELAY = 20;
     public static final int REBIRTH_DURATION = 140, SHIELD_CAST_DURATION = 200, METEOR_DURATION = 160, FIERY_QUAKE_DURATION = 360, FIERY_THRUST_DURATION = 60;
     public static final int METEOR_WINDUP_TICKS = 24, METEOR_RECOVERY_TICKS = 32;
     public static final int INTRO_DURATION = 100, BREAK_DURATION = 40, DEATH_DURATION = 160, BARRAGE_FIRE_TICKS = 100;
@@ -94,6 +96,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     public static final double FIERY_THRUST_SPEED = 1.35 * 3, FIERY_THRUST_DISTANCE = 1.35 * 16 * 2;
     private static final AttributeModifier THRUST_STEP_HEIGHT = new AttributeModifier(
             TwilightFinaleMod.prefix("fiery_thrust_step"), 0.5, AttributeModifier.Operation.ADD_VALUE);
+    private static final double PHASE_TWO_ORBIT_DISTANCE = 15;
     public static final int SUMMON_DELAY_TICKS = 60, FAN_DURATION = 24;
     public static final String ICE_BOMB_NO_SNOW_TAG = "FinaleHierophantIceBomb";
     public static final int ICE_THROW_TICK = 30, ICE_BOMB_DURATION = 54, WEAPON_THROW_COUNT = 30, AXE_WINDUP_TICKS = 40, CHUCKLE_DURATION = 40;
@@ -113,6 +116,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     private static final EntityDataAccessor<Boolean> ARENA_READY = data(EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HAS_COMBAT_TARGET = data(EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> SWORD_STAGE = data(EntityDataSerializers.INT), SWORD_STAGE_TIME = data(EntityDataSerializers.INT), SWORD_HIT_INDEX = data(EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> SWORD_IMPACT_Y = data(EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Boolean> SMOKE_PHASING = data(EntityDataSerializers.BOOLEAN);
 
     private static <T> EntityDataAccessor<T> data(EntityDataSerializer<T> serializer) {
         return SynchedEntityData.defineId(TheTwilightHierophantEntity.class, serializer);
@@ -125,11 +130,15 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     private boolean wallHitX, wallHitZ, pendingRelocation, moveCirclePlaced, resumeBarrage;
     private Vec3 lockedAim = Vec3.ZERO, moveDestination = Vec3.ZERO, dashDirection = Vec3.ZERO, previousDash = Vec3.ZERO;
     private Vec3 moveOrigin = Vec3.ZERO;
+    private Vec3 lastSafeSmokeLanding;
+    private int nextSmokeRecoveryTick;
+    private boolean checkLoadedSmokePosition = true;
     private double rushSpeed, fieryThrustTravelled;
     private Vec3 previousThrustPosition = Vec3.ZERO;
     private int thrustStalledTicks;
+    private int phaseTwoOrbitDirection;
     private Vec3 swordLanding = Vec3.ZERO;
-    private double swordJumpSpeed;
+    private double swordJumpSpeed, swordDiveStartY;
     private int swordStageSyncTick;
     private float shieldAngle, shieldAngleO;
     private int nextAttack = BARRAGE, nextMissileTick = 1, fastMissiles, barrageTicks;
@@ -291,6 +300,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         b.define(SWORD_STAGE, SWORD_RISE);
         b.define(SWORD_STAGE_TIME, 0);
         b.define(SWORD_HIT_INDEX, 0);
+        b.define(SWORD_IMPACT_Y, 0F);
+        b.define(SMOKE_PHASING, false);
     }
 
     @Override
@@ -313,6 +324,9 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
 
     @Override
     public void beginSkill(int id) {
+        // A fan interruption/phase change must not make the boss solid inside
+        // a wall or below the roof while a smoke move is still in progress.
+        if (id != SMOKE_MOVE && isSmokePhasing() && !finishSmokeTravel()) return;
         entityData.set(SKILL_TYPE, id);
         skillTick = 0;
         entityData.set(ATTACK_TIME, 0);
@@ -351,6 +365,14 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             pendingRelocation = false;
             moveOrigin = position();
             moveCirclePlaced = false;
+            nextSmokeRecoveryTick = 0;
+            Vec3 safeOrigin = smokeGroundAt(moveOrigin);
+            if (safeOrigin != null) lastSafeSmokeLanding = safeOrigin;
+            entityData.set(SMOKE_PHASING, true);
+            // This must happen before the next super.tick(), not a tick later:
+            // noPhysics would otherwise carry an old downward velocity through the floor.
+            setNoGravity(true);
+            setDeltaMovement(Vec3.ZERO);
             if (getPhase() == 3) queuedThirdAttack = switch (random.nextInt(8)) {
                 case 6 -> FIERY_QUAKE;
                 case 7 -> FIERY_THRUST;
@@ -370,13 +392,17 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         }
         if (id == CHUCKLE) playSound(SoundEvents.WITCH_CELEBRATE, 1, 0.9F);
         if (id == AXE_SLAM) setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(TFItems.DIAMOND_MINOTAUR_AXE.get()));
-        if (getPhase() == 3) setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(TFItems.FIERY_SWORD.get()));
+        if (getPhase() == 3) setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItem.TWILIGHT_SWORD.get()));
         if (id == FIERY_QUAKE && level() instanceof ServerLevel server) {
             entityData.set(SWORD_HIT_INDEX, 0);
             startSwordJump(server);
         }
         if (id == FIERY_THRUST) {
-            dashDirection = Vec3.ZERO;
+            // Lock the ray when charging starts, not when it is released.
+            dashDirection = lockedAim.subtract(position()).multiply(1, 0, 1).normalize();
+            if (dashDirection.lengthSqr() < 1.0E-6) dashDirection = getLookAngle().multiply(1, 0, 1).normalize();
+            if (dashDirection.lengthSqr() < 1.0E-6) dashDirection = new Vec3(1, 0, 0);
+            faceThrustDirection();
             fieryThrustTravelled = 0;
             previousThrustPosition = position();
             thrustStalledTicks = 0;
@@ -389,6 +415,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
 
     @Override
     public void endSkill() {
+        if (isSmokePhasing() && !finishSmokeTravel()) return;
+        entityData.set(SMOKE_PHASING, false);
         setThrustStepHeight(false);
         entityData.set(USING_SKILL, false);
         skillTick = 0;
@@ -396,7 +424,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         cubeShield.resetMotion();
         setNoGravity(false);
         setDeltaMovement(0, getDeltaMovement().y, 0);
-        setItemInHand(InteractionHand.MAIN_HAND, getPhase() == 3 && thirdPhaseUnlocked && (entityData.get(REBIRTH_TIME) == 0 || entityData.get(REBIRTH_TIME) >= 110) && isAlive() ? new ItemStack(TFItems.FIERY_SWORD.get()) : ItemStack.EMPTY);
+        setItemInHand(InteractionHand.MAIN_HAND, getPhase() == 3 && thirdPhaseUnlocked && (entityData.get(REBIRTH_TIME) == 0 || entityData.get(REBIRTH_TIME) >= 110) && isAlive() ? new ItemStack(ModItem.TWILIGHT_SWORD.get()) : ItemStack.EMPTY);
         setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
     }
 
@@ -404,6 +432,22 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     public void tick() {
         if (!level().isClientSide()) {
             ensureArena();
+            if (checkLoadedSmokePosition && isAlive() && isSpawned() && getPhase() >= 2
+                    && entityData.get(ARENA_READY) && !isSmokePhasing() && tickCount >= nextSmokeRecoveryTick) {
+                Vec3 safe = smokeExitGround();
+                if (safe == null) {
+                    safe = findSmokeRecoveryLanding();
+                    if (safe != null) {
+                        moveTo(safe.x, safe.y, safe.z, getYRot(), getXRot());
+                        setDeltaMovement(Vec3.ZERO);
+                        fallDistance = 0;
+                    } else nextSmokeRecoveryTick = tickCount + 20;
+                }
+                if (safe != null) {
+                    lastSafeSmokeLanding = safe;
+                    checkLoadedSmokePosition = false;
+                }
+            }
             refreshCombatTarget();
             if (isAlive()) {
                 if (entityData.get(HAS_COMBAT_TARGET)) cubeShield.tick();
@@ -488,8 +532,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         pendingRelocation = false;
         resumeBarrage = false;
         getNavigation().stop();
-        setNoGravity(false);
-        setDeltaMovement(0, getDeltaMovement().y, 0);
+        setNoGravity(isSmokePhasing());
+        setDeltaMovement(isSmokePhasing() ? Vec3.ZERO : new Vec3(0, getDeltaMovement().y, 0));
         // Wait in place like the native Lich. BaseTFBoss still owns peaceful
         // despawning, persistence, death and loot; no empty-arena respawn loop.
     }
@@ -768,10 +812,11 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             return;
         }
         getNavigation().stop();
-        faceTarget();
+        if (id == FIERY_THRUST) faceThrustDirection();
+        else faceTarget();
         // All second-phase actions can be interrupted by a close player,
         // except the harmless chuckle and a fan gust already in progress.
-        if (getPhase() == 2 && !hasShield() && id != CHUCKLE && id != FAN) {
+        if (getPhase() == 2 && !hasShield() && id != CHUCKLE && id != FAN && !isSmokePhasing()) {
             Player nearest = nearestArenaPlayer();
             if (nearest != null && distanceToSqr(nearest) < 3.5 * 3.5 && hasLineOfSight(nearest)) {
                 setTarget(nearest);
@@ -813,9 +858,10 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                     if (summonedAdherents.size() + summoningCircles.size() < getSummonedAdherentLimit())
                         summoningCircles.add(new SummoningCircle(groundAt(moveOrigin), SUMMON_DELAY_TICKS));
                 }
-                setNoGravity(t < 30);
                 fallDistance = 0;
-                if (t < 30) {
+                if (isSmokePhasing() && t >= 30) finishSmokeTravel();
+                setNoGravity(isSmokePhasing());
+                if (isSmokePhasing()) {
                     // Smoke crosses walls at a level height, then solidifies
                     // over a checked, unobstructed descent to the roof.
                     Vec3 to = new Vec3(moveDestination.x, Math.max(moveOrigin.y, moveDestination.y), moveDestination.z).subtract(position());
@@ -829,7 +875,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                         else setDeltaMovement(Vec3.ZERO);
                     } else setDeltaMovement(Vec3.ZERO);
                 } else setDeltaMovement(0, getDeltaMovement().y, 0);
-                if (t >= getActionDuration(SMOKE_MOVE) - 1) {
+                if (t >= getActionDuration(SMOKE_MOVE) - 1 && !isSmokePhasing()) {
                     resumeBarrage = false;
                     finishAction(getPhase() == 3 ? queuedThirdAttack : choosePhaseTwoAttack());
                 }
@@ -965,7 +1011,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             server.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, getX() + Math.cos(angle), getY() + 1.1 + Math.sin(angle * 2) * 0.25, getZ() + Math.sin(angle), 3, 0.06, 0.06, 0.06, 0.025);
         }
         if (t == 110) {
-            setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(TFItems.FIERY_SWORD.get()));
+            setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItem.TWILIGHT_SWORD.get()));
             playSound(SoundEvents.WITHER_SPAWN, 2, 1);
         }
         if (t >= REBIRTH_DURATION) {
@@ -1029,8 +1075,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                 Player target = players.get(shot % players.size());
                 // Each new meteor locks the current position, but a formed
                 // meteor never homes or moves its warning underneath a dodger.
-                Vec3 landing = groundAt(clampToArena(target.position()));
-                if (canStandAt(landing)) {
+                Vec3 landing = meteorGroundAt(target.position());
+                if (landing != null) {
                     HierophantMeteor meteor = new HierophantMeteor(server, this, landing);
                     if (insideArena(meteor.position()) && isAreaLoaded(meteor.getBoundingBox()) && server.noCollision(meteor)) {
                         server.addFreshEntity(meteor);
@@ -1057,6 +1103,17 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     public boolean isSwordComboSmoke() {
         return getAction() == FIERY_QUAKE && (getSwordComboStage() == SWORD_SMOKE
                 || getSwordComboIndex() > 0 && getSwordComboStage() == SWORD_RISE);
+    }
+
+    public boolean isSwordComboGrounded() {
+        return getAction() == FIERY_QUAKE && switch (getSwordComboStage()) {
+            case SWORD_SMOKE, SWORD_PLANTED, SWORD_FINISH -> true;
+            default -> false;
+        };
+    }
+
+    public double getSwordImpactY() {
+        return entityData.get(SWORD_IMPACT_Y);
     }
 
     private void setSwordStage(int stage) {
@@ -1113,6 +1170,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                     if (getSwordComboIndex() > 0) smoke(server, 20, 0.6);
                     setSwordStage(SWORD_HOLD);
                 } else if (stage == SWORD_HOLD && time + 1 >= SWORD_HOLD_TICKS) {
+                    swordDiveStartY = getY();
                     setSwordStage(SWORD_DIVE);
                     setDeltaMovement(velocity.x, -0.2, velocity.z);
                     playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.6F, 0.6F);
@@ -1120,15 +1178,15 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             }
             case SWORD_DIVE -> {
                 setNoGravity(true);
-                if (time > 0 && onGround()) {
+                if (time > 0 && onGround() && verticalCollisionBelow && swordDiveStartY - getY() > 0.05) {
                     setDeltaMovement(Vec3.ZERO);
                     setNoGravity(false);
+                    // Position interpolation must not leave the rendered boss
+                    // airborne after the authoritative impact starts dissolving.
+                    entityData.set(SWORD_IMPACT_Y, (float) getY());
                     swordDiveImpact(server);
                     if (getSwordComboIndex() == SWORD_COMBO_HITS - 1) setSwordStage(SWORD_PLANTED);
-                    else {
-                        setSwordStage(SWORD_SMOKE);
-                        smoke(server, 32, 0.8);
-                    }
+                    else setSwordStage(SWORD_SMOKE);
                 } else if (time >= 40) {
                     // No phantom impacts over a missing/destroyed floor.
                     beginSkill(SMOKE_MOVE);
@@ -1140,7 +1198,10 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             case SWORD_SMOKE -> {
                 setNoGravity(false);
                 setDeltaMovement(0, getDeltaMovement().y, 0);
-                smoke(server, 8, 0.65);
+                // First show the actual grounded strike, then dissolve. Never
+                // turn the model upright or start rising while it is visible.
+                if (time == SWORD_IMPACT_HOLD_TICKS) smoke(server, 32, 0.8);
+                if (time >= SWORD_IMPACT_HOLD_TICKS) smoke(server, 8, 0.65);
                 if (time + 1 >= SWORD_SMOKE_TICKS) {
                     entityData.set(SWORD_HIT_INDEX, getSwordComboIndex() + 1);
                     startSwordJump(server);
@@ -1221,13 +1282,10 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
 
     private void tickFieryThrust(ServerLevel server, int t) {
         if (t < 20) {
-            lockedAim = getTarget().position();
             setDeltaMovement(0, getDeltaMovement().y, 0);
             return;
         }
         if (t == 20) {
-            dashDirection = lockedAim.subtract(position()).multiply(1, 0, 1).normalize();
-            if (dashDirection.lengthSqr() < 1.0E-6) dashDirection = new Vec3(1, 0, 0);
             previousThrustPosition = position();
         } else {
             Vec3 travelled = position().subtract(previousThrustPosition);
@@ -1270,13 +1328,18 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             beginSkill(SMOKE_MOVE);
             return;
         }
-        setYRot((float) Math.toDegrees(Math.atan2(-dashDirection.x, dashDirection.z)));
-        setYBodyRot(getYRot());
-        setYHeadRot(getYRot());
+        faceThrustDirection();
         // Keep charging along the locked ray beyond the player. Do not stop on
         // proximity, a fixed 16-tick window, or a preflight collision with stairs.
         setDeltaMovement(velocity.x, getDeltaMovement().y, velocity.z);
         server.sendParticles(ParticleTypes.FLAME, getX(), getY() + 0.5, getZ(), 12, 0.35, 0.35, 0.35, 0.03);
+    }
+
+    private void faceThrustDirection() {
+        setYRot((float) Math.toDegrees(Math.atan2(-dashDirection.x, dashDirection.z)));
+        setYBodyRot(getYRot());
+        setYHeadRot(getYRot());
+        setXRot(0);
     }
 
     private void setThrustStepHeight(boolean active) {
@@ -1532,6 +1595,17 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         double initialDistance = nearestThreatDistanceSqr(position(), threats);
         double bestDistance = initialDistance + 0.25;
         double pathMinimum = Math.pow(Math.max(0, Math.sqrt(initialDistance) - 0.5), 2);
+        boolean orbitTarget = getPhase() == 2;
+        Vec3 orbitCentre = getTarget().position();
+        double preferredOrbitAngle = 0, bestOrbitScore = Double.POSITIVE_INFINITY;
+        if (orbitTarget) {
+            if (phaseTwoOrbitDirection == 0) phaseTwoOrbitDirection = random.nextBoolean() ? 1 : -1;
+            preferredOrbitAngle = Math.atan2(getZ() - orbitCentre.z, getX() - orbitCentre.x)
+                    + phaseTwoOrbitDirection * Math.PI / 3;
+            // Approaching the 15-block ring is allowed; do not demand that each
+            // move increases the separation and thereby drive the boss to an edge.
+            pathMinimum = Math.pow(Math.min(Math.sqrt(initialDistance), 10), 2);
+        }
         double margin = Math.max(getBbWidth() / 2 + 0.5, 2.5);
         double minX = arena.minX + margin, maxX = arena.maxX - margin;
         double minZ = arena.minZ + margin, maxZ = arena.maxZ - margin;
@@ -1540,7 +1614,15 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         boolean corner = getPhase() == 3 && queuedThirdAttack == FIERY_THRUST;
         for (int i = 0; i < (corner ? 4 : 49); i++) {
             Vec3 seed;
-            if (corner) {
+            if (orbitTarget) {
+                // Prefer the next point around the current player, not the arena.
+                // Search both sides of that point when walls or other players
+                // make it unsafe. Re-centre on the target on every relocation.
+                double offset = i == 0 ? 0 : ((i + 1) / 2) * (i % 2 == 1 ? 1 : -1) * Math.PI / 24;
+                double angle = preferredOrbitAngle + offset;
+                seed = new Vec3(orbitCentre.x + Math.cos(angle) * PHASE_TWO_ORBIT_DISTANCE, getY(),
+                        orbitCentre.z + Math.sin(angle) * PHASE_TWO_ORBIT_DISTANCE);
+            } else if (corner) {
                 seed = new Vec3((i & 1) == 0 ? minX : maxX, getY(), (i & 2) == 0 ? minZ : maxZ);
             } else if (i == 0) {
                 seed = position().add(Math.cos(awayAngle) * maxTravel, 0, Math.sin(awayAngle) * maxTravel);
@@ -1556,12 +1638,22 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             } else {
                 seed = new Vec3(Mth.lerp(random.nextDouble(), minX, maxX), getY(), Mth.lerp(random.nextDouble(), minZ, maxZ));
             }
-            Vec3 candidate = groundAt(clampToArena(seed));
+            Vec3 candidate = smokeGroundAt(clampToArena(seed));
+            if (candidate == null) continue;
             Vec3 delta = candidate.subtract(position());
             if (delta.lengthSqr() > maxTravel * maxTravel)
-                candidate = groundAt(clampToArena(position().add(delta.normalize().scale(maxTravel))));
+                candidate = smokeGroundAt(clampToArena(position().add(delta.normalize().scale(maxTravel))));
+            if (candidate == null) continue;
             double separation = nearestThreatDistanceSqr(candidate, threats);
-            if (separation <= bestDistance || separation < 25 || candidate.subtract(position()).horizontalDistanceSqr() < 16
+            double orbitScore = 0;
+            if (orbitTarget) {
+                Vec3 relative = candidate.subtract(orbitCentre);
+                double angle = Math.atan2(relative.z, relative.x) - preferredOrbitAngle;
+                double angleError = Math.abs(Math.atan2(Math.sin(angle), Math.cos(angle)));
+                orbitScore = Math.abs(relative.horizontalDistance() - PHASE_TWO_ORBIT_DISTANCE) * 8 + angleError * 2;
+            }
+            if ((orbitTarget ? orbitScore >= bestOrbitScore : separation <= bestDistance)
+                    || separation < 25 || candidate.subtract(position()).horizontalDistanceSqr() < 16
                     || !canStandAt(candidate)) continue;
             Vec3 flight = new Vec3(candidate.x, Math.max(getY(), candidate.y), candidate.z);
             AABB arrival = getBoundingBox().move(flight.subtract(position()));
@@ -1587,7 +1679,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             }
             if (clear) {
                 moveDestination = candidate;
-                bestDistance = separation;
+                if (orbitTarget) bestOrbitScore = orbitScore;
+                else bestDistance = separation;
             }
         }
     }
@@ -1606,7 +1699,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     public int getSummonedAdherentLimit() {
         return switch (level().getDifficulty()) {
             case PEACEFUL -> 0;
-            case EASY, NORMAL -> 3;
+            case EASY -> 2;
+            case NORMAL -> 3;
             case HARD -> 5;
         };
     }
@@ -1719,7 +1813,10 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     }
 
     public boolean insideArena(Vec3 at) {
-        return arena == null || arena.contains(at);
+        // Like the Lich, keep combat active on the surrounding walls too.
+        // The two-block roof trim/parapet belongs to this encounter. Movement
+        // still uses the original, walkable rectangle in clampToArena().
+        return arena == null || arena.inflate(2, 0, 2).contains(at);
     }
 
     public boolean isAreaLoaded(AABB box) {
@@ -1730,8 +1827,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         return true;
     }
 
-    private boolean isSmokePhasing() {
-        return isAlive() && isUsingSkill() && getSkillType() == SMOKE_MOVE && getActionTime() < 30;
+    public boolean isSmokePhasing() {
+        return isAlive() && entityData.get(SMOKE_PHASING);
     }
 
     @Override
@@ -1744,6 +1841,10 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         Vec3 requested = motion, before = position();
         boolean rushing = !level().isClientSide() && isShieldRushing() && type == MoverType.SELF;
         if (!level().isClientSide() && arena != null) {
+            if (isSmokePhasing()) {
+                // Walls may be crossed, but the roof's walkable floor may not.
+                motion = new Vec3(motion.x, Math.max(motion.y, arena.minY + 2 - getY()), motion.z);
+            }
             Vec3 limited = clampToArena(position().add(motion)).subtract(position());
             // Also handles external knockback. Never snap a displaced boss back home.
             motion = new Vec3(Mth.clamp(limited.x, -Math.abs(motion.x) - 0.3, Math.abs(motion.x) + 0.3), Mth.clamp(limited.y, -Math.abs(motion.y) - 0.3, Math.abs(motion.y) + 0.3), Mth.clamp(limited.z, -Math.abs(motion.z) - 0.3, Math.abs(motion.z) + 0.3));
@@ -1792,6 +1893,112 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                 return Vec3.atBottomCenterOf(feet);
         }
         return near;
+    }
+
+    /**
+     * Smoke landing searches never descend into rooms beneath the main roof.
+     */
+    private Vec3 smokeGroundAt(Vec3 near) {
+        if (!(level() instanceof ServerLevel) || arena == null) return null;
+        int floor = Mth.ceil(arena.minY + 2);
+        for (int y = floor + 3; y >= floor; y--) {
+            Vec3 candidate = new Vec3(near.x, y, near.z);
+            if (isSafeSmokeLanding(candidate)) return candidate;
+        }
+        return null;
+    }
+
+    private boolean isSafeSmokeLanding(Vec3 at) {
+        if (!(level() instanceof ServerLevel server) || arena == null
+                || at.y < arena.minY + 2 - 1.0E-5 || at.y > arena.minY + 5 + 1.0E-5) return false;
+        AABB body = getBoundingBox().move(at.subtract(position())).deflate(1.0E-5);
+        // Combat targeting includes parapets; materialization must use the
+        // actual main-roof rectangle, not that enlarged targeting volume.
+        if (body.minX < arena.minX + 0.2 || body.maxX > arena.maxX - 0.2
+                || body.minZ < arena.minZ + 0.2 || body.maxZ > arena.maxZ - 0.2
+                || !isAreaLoaded(body) || !server.noCollision(this, body)) return false;
+        for (int x = Mth.floor(body.minX); x <= Mth.floor(body.maxX); x++) {
+            for (int z = Mth.floor(body.minZ); z <= Mth.floor(body.maxZ); z++) {
+                BlockPos feet = BlockPos.containing(x, at.y, z);
+                if (!server.getBlockState(feet.below()).isFaceSturdy(server, feet.below(), Direction.UP)
+                        || !server.getFluidState(feet).isEmpty()) return false;
+                // Heightmaps work even in dimensions without skylight. A tower
+                // room has an opaque roof above it and is not an outdoor landing.
+                if (server.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) > at.y + 1.0E-5)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    private Vec3 smokeExitGround() {
+        if (!(level() instanceof ServerLevel server)) return null;
+        Vec3 landing = smokeGroundAt(position());
+        AABB descent = landing == null ? null : getBoundingBox()
+                .expandTowards(0, landing.y - getY(), 0).deflate(1.0E-5);
+        return landing != null && getY() >= landing.y - 1.0E-5
+                && isAreaLoaded(descent) && server.noCollision(this, descent) ? landing : null;
+    }
+
+    private boolean finishSmokeTravel() {
+        if (!isSmokePhasing()) return true;
+        if (!(level() instanceof ServerLevel server)) return false;
+        Vec3 landing = smokeExitGround();
+        if (landing == null) {
+            if (tickCount < nextSmokeRecoveryTick) return false;
+            nextSmokeRecoveryTick = tickCount + 10;
+            landing = findSmokeRecoveryLanding();
+            if (landing == null) {
+                // If the entire loaded roof was removed/obstructed, do not
+                // force materialization in a wall or fall into the rooms below.
+                setNoGravity(true);
+                setDeltaMovement(Vec3.ZERO);
+                return false;
+            }
+            smoke(server, 12, 0.5);
+            moveTo(landing.x, landing.y, landing.z, getYRot(), getXRot());
+            smoke(server, 12, 0.5);
+        }
+        lastSafeSmokeLanding = landing;
+        fallDistance = 0;
+        setDeltaMovement(Vec3.ZERO);
+        entityData.set(SMOKE_PHASING, false);
+        setNoGravity(false);
+        return true;
+    }
+
+    private Vec3 findSmokeRecoveryLanding() {
+        if (lastSafeSmokeLanding != null && isSafeSmokeLanding(lastSafeSmokeLanding)) return lastSafeSmokeLanding;
+        if (isSafeSmokeLanding(moveDestination)) return moveDestination;
+        Vec3 origin = smokeGroundAt(moveOrigin);
+        if (origin != null) return origin;
+        if (arena == null) return null;
+        Vec3 best = null;
+        double nearest = Double.POSITIVE_INFINITY;
+        double margin = getBbWidth() / 2 + 0.2;
+        for (int x = Mth.ceil(arena.minX + margin); x + 0.5 <= arena.maxX - margin; x++) {
+            for (int z = Mth.ceil(arena.minZ + margin); z + 0.5 <= arena.maxZ - margin; z++) {
+                Vec3 at = new Vec3(x + 0.5, arena.minY + 2, z + 0.5);
+                double distance = at.subtract(position()).horizontalDistanceSqr();
+                if (distance >= nearest) continue;
+                Vec3 safe = smokeGroundAt(at);
+                if (safe != null) {
+                    best = safe;
+                    nearest = distance;
+                }
+            }
+        }
+        return best;
+    }
+
+    private Vec3 meteorGroundAt(Vec3 target) {
+        if (!insideArena(target) || !level().hasChunkAt(BlockPos.containing(target))) return null;
+        double bottom = arena == null ? target.y - 8 : arena.minY;
+        // Fences/walls are collision surfaces, not sturdy full-block floors.
+        // Do not clamp an elevated target's meteor back onto the inner roof.
+        var hit = level().clip(new ClipContext(target.add(0, 2, 0), new Vec3(target.x, bottom, target.z),
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+        return hit.getType() == HitResult.Type.BLOCK ? hit.getLocation() : null;
     }
 
     private boolean canStandAt(Vec3 at) {

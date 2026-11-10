@@ -1,0 +1,45 @@
+{
+  "parent": "twilightforest:progress_adherent",
+  "criteria": {
+    "dispel_force_field": {
+      "trigger": "twilightforest_finale:dispel_force_field"
+    },
+    "previous_progression": {
+      "trigger": "minecraft:tick",
+      "conditions": {
+        "player": {
+          "type_specific": {
+            "type": "minecraft:player",
+            "advancements": {
+              "twilightforest:progress_adherent": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "twilightforest_finale:proverbs_scepter"
+    },
+    "title": {
+      "translate": "advancement.twilightforest_finale.alohomora"
+    },
+    "description": {
+      "translate": "advancement.twilightforest_finale.alohomora.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "requirements": [
+    [
+      "dispel_force_field"
+    ],
+    [
+      "previous_progression"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

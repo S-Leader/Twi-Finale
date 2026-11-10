@@ -16,7 +16,6 @@ public class ModRenderer {
         event.registerEntityRenderer(ModEntity.CASTLE_GUARDIAN.get(), CastleGuardianRenderer::new);
         event.registerEntityRenderer(ModEntity.THE_TWILIGHT_HIEROPHANT.get(), TheTwilightHierophantRenderer::new);
         event.registerEntityRenderer(ModEntity.LOYAL_WRAITH.get(), m -> new LoyalWraithRenderer(m, new LoyalWraithModel(m.bakeLayer(TFModelLayers.WRAITH)), 0.5f));
-        event.registerEntityRenderer(ModEntity.ANNIHILATION_HAND.get(), AnnihilationHandRenderer::new);
     }
 }
 

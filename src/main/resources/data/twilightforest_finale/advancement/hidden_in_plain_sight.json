@@ -1,0 +1,54 @@
+{
+  "parent": "twilightforest:progress_castle",
+  "criteria": {
+    "finalslayer": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "twilightforest_finale:finalslayer_sword"
+            ]
+          }
+        ]
+      }
+    },
+    "previous_progression": {
+      "trigger": "minecraft:tick",
+      "conditions": {
+        "player": {
+          "type_specific": {
+            "type": "minecraft:player",
+            "advancements": {
+              "twilightforest:progress_castle": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "twilightforest_finale:finalslayer_sword"
+    },
+    "title": {
+      "translate": "advancement.twilightforest_finale.hidden_in_plain_sight"
+    },
+    "description": {
+      "translate": "advancement.twilightforest_finale.hidden_in_plain_sight.desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "requirements": [
+    [
+      "finalslayer"
+    ],
+    [
+      "previous_progression"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

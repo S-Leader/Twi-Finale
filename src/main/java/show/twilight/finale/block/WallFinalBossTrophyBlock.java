@@ -2,7 +2,6 @@ package show.twilight.finale.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
@@ -19,10 +18,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import show.twilight.finale.block.entity.FinalTrophyBlockEntity;
 import twilightforest.init.TFParticleType;
@@ -32,25 +29,24 @@ import java.util.function.Supplier;
 public class WallFinalBossTrophyBlock
         extends WallFinalTrophyBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-    protected static final VoxelShape NORTH = Block.box((double) 4.0, (double) 4.0, (double) 8.0, (double) 12.0, (double) 12.0, (double) 16.0);
-    protected static final VoxelShape SOUTH = Block.box((double) 4.0, (double) 4.0, (double) 0.0, (double) 12.0, (double) 12.0, (double) 8.0);
-    protected static final VoxelShape EAST = Block.box((double) 0.0, (double) 4.0, (double) 4.0, (double) 8.0, (double) 12.0, (double) 12.0);
-    protected static final VoxelShape WEST = Block.box((double) 8.0, (double) 4.0, (double) 4.0, (double) 16.0, (double) 12.0, (double) 12.0);
+    protected static final VoxelShape NORTH = Block.box(4.0, 4.0, 8.0, 12.0, 12.0, 16.0);
+    protected static final VoxelShape SOUTH = Block.box(4.0, 4.0, 0.0, 12.0, 12.0, 8.0);
+    protected static final VoxelShape EAST = Block.box(0.0, 4.0, 4.0, 8.0, 12.0, 12.0);
+    protected static final VoxelShape WEST = Block.box(8.0, 4.0, 4.0, 16.0, 12.0, 12.0);
 
     public WallFinalBossTrophyBlock(BlockBehaviour.Properties properties, Supplier<BlockEntityType<FinalTrophyBlockEntity>> blockEntityType) {
         super(properties, blockEntityType);
-        this.registerDefaultState((BlockState) ((BlockState) this.getStateDefinition().any()).setValue(FACING, Direction.NORTH));
+        this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Direction[] nearestOrderedDirections;
         BlockState blockstate = this.defaultBlockState();
         Level blockgetter = context.getLevel();
         BlockPos blockpos = context.getClickedPos();
-        for (Direction direction : nearestOrderedDirections = context.getNearestLookingDirections()) {
+        for (Direction direction : context.getNearestLookingDirections()) {
             if (!direction.getAxis().isHorizontal()) continue;
-            blockstate = (BlockState) blockstate.setValue(FACING, direction.getOpposite());
+            blockstate = blockstate.setValue(FACING, direction.getOpposite());
             if (blockgetter.getBlockState(blockpos.relative(direction)).canBeReplaced(context)) continue;
             return blockstate;
         }
@@ -59,7 +55,7 @@ public class WallFinalBossTrophyBlock
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter p_60556_, BlockPos p_60557_, CollisionContext p_60558_) {
-        return switch ((Direction) state.getValue(FACING)) {
+        return switch (state.getValue(FACING)) {
             case SOUTH -> SOUTH;
             case EAST -> EAST;
             case WEST -> WEST;
@@ -68,13 +64,8 @@ public class WallFinalBossTrophyBlock
     }
 
     @Override
-    public VoxelShape getOcclusionShape(BlockState p_60578_, BlockGetter p_60579_, BlockPos p_60580_) {
-        return Shapes.empty();
-    }
-
-    @Override
     public BlockState rotate(BlockState state, Rotation rotation) {
-        return (BlockState) state.setValue(FACING, rotation.rotate((Direction) state.getValue(FACING)));
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
@@ -82,7 +73,7 @@ public class WallFinalBossTrophyBlock
         if (level.isClientSide()) {
             this.createParticles(level, pos);
         }
-        return InteractionResult.sidedSuccess((boolean) level.isClientSide());
+        return InteractionResult.sidedSuccess(level.isClientSide());
     }
 
     private void createParticles(Level level, BlockPos pos) {
@@ -90,24 +81,19 @@ public class WallFinalBossTrophyBlock
             double x = (double) pos.getX() + 0.5 + (Math.random() - 0.5);
             double y = (double) pos.getY() + 0.5 + (Math.random() - 0.5);
             double z = (double) pos.getZ() + 0.5 + (Math.random() - 0.5);
-            level.addParticle((ParticleOptions) TFParticleType.ANNIHILATE.get(), x, y, z, 0.0, 0.05, 0.0);
+            level.addParticle(TFParticleType.ANNIHILATE.get(), x, y, z, 0.0, 0.05, 0.0);
         }
     }
 
     @Override
     public BlockState mirror(BlockState state, Mirror mirror) {
-        return state.rotate(mirror.getRotation((Direction) state.getValue(FACING)));
+        return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(new Property[]{FACING});
+        builder.add(FACING);
         super.createBlockStateDefinition(builder);
-    }
-
-    @Override
-    public String getDescriptionId() {
-        return this.asItem().getDescriptionId();
     }
 }
 

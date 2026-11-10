@@ -10,6 +10,7 @@ public final class TFNetworkHandler {
     public static void register(RegisterPayloadHandlersEvent event) {
         event.registrar("1").playToClient(UpdateForceFieldPacket.TYPE, UpdateForceFieldPacket.STREAM_CODEC, (packet, context) -> context.enqueueWork(() -> FinaleClientPackets.apply(packet)));
         event.registrar("1").playToClient(AnimationPacket.TYPE, AnimationPacket.STREAM_CODEC, (packet, context) -> context.enqueueWork(() -> FinaleClientPackets.apply(packet)));
+        event.registrar("1").playToClient(TwilightSwordStatePacket.TYPE, TwilightSwordStatePacket.STREAM_CODEC, (packet, context) -> context.enqueueWork(() -> FinaleClientPackets.apply(packet)));
     }
 }
 

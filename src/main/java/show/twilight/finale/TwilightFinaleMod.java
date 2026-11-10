@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import show.twilight.finale.capabilities.ForceFieldCapabilityList;
 import show.twilight.finale.capabilities.hierophant.HierophantShieldCapabilities;
+import show.twilight.finale.client.animation.TwilightSwordPlayerAnimation;
 import show.twilight.finale.client.event.ModClientSetupEvent;
 import show.twilight.finale.compat.curios.ModCuriosCompat;
 import show.twilight.finale.compat.hadean.ModHadeanBlockCompat;
@@ -28,7 +29,6 @@ import show.twilight.finale.world.castle.FinaleCastlePieces;
 public class TwilightFinaleMod {
     public static final String MOD_ID = "twilightforest_finale";
     public static final Logger LOGGER = LogManager.getLogger();
-    public static final String ARMOR_DIR = MOD_ID + ":textures/models/armor/";
 
     public TwilightFinaleMod(IEventBus bus, ModContainer container) {
         container.registerConfig(ModConfig.Type.SERVER, HierophantConfig.SPEC);
@@ -40,6 +40,7 @@ public class TwilightFinaleMod {
         ModBlocks.BLOCK_ENTITIES.register(bus);
         ModParticle.PARTICLE_TYPES.register(bus);
         ModSounds.SOUNDS.register(bus);
+        ModCriteriaTriggers.TRIGGERS.register(bus);
         ForceFieldCapabilityList.TYPES.register(bus);
         bus.addListener(HierophantShieldCapabilities::register);
         FinaleCastlePieces.TYPES.register(bus);
@@ -52,6 +53,7 @@ public class TwilightFinaleMod {
         bus.addListener(CommonSetupEvent::registerAttributes);
         bus.addListener(ModResourcePack::addPackFinders);
         if (FMLEnvironment.dist == Dist.CLIENT) {
+            bus.addListener(TwilightSwordPlayerAnimation::registerExtensions);
             bus.addListener(ModModelLayers::registerLayerDefinitions);
             bus.addListener(ModRenderer::registerEntityRenderers);
             bus.addListener(ModParticle::registerFactories);

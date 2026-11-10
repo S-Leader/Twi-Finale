@@ -24,24 +24,23 @@ import java.util.function.Supplier;
 public class WallFinalTrophyBlock
         extends AbstractFinalTrophyBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-    protected static final VoxelShape NORTH = Block.box((double) 4.0, (double) 4.0, (double) 8.0, (double) 12.0, (double) 12.0, (double) 16.0);
-    protected static final VoxelShape SOUTH = Block.box((double) 4.0, (double) 4.0, (double) 0.0, (double) 12.0, (double) 12.0, (double) 8.0);
-    protected static final VoxelShape EAST = Block.box((double) 0.0, (double) 4.0, (double) 4.0, (double) 8.0, (double) 12.0, (double) 12.0);
-    protected static final VoxelShape WEST = Block.box((double) 8.0, (double) 4.0, (double) 4.0, (double) 16.0, (double) 12.0, (double) 12.0);
+    protected static final VoxelShape NORTH = Block.box(4.0, 4.0, 8.0, 12.0, 12.0, 16.0);
+    protected static final VoxelShape SOUTH = Block.box(4.0, 4.0, 0.0, 12.0, 12.0, 8.0);
+    protected static final VoxelShape EAST = Block.box(0.0, 4.0, 4.0, 8.0, 12.0, 12.0);
+    protected static final VoxelShape WEST = Block.box(8.0, 4.0, 4.0, 16.0, 12.0, 12.0);
 
     public WallFinalTrophyBlock(BlockBehaviour.Properties properties, Supplier<BlockEntityType<FinalTrophyBlockEntity>> blockEntityType) {
         super(properties, blockEntityType);
-        this.registerDefaultState((BlockState) ((BlockState) this.getStateDefinition().any()).setValue(FACING, Direction.NORTH));
+        this.registerDefaultState(this.getStateDefinition().any().setValue(FACING, Direction.NORTH));
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Direction[] nearestOrderedDirections;
         BlockState blockstate = this.defaultBlockState();
         Level blockgetter = context.getLevel();
         BlockPos blockpos = context.getClickedPos();
-        for (Direction direction : nearestOrderedDirections = context.getNearestLookingDirections()) {
+        for (Direction direction : context.getNearestLookingDirections()) {
             if (!direction.getAxis().isHorizontal()) continue;
-            blockstate = (BlockState) blockstate.setValue(FACING, direction.getOpposite());
+            blockstate = blockstate.setValue(FACING, direction.getOpposite());
             if (blockgetter.getBlockState(blockpos.relative(direction)).canBeReplaced(context)) continue;
             return blockstate;
         }
@@ -49,7 +48,7 @@ public class WallFinalTrophyBlock
     }
 
     public VoxelShape getShape(BlockState state, BlockGetter p_60556_, BlockPos p_60557_, CollisionContext p_60558_) {
-        return switch ((Direction) state.getValue(FACING)) {
+        return switch (state.getValue(FACING)) {
             case SOUTH -> SOUTH;
             case EAST -> EAST;
             case WEST -> WEST;
@@ -62,11 +61,11 @@ public class WallFinalTrophyBlock
     }
 
     public BlockState rotate(BlockState state, Rotation rotation) {
-        return (BlockState) state.setValue(FACING, rotation.rotate((Direction) state.getValue(FACING)));
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
     public BlockState mirror(BlockState state, Mirror mirror) {
-        return state.rotate(mirror.getRotation((Direction) state.getValue(FACING)));
+        return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

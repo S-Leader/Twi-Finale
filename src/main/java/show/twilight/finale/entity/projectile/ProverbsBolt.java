@@ -6,6 +6,7 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
@@ -28,6 +29,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import show.twilight.finale.init.ModCriteriaTriggers;
 import show.twilight.finale.init.ModEntity;
 import show.twilight.finale.init.ModItem;
 import twilightforest.block.ForceFieldBlock;
@@ -38,12 +40,17 @@ import twilightforest.init.TFParticleType;
 
 @OnlyIn(value = Dist.CLIENT, _interface = ItemSupplier.class)
 public class ProverbsBolt extends TFThrowable implements ITFProjectile, ItemSupplier {
+    private static final String SCEPTER_CASTER_TAG = "FinaleProverbsScepterCaster";
+
     public ProverbsBolt(EntityType<? extends ProverbsBolt> type, Level level) {
         super(type, level);
     }
 
     public ProverbsBolt(Level level, LivingEntity owner) {
         super(ModEntity.PROVERBS_BOLT.get(), level, owner);
+        if (owner instanceof ServerPlayer) {
+            this.getPersistentData().putUUID(SCEPTER_CASTER_TAG, owner.getUUID());
+        }
         this.shootFromRotation(owner, owner.getXRot(), owner.getYRot(), 0.0f, 1.5f, 1.0f);
     }
 
@@ -121,11 +128,13 @@ public class ProverbsBolt extends TFThrowable implements ITFProjectile, ItemSupp
         if (!this.level().isClientSide()) {
             BlockPos pos = result.getBlockPos();
             BlockState state = this.level().getBlockState(pos);
-            // The final boss's violet enclosure is deliberately not dispellable.
-            // It still intercepts/consumes the bolt in tick(), so this cannot be
-            // used to shoot through the field at the entity behind it.
-            if (state.getBlock() instanceof ForceFieldBlock) {
-                this.level().removeBlock(pos, false);
+            if (state.getBlock() instanceof ForceFieldBlock && this.level().removeBlock(pos, false)) {
+                // A reflected High Priest bolt is not a use of the player's scepter.
+                if (this.getOwner() instanceof ServerPlayer player
+                        && this.getPersistentData().hasUUID(SCEPTER_CASTER_TAG)
+                        && player.getUUID().equals(this.getPersistentData().getUUID(SCEPTER_CASTER_TAG))) {
+                    ModCriteriaTriggers.DISPEL_FORCE_FIELD.get().trigger(player);
+                }
                 Level level = this.level();
                 if (level instanceof ServerLevel server) {
                     RandomSource rand = server.getRandom();

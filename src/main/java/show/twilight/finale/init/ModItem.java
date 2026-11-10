@@ -26,6 +26,7 @@ public class ModItem {
     public static final Supplier<Item> NAGA_HELMET = ITEMS.register("naga_helmet", () -> new NagaExtraArmorItem(TFArmorMaterials.NAGA, ArmorItem.Type.HELMET, new Item.Properties().rarity(Rarity.UNCOMMON)));
     public static final Supplier<Item> NAGA_BOOTS = ITEMS.register("naga_boots", () -> new NagaExtraArmorItem(TFArmorMaterials.NAGA, ArmorItem.Type.BOOTS, new Item.Properties().rarity(Rarity.UNCOMMON)));
     public static final Supplier<Item> FINALSLAYER_SWORD = ITEMS.register("finalslayer_sword", () -> new FinalSlayerSwordItem(Tiers.DIAMOND, new Item.Properties().setNoRepair().rarity(Rarity.RARE)));
+    public static final Supplier<Item> TWILIGHT_SWORD = ITEMS.register("twilight_sword", () -> new TwilightSwordItem(new Item.Properties().fireResistant().rarity(Rarity.EPIC)));
     public static final Supplier<Item> TRIPLE_CROSSBOW = ITEMS.register("triple_crossbow", () -> new TripleCrossbowItem(new Item.Properties().rarity(Rarity.UNCOMMON).durability(384)));
     public static final Supplier<Item> SEEKER_CROSSBOW = ITEMS.register("seeker_crossbow", () -> new SeekerCrossbowItem(new Item.Properties().rarity(Rarity.UNCOMMON).durability(384)));
     public static final Supplier<Item> ICE_CROSSBOW = ITEMS.register("ice_crossbow", () -> new IceCrossbowItem(new Item.Properties().rarity(Rarity.UNCOMMON).durability(384)));

@@ -4,17 +4,18 @@
   "package": "show.twilight.finale.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "AdherentMixin",
     "CrumbleHornItemMixin",
     "EntityEventsMixin",
-    "GiantSwordItemMixin",
     "FinalCastleStructureMixin",
+    "FinaleScepterRepairMixin",
     "ForceFieldBlockMixin",
-    "AdherentMixin",
-    "HierophantIceBombMixin",
-    "FinaleScepterRepairMixin"
+    "GiantSwordItemMixin",
+    "HierophantIceBombMixin"
   ],
   "client": [
     "ItemInHandRendererMixin",
-    "JappaPackRepositoryMixin"
+    "JappaPackRepositoryMixin",
+    "TwilightSwordPlayerModelMixin"
   ]
 }

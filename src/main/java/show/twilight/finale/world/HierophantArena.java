@@ -4,28 +4,24 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.DoubleTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
-import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.config.HierophantConfig;
+import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.init.ModBlocks;
 import show.twilight.finale.world.castle.FinalCastleMainComponent;
 import show.twilight.finale.world.castle.FinalCastleRoof48CrenellatedComponent;
@@ -37,7 +33,9 @@ import java.util.*;
  */
 @EventBusSubscriber(modid = "twilightforest_finale")
 public final class HierophantArena extends SavedData {
-    /** Legacy rise/visual metadata, never a combat boundary. */
+    /**
+     * Legacy rise/visual metadata, never a combat boundary.
+     */
     public static final int RADIUS = 20;
     private static final int GAZEBO_RADIUS = 10, GAZEBO_HEIGHT = 12;
     private static final int LEGACY_RISE = 20, LEGACY_DURATION = 160;
@@ -57,6 +55,7 @@ public final class HierophantArena extends SavedData {
         private final int floorOffset;
         private final boolean legacy;
         private AABB roofBounds;
+        private boolean verifiedRoofBounds;
         private final List<Cell> recoveryCells = new ArrayList<>();
         public UUID boss;
         private boolean barriersCleared, recoverFloor, defeated;
@@ -127,7 +126,9 @@ public final class HierophantArena extends SavedData {
     }
 
     public void refreshBounds(ServerLevel level, Lift arena) {
-        if (arena.roofBounds != null) return;
+        // Revalidate persisted bounds once after loading. Old bounds may have
+        // included adjacent towers; only the actual main roof is a landing zone.
+        if (arena.roofBounds != null && arena.verifiedRoofBounds) return;
         BlockPos home = arena.sourceHome;
         var chunk = level.getChunkSource().getChunkNow(home.getX() >> 4, home.getZ() >> 4);
         if (chunk == null) return;
@@ -146,37 +147,39 @@ public final class HierophantArena extends SavedData {
             }
         AABB found = null;
         double nearestFloor = Double.POSITIVE_INFINITY;
-        for (StructureStart start : starts) for (var piece : start.getPieces()) {
-            var box = piece.getBoundingBox();
-            int minX, minZ, maxX, maxZ, floor;
-            if (piece instanceof FinalCastleRoof48CrenellatedComponent
-                    || piece instanceof twilightforest.world.components.structures.finalcastle.FinalCastleRoof48CrenellatedComponent) {
-                // Roof local (2..50, 2, 2..50) is the actual 49x49 floor;
-                // the bounding box also includes two blocks of outer trim.
-                minX = box.minX() + 2;
-                minZ = box.minZ() + 2;
-                maxX = box.maxX() - 1;
-                maxZ = box.maxZ() - 1;
-                floor = box.minY() + 3;
-            } else if (piece instanceof FinalCastleMainComponent
-                    || piece instanceof twilightforest.world.components.structures.finalcastle.FinalCastleMainComponent) {
-                minX = box.minX();
-                minZ = box.minZ();
-                maxX = box.maxX() + 1;
-                maxZ = box.maxZ() + 1;
-                floor = box.maxY() + 2;
-            } else continue;
-            double difference = Math.abs(floor - home.getY());
-            if (home.getX() < minX || home.getX() >= maxX || home.getZ() < minZ || home.getZ() >= maxZ
-                    || difference > 4 || difference >= nearestFloor) continue;
-            nearestFloor = difference;
-            floor += arena.floorOffset; // Preserve old recovered terrain, never restart its lift.
-            found = new AABB(minX, floor - 2, minZ, maxX, floor + 24, maxZ);
-        }
+        for (StructureStart start : starts)
+            for (var piece : start.getPieces()) {
+                var box = piece.getBoundingBox();
+                int minX, minZ, maxX, maxZ, floor;
+                if (piece instanceof FinalCastleRoof48CrenellatedComponent
+                        || piece instanceof twilightforest.world.components.structures.finalcastle.FinalCastleRoof48CrenellatedComponent) {
+                    // Roof local (2..50, 2, 2..50) is the actual 49x49 floor;
+                    // the bounding box also includes two blocks of outer trim.
+                    minX = box.minX() + 2;
+                    minZ = box.minZ() + 2;
+                    maxX = box.maxX() - 1;
+                    maxZ = box.maxZ() - 1;
+                    floor = box.minY() + 3;
+                } else if (piece instanceof FinalCastleMainComponent
+                        || piece instanceof twilightforest.world.components.structures.finalcastle.FinalCastleMainComponent) {
+                    minX = box.minX();
+                    minZ = box.minZ();
+                    maxX = box.maxX() + 1;
+                    maxZ = box.maxZ() + 1;
+                    floor = box.maxY() + 2;
+                } else continue;
+                double difference = Math.abs(floor - home.getY());
+                if (home.getX() < minX || home.getX() >= maxX || home.getZ() < minZ || home.getZ() >= maxZ
+                        || difference > 4 || difference >= nearestFloor) continue;
+                nearestFloor = difference;
+                floor += arena.floorOffset; // Preserve old recovered terrain, never restart its lift.
+                found = new AABB(minX, floor - 2, minZ, maxX, floor + 24, maxZ);
+            }
         if (found != null) {
             // Old journals have only Radius: they migrate to roof-piece bounds
             // here instead of retaining their circular platform restriction.
             arena.roofBounds = found;
+            arena.verifiedRoofBounds = true;
             setDirty();
         }
     }

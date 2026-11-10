@@ -22,7 +22,6 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import show.twilight.finale.block.entity.FinalTrophyBlockEntity;
 import twilightforest.init.TFParticleType;
@@ -48,19 +47,14 @@ public class FloorAdherentTrophyBlock extends FloorFinalTrophyBlock {
         return SHAPE;
     }
 
-    @Override
-    public VoxelShape getOcclusionShape(BlockState p_60578_, BlockGetter p_60579_, BlockPos p_60580_) {
-        return Shapes.empty();
-    }
-
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         level.playSound(player, pos, SoundEvents.PHANTOM_AMBIENT, SoundSource.BLOCKS, 1.0f, 1.0f);
         if (!level.isClientSide()) {
             ServerLevel serverLevel = (ServerLevel) level;
             for (int i = 0; i < 18; ++i) {
-                double x = (double) pos.getX() + 0.5 + (level.getRandom().nextDouble() - 0.5);
-                double y = (double) pos.getY() + 0.5 + (level.getRandom().nextDouble() - 0.5);
-                double z = (double) pos.getZ() + 0.5 + (level.getRandom().nextDouble() - 0.5);
+                double x = pos.getX() + 0.5 + (level.getRandom().nextDouble() - 0.5);
+                double y = pos.getY() + 0.5 + (level.getRandom().nextDouble() - 0.5);
+                double z = pos.getZ() + 0.5 + (level.getRandom().nextDouble() - 0.5);
                 serverLevel.sendParticles((ParticleOptions) TFParticleType.ANNIHILATE.get(), x, y, z, 1, 0.0, 0.05, 0.0, 0.0);
             }
         }

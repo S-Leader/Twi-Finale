@@ -22,6 +22,7 @@ public class ModTab {
         output.accept(ModItem.FIERY_AXE.get());
         output.accept(ModItem.FIERY_SHOVEL.get());
         output.accept(ModItem.FIERY_HOE.get());
+        output.accept(ModItem.TWILIGHT_SWORD.get());
         ModTab.generateGearWithEnchants(output, ModItem.FINALSLAYER_SWORD.get(), new EnchantmentInstance(parameters.holders().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SHARPNESS), 4), new EnchantmentInstance(parameters.holders().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.UNBREAKING), 3), new EnchantmentInstance(parameters.holders().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SWEEPING_EDGE), 2), new EnchantmentInstance(parameters.holders().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.LOOTING), 2));
         output.accept(ModItem.TWILIGHT_RETROFITTING_SMITHING_TEMPLATE.get());
         output.accept(ModItem.PHANTOMMETAL_INGOT.get());

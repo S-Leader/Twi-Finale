@@ -4,12 +4,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
 import show.twilight.finale.capabilities.ForceFieldCapabilityList;
 import show.twilight.finale.capabilities.shield.ForceFieldHandler;
+import show.twilight.finale.client.event.TwilightSwordClientEffects;
 import show.twilight.finale.network.AnimationPacket;
+import show.twilight.finale.network.TwilightSwordStatePacket;
 import show.twilight.finale.network.UpdateForceFieldPacket;
 import show.twilight.finale.runtime.entity.AbstractSkillEntity;
 
 public final class FinaleClientPackets {
     private FinaleClientPackets() {
+    }
+
+    public static void apply(TwilightSwordStatePacket packet) {
+        TwilightSwordClientEffects.apply(packet);
     }
 
     public static void apply(UpdateForceFieldPacket p) {

@@ -27,7 +27,7 @@ public class DuckEnforcerTrophyRenderer implements BlockEntityRenderer<FinalTrop
 
     public DuckEnforcerTrophyRenderer(DuckEnforcerTropy enforcer2Model) {
         this.enforcerModel = enforcer2Model;
-        this.enforcerRendertype = this.enforcerModel.renderType(ResourceLocation.fromNamespaceAndPath((String) "hadean_breathe", (String) "textures/entity/duck_enforcer.png"));
+        this.enforcerRendertype = this.enforcerModel.renderType(ResourceLocation.fromNamespaceAndPath("hadean_breathe", "textures/entity/duck_enforcer.png"));
     }
 
     public void render(FinalTrophyBlockEntity trophy, float partial, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int overlay) {

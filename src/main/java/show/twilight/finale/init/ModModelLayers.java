@@ -32,7 +32,6 @@ public class ModModelLayers {
         event.registerLayerDefinition(DuckEnforcerTropy.LAYER_LOCATION, DuckEnforcerTropy::createHead);
         event.registerLayerDefinition(AdherentHighPriestModel.LAYER_LOCATION, AdherentHighPriestModel::createBodyLayer);
         event.registerLayerDefinition(CastleGuardianModel.LAYER_LOCATION, CastleGuardianModel::createBodyLayer);
-        event.registerLayerDefinition(AnnihilationHandModel.LAYER_LOCATION, AnnihilationHandModel::createBodyLayer);
         event.registerLayerDefinition(TheTwilightHierophantModel.LAYER_LOCATION, () -> TheTwilightHierophantModel.createBodyLayer(false, 0.0f));
         event.registerLayerDefinition(TheTwilightHierophantModel.LAYER_LOCATION_SLIM, () -> TheTwilightHierophantModel.createBodyLayer(true, 0.0f));
         event.registerLayerDefinition(TheTwilightHierophantModel.LAYER_LOCATION_OUTER, () -> TheTwilightHierophantModel.createBodyLayer(false, 0.5f));

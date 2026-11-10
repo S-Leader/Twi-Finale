@@ -5,11 +5,13 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -107,8 +109,8 @@ public final class FinalCastleRoomLoader {
 
     private static boolean prepareFarmLight(ServerLevel level, StructureBlockEntity loader, CompoundTag data) {
         if (!loader.getStructureName().endsWith("/basement_room_1")) return true;
-        var template = level.getStructureManager().get(net.minecraft.resources.ResourceLocation.parse(loader.getStructureName())).orElseThrow();
-        var settings = new net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings().setRotation(loader.getRotation()).setMirror(loader.getMirror());
+        var template = level.getStructureManager().get(ResourceLocation.parse(loader.getStructureName())).orElseThrow();
+        var settings = new StructurePlaceSettings().setRotation(loader.getRotation()).setMirror(loader.getMirror());
         BlockPos origin = loader.getBlockPos().offset(loader.getStructurePos());
         if (!data.getBoolean("FarmLightingPrepared")) {
             // Structure-block LOAD immediately validates plants. Seed the lamps first,

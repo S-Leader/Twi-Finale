@@ -13,7 +13,6 @@ import net.minecraft.world.item.ItemStack;
 import show.twilight.finale.client.model.TheTwilightHierophantModel;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.init.ModItem;
-import twilightforest.init.TFItems;
 
 /**
  * Visual props, not item entities: neither ritual can drop/duplicate its items.
@@ -46,7 +45,7 @@ public final class HierophantRitualLayer<T extends TheTwilightHierophantEntity> 
             hand.translate((arm == net.minecraft.world.entity.HumanoidArm.LEFT ? -1 : 1) / 16F, 0.125, -0.625);
             var end = hand.last().pose().transformPosition(new org.joml.Vector3f());
             double side = arm == net.minecraft.world.entity.HumanoidArm.LEFT ? 1 : -1;
-            draw(pose, buffers, boss, new ItemStack(TFItems.FIERY_SWORD.get()), end.x + side * (1 - f) * (show.twilight.finale.world.HierophantArena.RADIUS + 4),
+            draw(pose, buffers, boss, new ItemStack(ModItem.TWILIGHT_SWORD.get()), end.x + side * (1 - f) * (show.twilight.finale.world.HierophantArena.RADIUS + 4),
                     end.y - Math.sin(f * Math.PI) * 2, end.z, 1, light, -40 + f * 40);
         }
     }
