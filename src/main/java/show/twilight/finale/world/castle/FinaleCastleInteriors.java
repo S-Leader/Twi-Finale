@@ -39,7 +39,7 @@ final class FinaleCastleInteriors {
                 pieces.addPiece(new FinalCastleRoomStructurePiece(center, variant, rotation, random.nextLong()));
             }
         }
-        // Exactly one saved chest placement per accepted castle, chosen once,
+        // Exactly one saved treasure placement per accepted castle, chosen once,
         // after all shells/templates so nothing later erases the hidden reward.
         var spires = pieces.pieces.stream().filter(p -> p instanceof FinalCastleRoof13ConicalComponent).toList();
         if (spires.isEmpty())
@@ -61,7 +61,9 @@ final class FinaleCastleInteriors {
                 ? roof.minY() + cone.slope * 7 + 2 : Math.max(roof.maxY(), roof.minY() + 19);
         int chestFloor = roof.minY() + (roofPiece instanceof FinalCastleRoof13ConicalComponent cone ? cone.slope * 4 : 12);
         pieces.addPiece(new FinalCastlePlainTowerPiece(tower.getBoundingBox(), roof, roofTop));
-        BlockPos at = new BlockPos(roof.getCenter().getX(), Math.min(chestFloor, roofTop - 3), roof.getCenter().getZ());
+        // Centre the 3x5x3 trap on the spire. Its barrel is two blocks above
+        // the base, at the same height as the former chest.
+        BlockPos at = new BlockPos(roof.getCenter().getX() - 1, Math.min(chestFloor - 1, roofTop - 4), roof.getCenter().getZ() - 1);
         pieces.addPiece(new FinaleCastleTemplatePiece(manager, "spire_treasure", at, Rotation.NONE, Mirror.NONE));
     }
 
