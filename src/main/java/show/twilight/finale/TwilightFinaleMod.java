@@ -20,6 +20,7 @@ import show.twilight.finale.compat.curios.ModCuriosCompat;
 import show.twilight.finale.compat.hadean.ModHadeanBlockCompat;
 import show.twilight.finale.config.HierophantConfig;
 import show.twilight.finale.event.CommonSetupEvent;
+import show.twilight.finale.event.TwilightSwordEvents;
 import show.twilight.finale.init.*;
 import show.twilight.finale.network.TFNetworkHandler;
 import show.twilight.finale.resource.ModResourcePack;
@@ -41,6 +42,7 @@ public class TwilightFinaleMod {
         ModParticle.PARTICLE_TYPES.register(bus);
         ModSounds.SOUNDS.register(bus);
         ModCriteriaTriggers.TRIGGERS.register(bus);
+        TwilightSwordEvents.registerAttachments(bus);
         ForceFieldCapabilityList.TYPES.register(bus);
         bus.addListener(HierophantShieldCapabilities::register);
         FinaleCastlePieces.TYPES.register(bus);

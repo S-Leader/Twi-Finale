@@ -1,12 +1,8 @@
 package show.twilight.finale.event;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -51,8 +47,8 @@ public class ExtraCharmEvents {
 
     private static boolean charmOfLife(Player player) {
         boolean glassheart;
-        boolean charm3 = TFItemStackUtils.consumeInventoryItem((Player) player, (Item) ((Item) ModItem.CHARM_OF_LIFE_3.get()), null, false) || ExtraCharmEvents.hasCharmCurio((Item) ModItem.CHARM_OF_LIFE_3.get(), player);
-        boolean bl = glassheart = TFItemStackUtils.consumeInventoryItem((Player) player, (Item) ((Item) ModItem.GLASS_HEART.get()), null, false) || ExtraCharmEvents.hasCharmCurio((Item) ModItem.GLASS_HEART.get(), player);
+        boolean charm3 = TFItemStackUtils.consumeInventoryItem(player, ModItem.CHARM_OF_LIFE_3.get(), null, false) || ExtraCharmEvents.hasCharmCurio(ModItem.CHARM_OF_LIFE_3.get(), player);
+        boolean bl = glassheart = TFItemStackUtils.consumeInventoryItem(player, ModItem.GLASS_HEART.get(), null, false) || ExtraCharmEvents.hasCharmCurio(ModItem.GLASS_HEART.get(), player);
         if (charm3 || glassheart) {
             if (glassheart) {
                 player.setHealth(6.0f);
@@ -70,14 +66,14 @@ public class ExtraCharmEvents {
                 player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 600, 0));
                 player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 600, 0));
             }
-            CharmEffect effect = new CharmEffect((EntityType) TFEntities.CHARM_EFFECT.get(), player.level(), (LivingEntity) player, new net.minecraft.world.item.ItemStack(glassheart ? ModItem.GLASS_HEART.get() : ModItem.CHARM_OF_LIFE_3.get()));
-            player.level().addFreshEntity((Entity) effect);
-            CharmEffect effect2 = new CharmEffect((EntityType) TFEntities.CHARM_EFFECT.get(), player.level(), (LivingEntity) player, new net.minecraft.world.item.ItemStack(glassheart ? ModItem.GLASS_HEART.get() : ModItem.CHARM_OF_LIFE_3.get()));
+            CharmEffect effect = new CharmEffect(TFEntities.CHARM_EFFECT.get(), player.level(), player, new net.minecraft.world.item.ItemStack(glassheart ? ModItem.GLASS_HEART.get() : ModItem.CHARM_OF_LIFE_3.get()));
+            player.level().addFreshEntity(effect);
+            CharmEffect effect2 = new CharmEffect(TFEntities.CHARM_EFFECT.get(), player.level(), player, new net.minecraft.world.item.ItemStack(glassheart ? ModItem.GLASS_HEART.get() : ModItem.CHARM_OF_LIFE_3.get()));
             effect2.offset = (float) Math.PI;
-            player.level().addFreshEntity((Entity) effect2);
-            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), (SoundEvent) TFSounds.CHARM_LIFE.get(), player.getSoundSource(), 1.0f, 1.0f);
+            player.level().addFreshEntity(effect2);
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), TFSounds.CHARM_LIFE.get(), player.getSoundSource(), 1.0f, 1.0f);
             if (player instanceof ServerPlayer) {
-                player.awardStat((ResourceLocation) TFStats.LIFE_CHARMS_ACTIVATED.get());
+                player.awardStat(TFStats.LIFE_CHARMS_ACTIVATED.get());
             }
             return true;
         }

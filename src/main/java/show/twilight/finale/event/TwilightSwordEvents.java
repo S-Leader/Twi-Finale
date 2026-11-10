@@ -16,22 +16,36 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import show.twilight.finale.TwilightFinaleMod;
 import show.twilight.finale.init.ModItem;
 import show.twilight.finale.item.TwilightSwordItem;
 import show.twilight.finale.network.TwilightSwordStatePacket;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 @EventBusSubscriber(modid = TwilightFinaleMod.MOD_ID)
 public final class TwilightSwordEvents {
-    private static final Map<ServerPlayer, DashState> STATES = new WeakHashMap<>();
+    private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, TwilightFinaleMod.MOD_ID);
+    // Runtime-only: neither saved, copied on respawn, nor synced as an attachment.
+    private static final Supplier<AttachmentType<DashState>> DASH_STATE = ATTACHMENTS.register("twilight_sword_dash", () -> AttachmentType.builder(holder -> new DashState((Player) holder)).build());
+
+    public static void registerAttachments(IEventBus bus) {
+        ATTACHMENTS.register(bus);
+    }
 
     private static final class DashState {
         final ResourceKey<Level> dimension;
@@ -43,7 +57,7 @@ public final class TwilightSwordEvents {
         double travelled;
         boolean dashing, needsRelease;
 
-        DashState(ServerPlayer player) {
+        DashState(Player player) {
             dimension = player.level().dimension();
         }
     }
@@ -51,26 +65,26 @@ public final class TwilightSwordEvents {
     @SubscribeEvent
     public static void tick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        DashState state = STATES.get(player);
+        DashState state = player.hasData(DASH_STATE) ? player.getData(DASH_STATE) : null;
         boolean eligible = player.isAlive() && !player.isSpectator() && !player.isPassenger() && !player.isSleeping() && player.getMainHandItem().is(ModItem.TWILIGHT_SWORD.get()) && player.getOffhandItem().isEmpty();
         if (!eligible || state != null && !state.dimension.equals(player.level().dimension())) {
-            if (state != null) stop(player, state);
-            STATES.remove(player);
+            if (state != null) {
+                stop(player, state);
+                player.removeData(DASH_STATE);
+            }
             return;
         }
-        boolean usingSword = player.isUsingItem() && player.getUsedItemHand() == InteractionHand.MAIN_HAND
-                && player.getUseItem() == player.getMainHandItem();
+        boolean usingSword = player.isUsingItem() && player.getUsedItemHand() == InteractionHand.MAIN_HAND && player.getUseItem() == player.getMainHandItem();
         if (state == null) {
             if (!usingSword) return;
-            state = new DashState(player);
-            STATES.put(player, state);
+            state = player.getData(DASH_STATE);
         }
         if (state.dashing) {
             tickDash(player, state);
             return;
         }
         if (state.needsRelease) {
-            if (!usingSword) state.needsRelease = false;
+            if (!usingSword) player.removeData(DASH_STATE);
             return;
         }
         if (usingSword) {
@@ -144,10 +158,7 @@ public final class TwilightSwordEvents {
         state.stalledTicks = step < 0.02 ? state.stalledTicks + 1 : 0;
         // A wall or a crouching ledge can clip just one movement axis.
         // End the dash instead of repeatedly pushing/sliding along that wall.
-        if (state.travelled >= state.maximumDistance - 0.01 || Math.abs(sideways) > 0.05
-                || forward < -0.05 || state.dashTicks >= 40
-                || state.dashTicks > 1 && player.horizontalCollision
-                || state.dashTicks > 6 && state.stalledTicks >= 3) {
+        if (state.travelled >= state.maximumDistance - 0.01 || Math.abs(sideways) > 0.05 || forward < -0.05 || state.dashTicks >= 40 || state.dashTicks > 1 && player.horizontalCollision || state.dashTicks > 6 && state.stalledTicks >= 3) {
             stop(player, state);
             return;
         }
@@ -195,6 +206,8 @@ public final class TwilightSwordEvents {
         state.charge = 0;
         state.needsRelease = true;
         sync(player, state, TwilightSwordStatePacket.IDLE);
+        state.hit.clear();
+        state.sword = ItemStack.EMPTY;
     }
 
     private static void sync(ServerPlayer player, DashState state, int mode) {
@@ -205,13 +218,27 @@ public final class TwilightSwordEvents {
 
     @SubscribeEvent
     public static void logout(PlayerEvent.PlayerLoggedOutEvent event) {
-        STATES.remove(event.getEntity());
+        event.getEntity().removeData(DASH_STATE);
+    }
+
+    @SubscribeEvent
+    public static void death(LivingDeathEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            DashState state = player.removeData(DASH_STATE);
+            if (state != null) stop(player, state);
+        }
+    }
+
+    @SubscribeEvent
+    public static void respawn(PlayerEvent.Clone event) {
+        event.getOriginal().removeData(DASH_STATE);
+        event.getEntity().removeData(DASH_STATE);
     }
 
     @SubscribeEvent
     public static void changeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            DashState state = STATES.remove(player);
+            DashState state = player.removeData(DASH_STATE);
             if (state != null) stop(player, state);
         }
     }
