@@ -11,7 +11,8 @@
     "FinaleScepterRepairMixin",
     "ForceFieldBlockMixin",
     "GiantSwordItemMixin",
-    "HierophantIceBombMixin"
+    "HierophantIceBombMixin",
+    "ToolEventsMixin"
   ],
   "client": [
     "ItemInHandRendererMixin",

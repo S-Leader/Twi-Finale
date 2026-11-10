@@ -27,8 +27,10 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.ItemAbility;
 import org.jetbrains.annotations.NotNull;
+import twilightforest.data.tags.BlockTagGenerator;
 import twilightforest.init.TFItems;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -82,6 +84,11 @@ public class TransformationToolItem extends AbstractTransformationItem implement
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
         tooltip.add(Component.translatable("item.twilightforest_finale.transformation_tool.desc").withStyle(ChatFormatting.GRAY));
+    }
+
+    public float getDestroySpeed(@Nonnull ItemStack stack, BlockState state) {
+        float destroySpeed = super.getDestroySpeed(stack, state);
+        return state.is(BlockTagGenerator.MAZEBREAKER_ACCELERATED) ? destroySpeed * 128.0f : destroySpeed;
     }
 
     public boolean isCorrectToolForDrops(@NotNull ItemStack stack, @NotNull BlockState state) {
