@@ -5,7 +5,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -14,7 +13,6 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,8 +24,8 @@ import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -36,8 +34,8 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -353,10 +351,10 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             pendingRelocation = false;
             moveOrigin = position();
             moveCirclePlaced = false;
-            if (getPhase() == 3) queuedThirdAttack = switch (random.nextInt(3)) {
-                case 0 -> METEORS;
-                case 1 -> FIERY_QUAKE;
-                default -> FIERY_THRUST;
+            if (getPhase() == 3) queuedThirdAttack = switch (random.nextInt(8)) {
+                case 6 -> FIERY_QUAKE;
+                case 7 -> FIERY_THRUST;
+                default -> METEORS; // Six of eight rolls: meteors : dives : thrust = 6 : 1 : 1.
             };
             chooseMoveDestination();
         }
@@ -597,7 +595,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             case INTRO -> predictedTime(entityData.get(INTRO_TIME), introSyncTick);
             case SHIELD_BREAK -> predictedTime(BREAK_DURATION - entityData.get(BREAK_TIME), breakSyncTick);
             case DEATH -> predictedTime(entityData.get(DEATH_TIME), deathSyncTick);
-            case REBIRTH -> entityData.get(HAS_COMBAT_TARGET) ? predictedTime(entityData.get(REBIRTH_TIME), rebirthSyncTick) : entityData.get(REBIRTH_TIME);
+            case REBIRTH ->
+                    entityData.get(HAS_COMBAT_TARGET) ? predictedTime(entityData.get(REBIRTH_TIME), rebirthSyncTick) : entityData.get(REBIRTH_TIME);
             case SHIELD_STUN ->
                     predictedTime(getShieldStopDuration() - cubeShield.getStopTicksRemaining(), stopSyncTick);
             default -> predictedTime(entityData.get(ATTACK_TIME), attackSyncTick);
@@ -817,15 +816,15 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                 setNoGravity(t < 30);
                 fallDistance = 0;
                 if (t < 30) {
-                    // Cross the roof at a level height, then descend. A straight
-                    // downward chord from the raised pedestal clips its stairs.
+                    // Smoke crosses walls at a level height, then solidifies
+                    // over a checked, unobstructed descent to the roof.
                     Vec3 to = new Vec3(moveDestination.x, Math.max(moveOrigin.y, moveDestination.y), moveDestination.z).subtract(position());
-                    if (to.lengthSqr() > 0.4) {
+                    if (to.lengthSqr() > 1.0E-6) {
                         // Keep the larger arena's third-phase corner destinations
                         // reachable in the same flight window; phase two is unchanged.
                         double speed = smokeMoveSpeed();
                         Vec3 velocity = to.normalize().scale(Math.min(speed, to.length()));
-                        if (insideArena(position().add(velocity)) && isAreaLoaded(getBoundingBox().move(velocity)) && server.noCollision(this, getBoundingBox().move(velocity)))
+                        if (insideArena(position().add(velocity)) && isAreaLoaded(getBoundingBox().expandTowards(velocity)))
                             setDeltaMovement(velocity);
                         else setDeltaMovement(Vec3.ZERO);
                     } else setDeltaMovement(Vec3.ZERO);
@@ -1244,7 +1243,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             if (travelled.horizontalDistanceSqr() > 1.0E-6)
                 for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class, sweep, this::canAttackVictim)) {
                     AABB hitbox = victim.getBoundingBox().inflate(getBbWidth() / 2 + 0.4, getBbHeight() / 2 + 0.4, getBbWidth() / 2 + 0.4);
-                    if (!hitbox.contains(from) && hitbox.clip(from, to).isEmpty() || !chargeHits.add(victim.getUUID())) continue;
+                    if (!hitbox.contains(from) && hitbox.clip(from, to).isEmpty() || !chargeHits.add(victim.getUUID()))
+                        continue;
                     if (victim.hurt(damageSources().mobAttack(this), 14)) {
                         victim.igniteForSeconds(5);
                         victim.push(dashDirection.x * 1.6, 0.55, dashDirection.z * 1.6);
@@ -1564,13 +1564,17 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             if (separation <= bestDistance || separation < 25 || candidate.subtract(position()).horizontalDistanceSqr() < 16
                     || !canStandAt(candidate)) continue;
             Vec3 flight = new Vec3(candidate.x, Math.max(getY(), candidate.y), candidate.z);
+            AABB arrival = getBoundingBox().move(flight.subtract(position()));
+            // Walls along the route do not matter, but the point where smoke
+            // becomes solid and its subsequent descent must remain clear.
+            if (!isAreaLoaded(arrival) || !level().noCollision(this, arrival)) continue;
             delta = flight.subtract(position());
             boolean clear = true;
             int steps = Math.max(1, Mth.ceil(delta.length() / 0.75));
             for (int stepIndex = 1; stepIndex <= steps; stepIndex++) {
                 Vec3 point = position().add(delta.scale(stepIndex / (double) steps));
                 AABB step = getBoundingBox().move(point.subtract(position()));
-                if (nearestThreatDistanceSqr(point, threats) < pathMinimum || !isAreaLoaded(step) || !level().noCollision(this, step)) {
+                if (nearestThreatDistanceSqr(point, threats) < pathMinimum || !isAreaLoaded(step)) {
                     clear = false;
                     break;
                 }
@@ -1726,6 +1730,15 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         return true;
     }
 
+    private boolean isSmokePhasing() {
+        return isAlive() && isUsingSkill() && getSkillType() == SMOKE_MOVE && getActionTime() < 30;
+    }
+
+    @Override
+    public boolean isInWall() {
+        return !isSmokePhasing() && super.isInWall();
+    }
+
     @Override
     public void move(MoverType type, Vec3 motion) {
         Vec3 requested = motion, before = position();
@@ -1735,7 +1748,15 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             // Also handles external knockback. Never snap a displaced boss back home.
             motion = new Vec3(Mth.clamp(limited.x, -Math.abs(motion.x) - 0.3, Math.abs(motion.x) + 0.3), Mth.clamp(limited.y, -Math.abs(motion.y) - 0.3, Math.abs(motion.y) + 0.3), Mth.clamp(limited.z, -Math.abs(motion.z) - 0.3, Math.abs(motion.z) + 0.3));
         }
-        super.move(type, motion);
+        // Bypass collision only for smoke travel, not for normal attacks,
+        // charging or landing. Restore even when movement exits exceptionally.
+        boolean wasNoPhysics = noPhysics;
+        if (isSmokePhasing()) noPhysics = true;
+        try {
+            super.move(type, motion);
+        } finally {
+            noPhysics = wasNoPhysics;
+        }
         if (rushing) {
             Vec3 travelled = position().subtract(before);
             wallHitX |= Math.abs(requested.x) > 1.0E-6 && Math.abs(travelled.x - requested.x) > 1.0E-4;
