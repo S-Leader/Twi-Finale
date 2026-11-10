@@ -14,6 +14,7 @@
     "FinaleScepterRepairMixin"
   ],
   "client": [
-    "ItemInHandRendererMixin"
+    "ItemInHandRendererMixin",
+    "JappaPackRepositoryMixin"
   ]
 }

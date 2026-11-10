@@ -1,1 +1,3 @@
-{"parent":"twilightforest_finale:block/twilight_hierophant_boss_spawner"}
+{
+  "parent": "twilightforest:block/boss_spawner"
+}

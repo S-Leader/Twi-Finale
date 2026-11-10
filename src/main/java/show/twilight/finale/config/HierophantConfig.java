@@ -22,7 +22,7 @@ public final class HierophantConfig {
         BEAM_DAMAGE = b.comment("Phase-two charged beam damage. Separate key from the old ten-damage spell.").defineInRange("phaseTwoBeamDamage", 30D, 0D, 1000D);
         BEAM_RANGE = b.defineInRange("beamRange", 8D, 2D, 64D);
         BEAM_LENGTH_MULTIPLIER = b.comment("Actual beam reach = beamRange * beamLengthMultiplier, capped at 64 blocks and clipped to the arena/loaded chunks. Also lengthens beams in existing configs with beamRange=8.").defineInRange("beamLengthMultiplier", 3D, 1D, 8D);
-        ARENA_RADIUS = b.comment("Fallback arena radius outside the castle forge/gazebo; saved per boss.").defineInRange("fallbackArenaRadius", 12, 4, 32);
+        ARENA_RADIUS = b.comment("Fallback square half-width for manual summons outside a known castle. Castle encounters use the actual main-tower roof structure bounds, not this value or a circle.").defineInRange("fallbackArenaRadius", 12, 4, 32);
         BEAM_BREAKS_BLOCKS = b.comment("Also requires mobGriefing; protects block entities, violet fields and blocks outside the arena.").define("beamBreaksBlocks", false);
         b.pop();
         SPEC = b.build();

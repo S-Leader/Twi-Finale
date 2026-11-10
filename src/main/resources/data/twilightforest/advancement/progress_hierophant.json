@@ -71,18 +71,6 @@
         ]
       },
       "trigger": "twilightforest:hurt_boss"
-    },
-    "shadow_scepter": {
-      "conditions": {
-        "items": [
-          {
-            "items": [
-              "twilightforest_finale:shadow_scepter"
-            ]
-          }
-        ]
-      },
-      "trigger": "minecraft:inventory_changed"
     }
   },
   "display": {

@@ -1,1 +1,7 @@
-{"variants":{"":{"model":"twilightforest_finale:block/twilight_hierophant_boss_spawner"}}}
+{
+  "variants": {
+    "": {
+      "model": "twilightforest_finale:block/twilight_hierophant_boss_spawner"
+    }
+  }
+}

@@ -5,6 +5,7 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
@@ -12,17 +13,22 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
+import show.twilight.finale.config.HierophantConfig;
 import show.twilight.finale.init.ModBlocks;
+import show.twilight.finale.world.castle.FinalCastleMainComponent;
+import show.twilight.finale.world.castle.FinalCastleRoof48CrenellatedComponent;
 
 import java.util.*;
 
@@ -31,6 +37,7 @@ import java.util.*;
  */
 @EventBusSubscriber(modid = "twilightforest_finale")
 public final class HierophantArena extends SavedData {
+    /** Legacy rise/visual metadata, never a combat boundary. */
     public static final int RADIUS = 20;
     private static final int GAZEBO_RADIUS = 10, GAZEBO_HEIGHT = 12;
     private static final int LEGACY_RISE = 20, LEGACY_DURATION = 160;
@@ -49,6 +56,7 @@ public final class HierophantArena extends SavedData {
         public final int radius;
         private final int floorOffset;
         private final boolean legacy;
+        private AABB roofBounds;
         private final List<Cell> recoveryCells = new ArrayList<>();
         public UUID boss;
         private boolean barriersCleared, recoverFloor, defeated;
@@ -74,9 +82,12 @@ public final class HierophantArena extends SavedData {
         }
 
         public AABB bounds() {
+            if (roofBounds != null) return roofBounds;
+            // Only manual summons outside a known castle use this fallback.
+            int fallback = HierophantConfig.ARENA_RADIUS.get();
             double floor = home().getY();
-            return new AABB(sourceHome.getX() - radius, floor - 1, sourceHome.getZ() - radius,
-                    sourceHome.getX() + radius + 1, floor + 22, sourceHome.getZ() + radius + 1);
+            return new AABB(sourceHome.getX() - fallback, floor - 2, sourceHome.getZ() - fallback,
+                    sourceHome.getX() + fallback + 1, floor + 24, sourceHome.getZ() + fallback + 1);
         }
     }
 
@@ -110,8 +121,64 @@ public final class HierophantArena extends SavedData {
         }
         GlobalPos restriction = GlobalPos.of(level.dimension(), arena.home());
         if (!restriction.equals(boss.getRestrictionPoint())) boss.setRestrictionPoint(restriction);
+        refreshBounds(level, arena);
         prepare(level, arena);
         return arena;
+    }
+
+    public void refreshBounds(ServerLevel level, Lift arena) {
+        if (arena.roofBounds != null) return;
+        BlockPos home = arena.sourceHome;
+        var chunk = level.getChunkSource().getChunkNow(home.getX() >> 4, home.getZ() >> 4);
+        if (chunk == null) return;
+        var registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        ResourceLocation castle = ResourceLocation.fromNamespaceAndPath("twilightforest", "final_castle");
+        Set<StructureStart> starts = new HashSet<>();
+        for (var entry : chunk.getAllStarts().entrySet())
+            if (castle.equals(registry.getKey(entry.getKey()))) starts.add(entry.getValue());
+        for (var entry : chunk.getAllReferences().entrySet())
+            if (castle.equals(registry.getKey(entry.getKey()))) for (long reference : entry.getValue()) {
+                ChunkPos at = new ChunkPos(reference);
+                var origin = level.getChunkSource().getChunkNow(at.x, at.z);
+                if (origin == null) continue; // Never force-load structure starts.
+                StructureStart start = origin.getStartForStructure(entry.getKey());
+                if (start != null) starts.add(start);
+            }
+        AABB found = null;
+        double nearestFloor = Double.POSITIVE_INFINITY;
+        for (StructureStart start : starts) for (var piece : start.getPieces()) {
+            var box = piece.getBoundingBox();
+            int minX, minZ, maxX, maxZ, floor;
+            if (piece instanceof FinalCastleRoof48CrenellatedComponent
+                    || piece instanceof twilightforest.world.components.structures.finalcastle.FinalCastleRoof48CrenellatedComponent) {
+                // Roof local (2..50, 2, 2..50) is the actual 49x49 floor;
+                // the bounding box also includes two blocks of outer trim.
+                minX = box.minX() + 2;
+                minZ = box.minZ() + 2;
+                maxX = box.maxX() - 1;
+                maxZ = box.maxZ() - 1;
+                floor = box.minY() + 3;
+            } else if (piece instanceof FinalCastleMainComponent
+                    || piece instanceof twilightforest.world.components.structures.finalcastle.FinalCastleMainComponent) {
+                minX = box.minX();
+                minZ = box.minZ();
+                maxX = box.maxX() + 1;
+                maxZ = box.maxZ() + 1;
+                floor = box.maxY() + 2;
+            } else continue;
+            double difference = Math.abs(floor - home.getY());
+            if (home.getX() < minX || home.getX() >= maxX || home.getZ() < minZ || home.getZ() >= maxZ
+                    || difference > 4 || difference >= nearestFloor) continue;
+            nearestFloor = difference;
+            floor += arena.floorOffset; // Preserve old recovered terrain, never restart its lift.
+            found = new AABB(minX, floor - 2, minZ, maxX, floor + 24, maxZ);
+        }
+        if (found != null) {
+            // Old journals have only Radius: they migrate to roof-piece bounds
+            // here instead of retaining their circular platform restriction.
+            arena.roofBounds = found;
+            setDirty();
+        }
     }
 
     public void defeated(BlockPos home) {
@@ -219,6 +286,14 @@ public final class HierophantArena extends SavedData {
             arena.defeated = t.getBoolean("Defeated");
             arena.barriersCleared = current ? t.getBoolean("BarriersCleared") : arena.defeated;
             arena.recoverFloor = current ? t.getBoolean("RecoverFloor") : removed && !placed;
+            ListTag roof = t.getList("RoofBounds", Tag.TAG_DOUBLE);
+            if (roof.size() == 6) {
+                double[] values = new double[6];
+                boolean finite = true;
+                for (int i = 0; i < 6; i++) finite &= Double.isFinite(values[i] = roof.getDouble(i));
+                if (finite && values[3] > values[0] && values[4] > values[1] && values[5] > values[2])
+                    arena.roofBounds = new AABB(values[0], values[1], values[2], values[3], values[4], values[5]);
+            }
             if (arena.recoverFloor) for (Tag cellRaw : t.getList("Cells", Tag.TAG_COMPOUND)) {
                 CompoundTag cell = (CompoundTag) cellRaw;
                 arena.recoveryCells.add(new Cell(BlockPos.of(cell.getLong("Pos")),
@@ -245,6 +320,13 @@ public final class HierophantArena extends SavedData {
             t.putBoolean("BarriersCleared", arena.barriersCleared);
             t.putBoolean("RecoverFloor", arena.recoverFloor);
             t.putBoolean("Defeated", arena.defeated);
+            if (arena.roofBounds != null) {
+                AABB box = arena.roofBounds;
+                ListTag roof = new ListTag();
+                for (double value : new double[]{box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ})
+                    roof.add(DoubleTag.valueOf(value));
+                t.put("RoofBounds", roof);
+            }
             ListTag cells = new ListTag();
             for (Cell cell : arena.recoveryCells) {
                 CompoundTag c = new CompoundTag();

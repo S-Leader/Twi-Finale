@@ -2,9 +2,61 @@
   "type": "minecraft:entity",
   "random_sequence": "twilightforest_finale:entities/the_twilight_hierophant",
   "pools": [
-    {"rolls":1,"entries":[{"type":"minecraft:item","name":"twilightforest:cube_talisman"}]},
-    {"rolls":1,"entries":[{"type":"minecraft:item","name":"minecraft:book","functions":[{"function":"minecraft:set_count","count":{"type":"minecraft:uniform","min":3,"max":10}}]}]},
-    {"rolls":1,"entries":[{"type":"minecraft:item","name":"minecraft:paper","functions":[{"function":"minecraft:set_count","count":{"type":"minecraft:uniform","min":8,"max":20}}]}]},
-    {"rolls":1,"entries":[{"type":"minecraft:item","name":"twilightforest_finale:hierophant_trophy"}]}
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:annihilation_chestplate"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 3,
+                "max": 10
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:paper",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 8,
+                "max": 20
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:hierophant_trophy"
+        }
+      ]
+    }
   ]
 }

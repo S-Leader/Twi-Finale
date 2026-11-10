@@ -1,11 +1,16 @@
 package show.twilight.finale.entity.projectile;
 
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,10 +32,13 @@ import java.util.UUID;
  * not a homing path to the caster's new position.
  */
 public final class HierophantFragment extends Projectile {
+    private static final ResourceKey<DamageType> SHIELD_MISSILE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE,
+            ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "hierophant_shield_missile"));
     private static final EntityDataAccessor<Boolean> RETURNING = SynchedEntityData.defineId(HierophantFragment.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> EXPLOSIVE = SynchedEntityData.defineId(HierophantFragment.class, EntityDataSerializers.BOOLEAN);
     private Vec3 origin = Vec3.ZERO, direction = Vec3.ZERO;
     private int age, stage, stageTicks;
+    private boolean bypassesCooldown;
     private final Set<UUID> hitThisLeg = new HashSet<>();
 
     public HierophantFragment(EntityType<? extends HierophantFragment> type, Level level) {
@@ -60,6 +68,10 @@ public final class HierophantFragment extends Projectile {
 
     public void setExplosive() {
         entityData.set(EXPLOSIVE, true);
+    }
+
+    public void setBypassesCooldown() {
+        bypassesCooldown = true;
     }
 
     @Override
@@ -104,8 +116,14 @@ public final class HierophantFragment extends Projectile {
         EntityHitResult hit = ProjectileUtil.getEntityHitResult(level(), this, start, limited, getBoundingBox().expandTowards(getDeltaMovement()).inflate(0.2), this::canHitEntity);
         if (hit != null && hit.getEntity() instanceof LivingEntity victim) {
             hitThisLeg.add(victim.getUUID());
-            if (!entityData.get(EXPLOSIVE))
-                victim.hurt(damageSources().indirectMagic(this, boss), HierophantConfig.SHARD_DAMAGE.get().floatValue());
+            if (!entityData.get(EXPLOSIVE)) {
+                // Use vanilla's per-source cooldown tag, without resetting the
+                // victim's invulnerability timer for unrelated incoming attacks.
+                DamageSource source = bypassesCooldown
+                        ? new DamageSource(registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SHIELD_MISSILE_DAMAGE), this, boss)
+                        : damageSources().indirectMagic(this, boss);
+                victim.hurt(source, HierophantConfig.SHARD_DAMAGE.get().floatValue());
+            }
             if (!returns()) {
                 burst(hit.getLocation());
                 discard();
@@ -154,6 +172,7 @@ public final class HierophantFragment extends Projectile {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("Returns", returns());
         tag.putBoolean("Explosive", entityData.get(EXPLOSIVE));
+        tag.putBoolean("BypassesCooldown", bypassesCooldown);
         tag.putInt("Age", age);
         tag.putInt("Stage", stage);
         tag.putInt("StageTicks", stageTicks);
@@ -169,6 +188,7 @@ public final class HierophantFragment extends Projectile {
         super.readAdditionalSaveData(tag);
         entityData.set(RETURNING, tag.getBoolean("Returns"));
         entityData.set(EXPLOSIVE, tag.getBoolean("Explosive"));
+        bypassesCooldown = tag.getBoolean("BypassesCooldown");
         age = tag.getInt("Age");
         stage = tag.getInt("Stage");
         stageTicks = tag.getInt("StageTicks");

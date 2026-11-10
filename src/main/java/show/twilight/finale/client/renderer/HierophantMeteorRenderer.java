@@ -1,6 +1,7 @@
 package show.twilight.finale.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -30,6 +31,15 @@ public final class HierophantMeteorRenderer extends EntityRenderer<HierophantMet
 
     @Override
     public void render(HierophantMeteor entity, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
+        float progress = entity.getFormationProgress(partial);
+        float size = 0.25F + 0.75F * progress * progress * (3 - 2 * progress);
+        pose.pushPose();
+        pose.translate(0, 0.375, 0);
+        pose.mulPose(Axis.XP.rotationDegrees((entity.tickCount + partial) * 24));
+        pose.scale(size, size, size);
+        // The native cube spans Y=0..8 pixels; tumble around its centre.
+        pose.translate(0, -0.25, 0);
         model.renderToBuffer(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), 15728880, OverlayTexture.NO_OVERLAY, -1);
+        pose.popPose();
     }
 }

@@ -77,6 +77,16 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
             float dissolve = smooth(t / 8) * smooth((TheTwilightHierophantEntity.getActionDuration(action) - t) / 10);
             alpha = net.minecraft.util.Mth.lerp(dissolve, alpha, 0.12F);
         }
+        if (action == TheTwilightHierophantEntity.FIERY_QUAKE) {
+            int stage = entity.getSwordComboStage();
+            float local = entity.getSwordComboTime() + partialTicks;
+            if (stage == TheTwilightHierophantEntity.SWORD_SMOKE)
+                alpha *= 1 - smooth(local / 3F);
+            else if (entity.getSwordComboIndex() > 0) {
+                if (stage == TheTwilightHierophantEntity.SWORD_RISE) alpha = 0;
+                else if (stage == TheTwilightHierophantEntity.SWORD_HOLD) alpha *= smooth(local / 3F);
+            }
+        }
         if (action == TheTwilightHierophantEntity.DEATH)
             alpha *= net.minecraft.util.Mth.clamp((125 - time - partialTicks) / 55F, 0, 1);
         boolean afterimages = entity.getPhase() == 3 && action != TheTwilightHierophantEntity.REBIRTH;
@@ -109,7 +119,8 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
      * Low health changes density/lifetime only, never adds artificial orbit/jitter.
      */
     private void renderShadow(T entity, float partial, PoseStack pose, MultiBufferSource buffers, int light, boolean active, float bodyAlpha) {
-        if (entity.getPhase() != 3 || entity.isDeadOrDying() || entity.getAction() == TheTwilightHierophantEntity.REBIRTH) {
+        if (entity.getPhase() != 3 || entity.isDeadOrDying() || entity.getAction() == TheTwilightHierophantEntity.REBIRTH
+                || entity.isSwordComboSmoke()) {
             histories.remove(entity);
             return;
         }

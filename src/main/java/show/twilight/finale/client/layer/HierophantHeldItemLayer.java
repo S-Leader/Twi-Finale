@@ -28,10 +28,18 @@ public final class HierophantHeldItemLayer<T extends TheTwilightHierophantEntity
     protected void renderArmWithItem(LivingEntity living, ItemStack item, ItemDisplayContext context, HumanoidArm arm,
                                      PoseStack pose, MultiBufferSource buffers, int light) {
         if (living instanceof TheTwilightHierophantEntity boss) {
+            if (boss.getAction() == TheTwilightHierophantEntity.METEORS) {
+                if (item.isEmpty() || arm != boss.getMainArm()) return;
+                pose.pushPose();
+                getParentModel().translateToRaisedSword(arm, pose);
+                items.renderItem(living, item, ItemDisplayContext.NONE, false, pose, buffers, light);
+                pose.popPose();
+                return;
+            }
             if (boss.getAction() == TheTwilightHierophantEntity.FIERY_QUAKE) {
                 if (item.isEmpty() || arm != boss.getMainArm()) return;
                 pose.pushPose();
-                getParentModel().translateToPlantedSword(pose);
+                getParentModel().translateToComboSword(pose);
                 // Native third-person hand transforms turn the sword sideways;
                 // this pose already positions the real item by its shared grip.
                 items.renderItem(living, item, ItemDisplayContext.NONE, false, pose, buffers, light);
