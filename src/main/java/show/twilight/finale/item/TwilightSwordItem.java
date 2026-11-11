@@ -20,7 +20,7 @@ import java.util.List;
 
 public final class TwilightSwordItem extends SwordItem {
     public static final int MIN_CHARGE_TICKS = 10;
-    public static final float DASH_DISTANCE = 10, DASH_DAMAGE = 5;
+    public static final float DASH_DISTANCE = 15;
     public static final double DASH_SPEED = 1.35;
 
     public TwilightSwordItem(Properties properties) {
@@ -50,7 +50,7 @@ public final class TwilightSwordItem extends SwordItem {
     public static void igniteTarget(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (target.level().isClientSide() || target.fireImmune()) return;
         var fireAspect = attacker.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.FIRE_ASPECT);
-        int level = EnchantmentHelper.getItemEnchantmentLevel(fireAspect, stack);
+        int level = EnchantmentHelper.getEnchantmentLevel(fireAspect, attacker);
         target.igniteForSeconds(5 + level * 4);
     }
 

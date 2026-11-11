@@ -10,6 +10,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -117,7 +118,7 @@ public final class TwilightSwordEvents {
         float yaw = player.getYRot() * Mth.DEG_TO_RAD;
         state.direction = new Vec3(-Mth.sin(yaw), 0, Mth.cos(yaw)).normalize();
         state.maximumDistance = TwilightSwordItem.DASH_DISTANCE;
-        state.attackDamage = TwilightSwordItem.DASH_DAMAGE;
+        state.attackDamage = (float) player.getAttributes().getValue(Attributes.ATTACK_DAMAGE);
         state.travelled = 0;
         state.origin = state.previous = player.position();
         state.dashTicks = 0;
