@@ -69,13 +69,13 @@
   "advancement.twilightforest_finale.adherent_scepters": "All Scepters as One!",
   "advancement.twilightforest_finale.adherent_scepters.desc": "Acquire all four scepters of power from the High Priest of Adherent, artifacts that far transcend the strength of a Lich.",
   "advancement.twilightforest_finale.alohomora": "Alohomora",
-  "advancement.twilightforest_finale.alohomora.desc": "Break a force field with the Proverbs Scepter for the first time.",
+  "advancement.twilightforest_finale.alohomora.desc": "Break a force field with the Proverbs Scepter.",
   "advancement.twilightforest_finale.hidden_in_plain_sight": "Hidden in Plain Sight",
-  "advancement.twilightforest_finale.hidden_in_plain_sight.desc": "Found the Finalslayer in a special tower.",
+  "advancement.twilightforest_finale.hidden_in_plain_sight.desc": "Found the Finalslayer.",
   "advancement.twilightforest_finale.all_adherent_colors": "A Colorful Defeat",
   "advancement.twilightforest_finale.all_adherent_colors.desc": "Slay at all types of Adherent.",
   "advancement.twilightforest_finale.found_purple_adherent": "How Did You Even Find Me? [NYI]",
-  "advancement.twilightforest_finale.found_purple_adherent.desc": "Slay a purple Adherent.",
+  "advancement.twilightforest_finale.found_purple_adherent.desc": "Found a special Adherent.",
   "advancement.twilightforest_finale.poor_view_down_here": "Not Much of a View Down Here [NYI]",
   "advancement.twilightforest_finale.poor_view_down_here.desc": "Slay a Roving Cube to obtain a Cube Talisman.",
   "advancement.twilightforest_finale.kill_hierophant": "Dawnlight Forest",
@@ -92,5 +92,9 @@
   "boss.twilightforest_finale.hierophant_shield": "Annihilation Shield",
   "entity.twilightforest_finale.hierophant_fragment": "Annihilation Fragment",
   "commands.twilightforest_finale.forge_not_found": "Stand inside this mod's forge hall to repair it.",
-  "commands.twilightforest_finale.forge_repaired": "Cleared %s intrusive terrain blocks; skipped %s unloaded chunks. Loot and spawners were not reset."
+  "commands.twilightforest_finale.forge_repaired": "Cleared %s intrusive terrain blocks; skipped %s unloaded chunks. Loot and spawners were not reset.",
+  "twilightforest_finale.configuration.hierophant": "Twilight Hierophant",
+  "twilightforest_finale.configuration.hierophant.tooltip": "Twilight Hierophant arena settings.",
+  "twilightforest_finale.configuration.hierophant.fallbackArenaRadius": "Fallback arena radius",
+  "twilightforest_finale.configuration.hierophant.fallbackArenaRadius.tooltip": "Fallback square half-width, in blocks, for manual summons outside a known castle. Castle encounters use the actual main-tower roof structure bounds."
 }

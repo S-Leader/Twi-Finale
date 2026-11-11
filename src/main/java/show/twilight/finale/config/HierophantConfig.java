@@ -8,8 +8,12 @@ public final class HierophantConfig {
 
     static {
         var b = new ModConfigSpec.Builder();
-        b.push("hierophant");
-        ARENA_RADIUS = b.comment("Fallback square half-width for manual summons outside a known castle. Castle encounters use the actual main-tower roof structure bounds, not this value or a circle.", "非城堡内手动召唤时的后备方形场地半径；城堡战斗使用实际塔顶结构边界。").defineInRange("fallbackArenaRadius", 12, 4, 32);
+        b.comment("twilightforest_finale.configuration.hierophant.tooltip")
+                .translation("twilightforest_finale.configuration.hierophant")
+                .push("hierophant");
+        ARENA_RADIUS = b.comment("twilightforest_finale.configuration.hierophant.fallbackArenaRadius.tooltip")
+                .translation("twilightforest_finale.configuration.hierophant.fallbackArenaRadius")
+                .defineInRange("fallbackArenaRadius", 12, 4, 32);
         b.pop();
         SPEC = b.build();
     }

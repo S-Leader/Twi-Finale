@@ -121,7 +121,7 @@ public final class HierophantFragment extends Projectile {
                 DamageSource source = bypassesCooldown
                         ? new DamageSource(registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SHIELD_MISSILE_DAMAGE), this, boss)
                         : damageSources().indirectMagic(this, boss);
-                victim.hurt(source, 6.0F);
+                victim.hurt(source, 3.0F);
             }
             if (!returns()) {
                 burst(hit.getLocation());
