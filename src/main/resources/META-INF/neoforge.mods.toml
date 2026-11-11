@@ -1,36 +1,36 @@
-modLoader="javafml"
-loaderVersion="[4,)"
-license="Finale: All Rights Reserved; Twilight Forest-derived code: LGPL-2.1-or-later; VzlingLib shadow port: MIT"
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "Finale: All Rights Reserved; Twilight Forest-derived code: LGPL-2.1-or-later; VzlingLib shadow port: MIT"
 
 [[mods]]
-modId="twilightforest_finale"
-version="0.1.5-port.18"
-displayName="Twilight Forest Finale (1.21.1 Port)"
-authors="Vzling, shuixingshow; local NeoForge port"
-description='''Twilight Forest Finale port without an external VzlingLib dependency. Includes a relocated MIT-licensed VzlingLib shadow implementation. Skylight Forest is excluded.'''
+modId = "twilightforest_finale"
+version = "0.1.5-port.18"
+displayName = "Twilight Forest Finale (1.21.1 Port)"
+authors = "Vzling, shuixingshow; local NeoForge port"
+description = '''Twilight Forest Finale port without an external VzlingLib dependency. Includes a relocated MIT-licensed VzlingLib shadow implementation. Skylight Forest is excluded.'''
 
 [[dependencies.twilightforest_finale]]
-modId="minecraft"
-type="required"
-versionRange="[1.21.1,1.21.2)"
-side="BOTH"
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.21.2)"
+side = "BOTH"
 
 [[dependencies.twilightforest_finale]]
-modId="neoforge"
-type="required"
-versionRange="[21.1.230,)"
-side="BOTH"
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1.230,)"
+side = "BOTH"
 
 [[dependencies.twilightforest_finale]]
-modId="twilightforest"
-type="required"
-versionRange="[4.8.3345,4.9)"
-ordering="AFTER"
-side="BOTH"
+modId = "twilightforest"
+type = "required"
+versionRange = "[4.8.3345,4.9)"
+ordering = "AFTER"
+side = "BOTH"
 
 [[dependencies.twilightforest_finale]]
-modId="curios"
-type="optional"
-versionRange="[9.5.1,10)"
-ordering="AFTER"
-side="BOTH"
+modId = "curios"
+type = "optional"
+versionRange = "[9.5.1,10)"
+ordering = "AFTER"
+side = "BOTH"

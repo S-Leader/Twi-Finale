@@ -1,6 +1,11 @@
 {
   "guardian_targeting": {
     "subtitle": "subtitles.twilightforest_finale.guardian_targeting",
-    "sounds": [{"name": "minecraft:entity.guardian.attack", "type": "event"}]
+    "sounds": [
+      {
+        "name": "minecraft:entity.guardian.attack",
+        "type": "event"
+      }
+    ]
   }
 }

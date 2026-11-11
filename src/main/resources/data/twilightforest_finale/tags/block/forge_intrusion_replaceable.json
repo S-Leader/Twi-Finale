@@ -2,7 +2,10 @@
   "replace": false,
   "values": [
     "#minecraft:base_stone_overworld",
-    {"id": "#c:stones", "required": false},
+    {
+      "id": "#c:stones",
+      "required": false
+    },
     "minecraft:bedrock",
     "minecraft:basalt",
     "minecraft:blackstone",

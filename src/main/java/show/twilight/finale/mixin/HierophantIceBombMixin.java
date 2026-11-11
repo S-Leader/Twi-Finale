@@ -11,7 +11,9 @@ import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import twilightforest.data.tags.BlockTagGenerator;
 import twilightforest.entity.projectile.IceBomb;
 
-/** Suppress snow placement/layer growth only for the Hierophant's native ice bombs. */
+/**
+ * Suppress snow placement/layer growth only for the Hierophant's native ice bombs.
+ */
 @Mixin(IceBomb.class)
 public abstract class HierophantIceBombMixin {
     @Inject(method = "doTerrainEffect", at = @At("HEAD"), cancellable = true, remap = false)

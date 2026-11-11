@@ -15,7 +15,9 @@ import show.twilight.finale.resource.ModResourcePack;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Client-only companion loading; never edits the user's selected-pack settings. */
+/**
+ * Client-only companion loading; never edits the user's selected-pack settings.
+ */
 @Mixin(PackRepository.class)
 public abstract class JappaPackRepositoryMixin {
     @Unique
@@ -30,7 +32,8 @@ public abstract class JappaPackRepositoryMixin {
         int lastJappa = -1;
         for (int i = 0; i < packs.size(); i++) {
             PackResources resources = packs.get(i);
-            if (ModResourcePack.JAPPA_PACK_ID.equals(resources.packId())) return; // Manual selection wins; no duplicate.
+            if (ModResourcePack.JAPPA_PACK_ID.equals(resources.packId()))
+                return; // Manual selection wins; no duplicate.
             // Identical detection to Twilight Forest's JappaPackReloadListener,
             // independent of the zip filename or translated display name.
             if (resources.getResource(PackType.CLIENT_RESOURCES, finale$JAPPA_MARKER) != null) lastJappa = i;
