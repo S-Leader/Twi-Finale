@@ -18,7 +18,6 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.*;
-import show.twilight.finale.config.HierophantConfig;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.init.ModEntity;
 import twilightforest.init.TFParticleType;
@@ -122,7 +121,7 @@ public final class HierophantFragment extends Projectile {
                 DamageSource source = bypassesCooldown
                         ? new DamageSource(registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SHIELD_MISSILE_DAMAGE), this, boss)
                         : damageSources().indirectMagic(this, boss);
-                victim.hurt(source, HierophantConfig.SHARD_DAMAGE.get().floatValue());
+                victim.hurt(source, 6.0F);
             }
             if (!returns()) {
                 burst(hit.getLocation());

@@ -13,11 +13,8 @@ import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 public final class HierophantDebrisEvents {
     @SubscribeEvent
     public static void onDebrisLanded(EntityLeaveLevelEvent event) {
-        if (event.getEntity() instanceof FallingBlockEntity brick && event.getLevel() instanceof ServerLevel server
-                && brick.getRemovalReason() == Entity.RemovalReason.DISCARDED && brick.onGround()
-                && brick.getPersistentData().getBoolean("FinaleCeilingDebris")) {
-            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, brick.getBlockState()),
-                    brick.getX(), brick.getY() + 0.3, brick.getZ(), 24, 0.4, 0.25, 0.4, 0.08);
+        if (event.getEntity() instanceof FallingBlockEntity brick && event.getLevel() instanceof ServerLevel server && brick.getRemovalReason() == Entity.RemovalReason.DISCARDED && brick.onGround() && brick.getPersistentData().getBoolean("FinaleCeilingDebris")) {
+            server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, brick.getBlockState()), brick.getX(), brick.getY() + 0.3, brick.getZ(), 24, 0.4, 0.25, 0.4, 0.08);
         }
     }
 }

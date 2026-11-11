@@ -18,7 +18,7 @@ import twilightforest.init.TFDamageTypes;
 import java.util.EnumSet;
 
 public final class AdherentAttackGoal extends Goal {
-    private static final int CHARGE_TICKS = 40, RED_BREATH_TICKS = 100;
+    private static final int CHARGE_TICKS = 40, RED_BREATH_TICKS = 20;
     private static final float RED_BREATH_DAMAGE = 19F / 3F;
     private final Adherent mob;
     private int cooldown, casting;

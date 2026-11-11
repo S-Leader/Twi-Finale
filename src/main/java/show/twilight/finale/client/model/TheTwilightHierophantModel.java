@@ -302,16 +302,6 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
                 left_arm.xRot = right_arm.xRot = 0.8F;
                 weight = motionWindow(t, TheTwilightHierophantEntity.getActionDuration(action), 8, 10);
             }
-            case TheTwilightHierophantEntity.CHARGE -> {
-                body.xRot -= boss.isShieldRushing() ? 0.12F : 0;
-                weight = smooth(t / 12F);
-            }
-            case TheTwilightHierophantEntity.SHIELD_STUN -> {
-                float dazed = motionWindow(t, boss.getShieldStopDuration(), 8, 12);
-                entity.zRot = 0.25F * dazed;
-                head.xRot += Mth.sin(age * 0.25F) * 0.08F * dazed;
-                weight = 1;
-            }
             case TheTwilightHierophantEntity.FAN -> {
                 // ItemInHandLayer follows getMainArm(), including randomly
                 // left-handed bosses. Animate that same arm, not always the right.

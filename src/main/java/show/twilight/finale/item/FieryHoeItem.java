@@ -10,6 +10,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.common.EventBusSubscriber;
+import show.twilight.finale.util.EnchantmentsUtil;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class FieryHoeItem
     }
 
     public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
-        return !show.twilight.finale.util.EnchantmentsUtil.hasStored(book, Enchantments.FIRE_ASPECT) && super.isBookEnchantable(stack, book);
+        return !EnchantmentsUtil.hasStored(book, Enchantments.FIRE_ASPECT) && super.isBookEnchantable(stack, book);
     }
 
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {

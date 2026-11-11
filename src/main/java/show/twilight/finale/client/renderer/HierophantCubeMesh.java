@@ -43,6 +43,12 @@ final class HierophantCubeMesh {
         pose.translate(0, centreY, 0);
         pose.mulPose(Axis.YP.rotationDegrees(rotation));
         pose.scale(size, size, size);
+        // Fade every face and its dark texture border together. A depleted
+        // shield loses saturation as well as opacity instead of remaining tinted glass.
+        float strength = Mth.clamp(opacity, 0, 1);
+        float r = shield ? Mth.lerp(strength, 1, red ? 1 : 0.08F) : 1;
+        float g = shield ? Mth.lerp(strength, 1, red ? 0.12F : 0.22F) : 1;
+        float b = shield ? Mth.lerp(strength, 1, red ? 0.12F : 1) : 1;
         model.renderToBuffer(pose, buffers.getBuffer(RenderType.entityTranslucent(TEXTURE)), light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(opacity, shield && !red ? 0.08F : 1, red ? 0.12F : shield ? 0.22F : 1, red ? 0.12F : 1));
         pose.popPose();
     }

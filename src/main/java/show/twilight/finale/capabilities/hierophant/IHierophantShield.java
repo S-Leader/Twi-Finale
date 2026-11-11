@@ -4,36 +4,18 @@ package show.twilight.finale.capabilities.hierophant;
  * A shield on its owning boss, not a separate entity. Mutations are server-only.
  */
 public interface IHierophantShield {
-    int MIN_STOP_TICKS = 40;
-    int DEFAULT_STOP_TICKS = 100;
-
     float getHealth();
 
     float getMaxHealth();
 
     /**
-     * Visual opacity only: at least 50% while active, not the HP-bar ratio.
+     * Remaining visual strength in [0, 1]; the renderer fades both faces and borders with it.
      */
     float getOpacity();
 
-    float getSpinSpeed();
-
     boolean isActive();
 
-    boolean isRushing();
-
     boolean requiresPhysicalDamage();
-
-    boolean isStopped();
-
-    int getStopTicksRemaining();
-
-    int getStopDuration();
-
-    /**
-     * Stops the shield and opens its damage window, clamped to 2-5 seconds.
-     */
-    void stop(int ticks);
 
     /**
      * Consumes HP. Polarity is timed by the capability, never toggled by a hit.

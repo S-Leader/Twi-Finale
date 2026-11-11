@@ -116,7 +116,7 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
                 stack.mulPose(Axis.ZP.rotationDegrees((float) Math.sin(age * 3) * entity.hurtTime * 0.45F));
             }
             if (grow > 0)
-                cube.renderShield(stack, bufferSource, light, entity.getScale(), grow, entity.getShieldRotation(partialTicks), entity.getShieldOpacity(), entity.isShieldRed());
+                cube.renderShield(stack, bufferSource, light, entity.getScale(), grow, 0, entity.getShieldOpacity(), entity.isShieldRed());
             stack.popPose();
         }
     }

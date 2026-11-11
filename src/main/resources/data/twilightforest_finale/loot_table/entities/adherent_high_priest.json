@@ -2,6 +2,17 @@
   "type": "minecraft:entity",
   "pools": [
     {
+      "comment": "guaranteed_proverbs_scepter",
+      "bonus_rolls": 0.0,
+      "rolls": 1.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "twilightforest_finale:proverbs_scepter"
+        }
+      ]
+    },
+    {
       "comment": "scepter",
       "bonus_rolls": 0.0,
       "rolls": 2.0,
