@@ -37,10 +37,10 @@
     "description": {
       "translate": "advancement.twilightforest_finale.hidden_in_plain_sight.desc"
     },
-    "frame": "task",
+    "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,
-    "hidden": false
+    "hidden": true
   },
   "requirements": [
     [

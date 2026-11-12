@@ -5,7 +5,7 @@
       "trigger": "minecraft:player_killed_entity",
       "conditions": {
         "entity": {
-          "type": "twilightforest_fianle:annihilation_golem"
+          "type": "twilightforest_finale:annihilation_golem"
         }
       }
     },
@@ -21,19 +21,25 @@
         ]
       }
     },
-    "previous_progression": {
-      "trigger": "minecraft:tick",
+    "alohomora": {
       "conditions": {
-        "player": {
-          "type_specific": {
-            "type": "minecraft:player",
-            "advancements": {
-              "twilightforest_finale:alohomora": true
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "type_specific": {
+                "type": "minecraft:player",
+                "advancements": {
+                  "twilightforest_finale:alohomora": true
+                }
+              }
             }
           }
-        }
+        ]
       }
-    }
+    },
+    "trigger": "minecraft:tick"
   },
   "display": {
     "icon": {
@@ -56,7 +62,7 @@
       "cube_talisman"
     ],
     [
-      "previous_progression"
+      "alohomora"
     ]
   ],
   "sends_telemetry_event": true

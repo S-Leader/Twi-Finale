@@ -70,10 +70,10 @@
     "description": {
       "translate": "advancement.twilightforest_finale.all_adherent_colors.desc"
     },
-    "frame": "task",
+    "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,
-    "hidden": false
+    "hidden": true
   },
   "requirements": [
     [

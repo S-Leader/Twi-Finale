@@ -1,5 +1,5 @@
 {
-  "parent": "twilightforest_finale:poor_view_down_here",
+  "parent": "twilightforest:progress_golem",
   "criteria": {
     "kill_hierophant": {
       "conditions": {
@@ -15,7 +15,7 @@
       },
       "trigger": "minecraft:player_killed_entity"
     },
-    "castle": {
+    "golem": {
       "conditions": {
         "player": [
           {
@@ -23,9 +23,9 @@
             "entity": "this",
             "predicate": {
               "type_specific": {
-                "type": "player",
+                "type": "minecraft:player",
                 "advancements": {
-                  "twilightforest_finale:poor_view_down_here": true
+                  "twilightforest:progress_golem": true
                 }
               }
             }
@@ -34,12 +34,12 @@
       },
       "trigger": "minecraft:tick"
     },
-    "cube_talisman": {
+    "twilight_sword": {
       "conditions": {
         "items": [
           {
             "items": [
-              "twilightforest:cube_talisman"
+              "twilightforest_finale:twilight_sword"
             ]
           }
         ]
@@ -97,11 +97,11 @@
     [
       "kill_hierophant",
       "trophy",
-      "cube_talisman",
+      "twilight_sword",
       "was_in_fight"
     ],
     [
-      "castle"
+      "golem"
     ]
   ],
   "sends_telemetry_event": true
