@@ -55,6 +55,7 @@ import show.twilight.finale.entity.projectile.HierophantFragment;
 import show.twilight.finale.entity.projectile.HierophantMeteor;
 import show.twilight.finale.entity.projectile.HierophantThrownWeapon;
 import show.twilight.finale.init.ModBlocks;
+import show.twilight.finale.init.ModEntity;
 import show.twilight.finale.init.ModItem;
 import show.twilight.finale.init.ModParticle;
 import show.twilight.finale.runtime.animation.VzlingAnimatable;
@@ -85,7 +86,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     public static final int SWORD_COMBO_HITS = 5, SWORD_RISE_TICKS = 20, SWORD_HOLD_TICKS = 6, SWORD_SMOKE_TICKS = SWORD_IMPACT_HOLD_TICKS + 6, SWORD_BLAST_DELAY = 20;
     public static final int REBIRTH_DURATION = 140, SHIELD_CAST_DURATION = 200, METEOR_DURATION = 160, FIERY_QUAKE_DURATION = 360, FIERY_THRUST_DURATION = 60;
     public static final int METEOR_WINDUP_TICKS = 24, METEOR_RECOVERY_TICKS = 32;
-    public static final int INTRO_DURATION = 100, BREAK_DURATION = 40, DEATH_DURATION = 160, BARRAGE_FIRE_TICKS = 100;
+    public static final int INTRO_DURATION = 100, BREAK_DURATION = 40, DEATH_DURATION = 200, TRANSFORM_DURATION = 30, BARRAGE_FIRE_TICKS = 100;
     public static final float BARRAGE_SPREAD_DEGREES = 5F;
     public static final float SHIELD_SIZE = 2.6F;
     public static final int BARRAGE_RAMP_TICKS = 160, BARRAGE_INITIAL_INTERVAL = 12, BARRAGE_MIN_INTERVAL = 2, BARRAGE_FAST_PROJECTILES = 50;
@@ -120,7 +121,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     private AABB arena;
     private final HierophantShield cubeShield = new HierophantShield(this);
     private boolean shieldCollision, routeShieldDamage, reflectingDamage;
-    private boolean pendingRelocation, moveCirclePlaced, resumeBarrage;
+    private boolean moveCirclePlaced, resumeBarrage;
     private Vec3 lockedAim = Vec3.ZERO, moveDestination = Vec3.ZERO, dashDirection = Vec3.ZERO;
     private Vec3 moveOrigin = Vec3.ZERO;
     private Vec3 lastSafeSmokeLanding;
@@ -142,6 +143,9 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     private int monstrosityBridgeStage;
     private UUID encounterMonstrosity;
     private BlockPos trapChestPosition;
+    private Vec3 finalDeathOrigin;
+    private BlockPos finalRewardPosition;
+    private int finalDeathExperience, finalDeathExperiencePaid;
     private HierophantArena.Lift roofLift;
     private Vec3 paceDestination = Vec3.ZERO;
     private final List<VzlingAnimation> animations = new ArrayList<>();
@@ -207,7 +211,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         xpReward = 100;
         if (FMLLoader.getDist().isClient()) IDLE.setDefinition(TheTwilightHierophantAnimation.IDLE);
         if (!level.isClientSide()) {
-            float hp = 100.0F;
+            float hp = HierophantShield.CAPACITY;
             cubeShield.restore(hp, hp);
         }
         setDropChance(EquipmentSlot.MAINHAND, 0);
@@ -339,7 +343,6 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             resumeBarrage = false;
         }
         if (id == SMOKE_MOVE) {
-            pendingRelocation = false;
             moveOrigin = position();
             moveCirclePlaced = false;
             nextSmokeRecoveryTick = 0;
@@ -436,10 +439,6 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                 if (entityData.get(HAS_COMBAT_TARGET)) cubeShield.tick();
                 if (!hasShield() && getPhase() == 1) onShieldBroken();
             }
-            if (pendingRelocation && getPhase() == 2 && isSpawned() && !hasShield() && entityData.get(BREAK_TIME) == 0 && getAction() != SMOKE_MOVE && getAction() != FAN && validTarget(getTarget())) {
-                resumeBarrage |= isUsingSkill() && getSkillType() == BARRAGE;
-                beginSkill(SMOKE_MOVE);
-            }
         }
         super.tick();
         if (isRemoved()) return;
@@ -508,7 +507,6 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         entityData.set(HAS_COMBAT_TARGET, active);
         if (active) return;
         if (isUsingSkill()) endSkill();
-        pendingRelocation = false;
         resumeBarrage = false;
         getNavigation().stop();
         setNoGravity(isSmokePhasing());
@@ -666,7 +664,6 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         endSkill();
         setPhase(2);
         nextAttack = SMOKE_MOVE;
-        pendingRelocation = false;
         entityData.set(BREAK_TIME, 0);
         updateShieldCollision();
         // Leave immediately, while the uncurling/recovery animation plays.
@@ -675,7 +672,8 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        if (monstrosityBridgeStage > 0 && getPhase() == 3 && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return false;
+        if (monstrosityBridgeStage > 0 && getPhase() == 3 && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY))
+            return false;
         Entity attacker = source.getEntity();
         if (attacker == this || attacker instanceof Adherent || attacker != null && attacker.getPersistentData().hasUUID("FinaleHierophantOwner") && getUUID().equals(attacker.getPersistentData().getUUID("FinaleHierophantOwner")))
             return false;
@@ -699,7 +697,6 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                 return false;
             }
         }
-        boolean shielded = hasShield();
         boolean hurt;
         bypassRebirth = source.is(DamageTypeTags.BYPASSES_INVULNERABILITY);
         try {
@@ -707,7 +704,6 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         } finally {
             bypassRebirth = false;
         }
-        if (hurt && !shielded && getPhase() == 2 && isAlive() && getAction() != SMOKE_MOVE) pendingRelocation = true;
         if (hurt && attacker instanceof Player && getPhase() == 4 && isAlive() && getAction() == METEORS)
             beginSkill(SMOKE_MOVE);
         return hurt;
@@ -909,7 +905,6 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         setPhase(3);
         monstrosityBridgeStage = 1;
         entityData.set(DEATH_TIME, 1);
-        pendingRelocation = false;
         summoningCircles.clear();
         setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
@@ -924,33 +919,57 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     private void tickMonstrosityBridge(ServerLevel server) {
         getBossBar().setVisible(false);
         shieldBar.setVisible(false);
+        if (monstrosityBridgeStage == 2) {
+            // Upgrade old saves: transfer the previously hidden body into its loaded custodian.
+            if (encounterMonstrosity != null && server.getEntity(encounterMonstrosity) instanceof CastleMonstrosityEntity beast && beast.storeHierophant(this))
+                return;
+            if (trapChestPosition != null && server.hasChunkAt(trapChestPosition)
+                    && server.getBlockEntity(trapChestPosition) instanceof show.twilight.finale.block.entity.TwilightTrapChestBlockEntity chest)
+                chest.storeHierophant(this);
+            return;
+        }
         if (monstrosityBridgeStage != 1) return;
         int t = entityData.get(DEATH_TIME) + 1;
-        entityData.set(DEATH_TIME, Math.min(t, DEATH_DURATION));
-        if (t == 40) playSound(SoundEvents.ENDERMAN_DEATH, 3, 0.8F);
-        if (t >= 50 && t < 150) {
-            smoke(server, 4 + (t - 50) / 10, 0.65);
-            server.sendParticles(ParticleTypes.ASH, getX(), getY() + 1, getZ(), 8, 0.6, 0.8, 0.6, 0.04);
-        }
-        if (t < DEATH_DURATION) return;
+        entityData.set(DEATH_TIME, Math.min(t, TRANSFORM_DURATION));
+        if (t < TRANSFORM_DURATION) return;
         BlockPos pos = blockPosition();
         for (int i = 0; i < 16 && !server.getBlockState(pos).canBeReplaced(); i++) pos = pos.above();
         if (!server.getBlockState(pos).canBeReplaced()) return;
         // Intermediate encounter block: never routed through boss loot/chest configuration.
-        if (!server.setBlock(pos, ModBlocks.TWILIGHT_TRAP_CHEST.get().defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, getDirection()), 3)) return;
+        if (!server.setBlock(pos, ModBlocks.TWILIGHT_TRAP_CHEST.get().defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, getDirection()), 3))
+            return;
         if (server.getBlockEntity(pos) instanceof show.twilight.finale.block.entity.TwilightTrapChestBlockEntity chest) {
-            chest.bindHierophant(getUUID());
             encounterMonstrosity = chest.getMonstrosityUUID();
             trapChestPosition = pos.immutable();
             monstrosityBridgeStage = 2;
-            setInvisible(true);
-            noPhysics = true;
+            smoke(server, 90, 0.65);
+            server.sendParticles(TFParticleType.ANNIHILATE.get(), getX(), getY() + 0.7, getZ(), 45, 0.5, 0.45, 0.5, 0.04);
             playSound(TFSounds.BOSS_CHEST_APPEAR.get(), 2, 1);
+            chest.storeHierophant(this);
         }
     }
 
-    public void resumeAfterMonstrosity(UUID beast, Vec3 at) {
-        if (getPhase() != 3 || monstrosityBridgeStage != 2 || !beast.equals(encounterMonstrosity)) return;
+    public boolean isWaitingForMonstrosity(UUID beast) {
+        return getPhase() == 3 && monstrosityBridgeStage == 2 && beast.equals(encounterMonstrosity);
+    }
+
+    public static boolean restoreAfterMonstrosity(ServerLevel server, UUID ownerId, UUID beast, CompoundTag data, Vec3 at) {
+        Entity existing = server.getEntity(ownerId);
+        if (existing instanceof TheTwilightHierophantEntity owner) {
+            if (owner.getPhase() == 4 && beast.equals(owner.encounterMonstrosity)) return true;
+            return owner.resumeAfterMonstrosity(beast, at);
+        }
+        if (existing != null || data == null) return false;
+        TheTwilightHierophantEntity owner = ModEntity.THE_TWILIGHT_HIEROPHANT.get().create(server);
+        if (owner == null) return false;
+        owner.load(data.copy());
+        // Restore the original UUID, arena and encounter state, and heal before spawning.
+        if (!ownerId.equals(owner.getUUID()) || !owner.resumeAfterMonstrosity(beast, at)) return false;
+        return server.addFreshEntity(owner);
+    }
+
+    public boolean resumeAfterMonstrosity(UUID beast, Vec3 at) {
+        if (!isWaitingForMonstrosity(beast)) return false;
         monstrosityBridgeStage = 0;
         setInvisible(false);
         noPhysics = false;
@@ -959,6 +978,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         moveTo(at.x, at.y, at.z, getYRot(), 0);
         getBossBar().setVisible(true);
         startFinalPhase();
+        return true;
     }
 
     private void startFinalPhase() {
@@ -968,7 +988,6 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         super.setHealth(getMaxHealth()); // No die(), loot roll, advancement or conquered flag at phase two's end.
         entityData.set(REBIRTH_TIME, 1);
         setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        pendingRelocation = false;
         summoningCircles.clear();
         setNoGravity(true);
         setDeltaMovement(Vec3.ZERO);
@@ -1989,6 +2008,15 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
 
     @Override
     public void die(DamageSource source) {
+        if (dead) return;
+        if (getPhase() == 4) {
+            finalDeathOrigin = position();
+            finalRewardPosition = EntityUtil.bossChestLocation(this);
+            if (!isRestrictionPointValid(level().dimension())) {
+                var ground = level().clip(new ClipContext(position().add(0, 0.5, 0), position().add(0, -32, 0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+                if (ground.getType() == HitResult.Type.BLOCK) finalRewardPosition = ground.getBlockPos().above();
+            }
+        }
         super.die(source);
         if (!dead) return;
         if (level() instanceof ServerLevel server && getRestrictionPoint() != null)
@@ -1998,6 +2026,12 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         updateShieldCollision();
         shieldBar.setVisible(false);
+        if (getPhase() == 4) {
+            setNoGravity(true);
+            noPhysics = true;
+            setDeltaMovement(Vec3.ZERO);
+            playSound(SoundEvents.ENDER_DRAGON_DEATH, 3, 1.2F);
+        }
         if (level() instanceof ServerLevel server)
             for (var minion : server.getEntitiesOfClass(twilightforest.entity.monster.Adherent.class, getBoundingBox().inflate(48), e -> e.getPersistentData().hasUUID("FinaleHierophantOwner") && getUUID().equals(e.getPersistentData().getUUID("FinaleHierophantOwner"))))
                 minion.discard();
@@ -2005,16 +2039,49 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
 
     @Override
     protected void tickDeath() {
-        super.tickDeath(); // Native removal, loot deposit and death-time handling.
-        if (isRemoved() || !(level() instanceof ServerLevel server)) return;
-        entityData.set(DEATH_TIME, deathTime);
-        setDeltaMovement(0, getDeltaMovement().y, 0);
-        getNavigation().stop();
-        if (deathTime == 40) playSound(SoundEvents.ENDERMAN_DEATH, 3, 0.8F);
-        if (deathTime >= 50 && deathTime < 150) {
-            smoke(server, 4 + (deathTime - 50) / 10, 0.65);
-            server.sendParticles(ParticleTypes.ASH, getX(), getY() + 1, getZ(), 8, 0.6, 0.8, 0.6, 0.04);
+        if (getPhase() != 4) {
+            super.tickDeath();
+            return;
         }
+        deathTime++;
+        entityData.set(DEATH_TIME, deathTime);
+        setNoGravity(true);
+        noPhysics = true;
+        setDeltaMovement(Vec3.ZERO);
+        getNavigation().stop();
+        if (!(level() instanceof ServerLevel server)) return;
+        if (finalDeathOrigin == null) finalDeathOrigin = position().add(0, -(deathTime - 1) * 0.04, 0);
+        setPos(finalDeathOrigin.add(0, Math.min(deathTime, DEATH_DURATION) * 0.04, 0));
+        fallDistance = 0;
+        if (deathTime % 3 == 0) {
+            server.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 1, getZ(), 3 + deathTime / 25, 0.55, 0.9, 0.55, 0.03);
+            server.sendParticles(ParticleTypes.ASH, getX(), getY() + 1, getZ(), 3 + deathTime / 20, 0.6, 0.9, 0.6, 0.02);
+        }
+        if (deathTime >= 180 && deathTime % 3 == 0)
+            server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, getX(), getY() + 1, getZ(), 1, 0.7, 0.8, 0.7, 0);
+        if (deathTime >= 150 && deathTime % 5 == 0) {
+            int desired = Mth.floor(finalDeathExperience * Mth.clamp((deathTime - 145) / 55F, 0, 1));
+            int amount = Math.max(0, desired - finalDeathExperiencePaid);
+            if (amount > 0 && server.getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOMOBLOOT)) {
+                ExperienceOrb.award(server, position(), amount);
+                finalDeathExperiencePaid += amount;
+            }
+        }
+        if (deathTime >= DEATH_DURATION) {
+            remove(RemovalReason.KILLED); // Native boss inventory deposit still happens exactly once.
+            gameEvent(GameEvent.ENTITY_DIE);
+        }
+    }
+
+    @Override
+    protected void dropExperience(Entity attacker) {
+        if (getPhase() != 4) {
+            super.dropExperience(attacker);
+            return;
+        }
+        // Defer the normal 100 XP until the disintegration, instead of paying both here and later.
+        if (level() instanceof ServerLevel server && !wasExperienceConsumed() && server.getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOMOBLOOT))
+            finalDeathExperience = Math.max(0, net.neoforged.neoforge.event.EventHooks.getExperienceDrop(this, lastHurtByPlayer, getExperienceReward(server, attacker)));
     }
 
     @Override
@@ -2025,8 +2092,13 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     @Override
     protected void postRemoval(ServerLevel server, RemovalReason reason) {
         boolean showReward = reason == RemovalReason.KILLED && shouldSpawnLoot();
-        BlockPos chestBase = showReward ? EntityUtil.bossChestLocation(this) : null;
-        super.postRemoval(server, reason); // Native loot roll/inventory/deposit, exactly once.
+        BlockPos chestBase = showReward ? finalRewardPosition != null ? finalRewardPosition : EntityUtil.bossChestLocation(this) : null;
+        if (showReward && finalRewardPosition != null) {
+            // Keep the native inventory/deposit rules, but pin the destination before the ascent.
+            // Loading the dying boss may attach an arena home at its elevated position.
+            twilightforest.entity.boss.IBossLootBuffer.depositDropsIntoChest(this,
+                    getDeathContainer(random).defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, getDirection()), finalRewardPosition, server);
+        } else super.postRemoval(server, reason);
         if (!showReward) return;
 
         // Native deposit may move the chest upwards when its first position is
@@ -2074,6 +2146,11 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        if (finalDeathOrigin != null)
+            tag.put("FinalDeathOrigin", newDoubleList(finalDeathOrigin.x, finalDeathOrigin.y, finalDeathOrigin.z));
+        if (finalRewardPosition != null) tag.putLong("FinalRewardPosition", finalRewardPosition.asLong());
+        tag.putInt("FinalDeathExperience", finalDeathExperience);
+        tag.putInt("FinalDeathExperiencePaid", finalDeathExperiencePaid);
         tag.putInt("HierophantEncounterVersion", 2);
         tag.putInt("MonstrosityBridgeStage", monstrosityBridgeStage);
         tag.putInt("MonstrosityDeathTime", entityData.get(DEATH_TIME));
@@ -2112,6 +2189,12 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        var deathOrigin = tag.getList("FinalDeathOrigin", net.minecraft.nbt.Tag.TAG_DOUBLE);
+        if (deathOrigin.size() == 3)
+            finalDeathOrigin = new Vec3(deathOrigin.getDouble(0), deathOrigin.getDouble(1), deathOrigin.getDouble(2));
+        if (tag.contains("FinalRewardPosition")) finalRewardPosition = BlockPos.of(tag.getLong("FinalRewardPosition"));
+        finalDeathExperience = Math.max(0, tag.getInt("FinalDeathExperience"));
+        finalDeathExperiencePaid = Mth.clamp(tag.getInt("FinalDeathExperiencePaid"), 0, finalDeathExperience);
         float previousMax = getMaxHealth(), previousHealth = getHealth();
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(200);
         // Old saved attributes otherwise override the new 200-HP default.
@@ -2141,7 +2224,7 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             // Preserve partially depleted shields from pre-capability saves.
             float max = tag.contains("HierophantShieldMax") ? tag.getFloat("HierophantShieldMax") : 100.0F;
             float hp = tag.contains("HierophantShield") ? tag.getFloat("HierophantShield") : getPhase() >= 2 ? 0 : max;
-            float replacement = 100.0F;
+            float replacement = HierophantShield.CAPACITY;
             cubeShield.restore(replacement, max > 0 ? hp / max * replacement : 0);
         }
         var bounds = tag.getList("HierophantArena", net.minecraft.nbt.Tag.TAG_DOUBLE);
@@ -2165,7 +2248,6 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
                 summoningCircles.add(new SummoningCircle(at, Mth.clamp(saved.getInt("Delay"), 0, SUMMON_DELAY_TICKS)));
         }
         nextAttack = getPhase() == 4 ? METEORS : BARRAGE;
-        pendingRelocation = false;
         resumeBarrage = false;
         endSkill(); // Cancel casts on reload; native BaseTFBoss restores home and loot.
         if (!hasShield() && getPhase() == 1) setPhase(2);

@@ -24,6 +24,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import show.twilight.finale.entity.CastleMonstrosityEntity;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.entity.combat.AdherentAttackGoal;
 import show.twilight.finale.entity.combat.ColoredAdherent;
@@ -100,8 +101,7 @@ public abstract class AdherentMixin extends Monster implements ColoredAdherent {
 
     @Unique
     private TheTwilightHierophantEntity finale$getSummoner() {
-        if (level() instanceof ServerLevel server && getPersistentData().hasUUID("FinaleHierophantOwner")
-                && server.getEntity(getPersistentData().getUUID("FinaleHierophantOwner")) instanceof TheTwilightHierophantEntity owner)
+        if (level() instanceof ServerLevel server && getPersistentData().hasUUID("FinaleHierophantOwner") && server.getEntity(getPersistentData().getUUID("FinaleHierophantOwner")) instanceof TheTwilightHierophantEntity owner)
             return owner;
         return null;
     }
@@ -129,16 +129,16 @@ public abstract class AdherentMixin extends Monster implements ColoredAdherent {
     public boolean hurt(DamageSource source, float amount) {
         Entity attacker = source.getEntity();
         if (attacker instanceof TheTwilightHierophantEntity) return false;
-        if (attacker != null && attacker.getPersistentData().hasUUID("FinaleHierophantOwner")
-                && level() instanceof net.minecraft.server.level.ServerLevel server
-                && server.getEntity(attacker.getPersistentData().getUUID("FinaleHierophantOwner")) instanceof TheTwilightHierophantEntity)
+        if (attacker != null && attacker.getPersistentData().hasUUID("FinaleHierophantOwner") && level() instanceof net.minecraft.server.level.ServerLevel server && server.getEntity(attacker.getPersistentData().getUUID("FinaleHierophantOwner")) instanceof TheTwilightHierophantEntity)
             return false;
-        return !(finale$getColor() == RED && source.is(DamageTypeTags.IS_FIRE)) && super.hurt(source, amount);
+        boolean damaged = !(finale$getColor() == RED && source.is(DamageTypeTags.IS_FIRE)) && super.hurt(source, amount);
+        if (attacker instanceof CastleMonstrosityEntity) setLastHurtByMob(null);
+        return damaged;
     }
 
     @Override
     public boolean isAlliedTo(Entity entity) {
-        return entity instanceof TheTwilightHierophantEntity || super.isAlliedTo(entity);
+        return entity instanceof TheTwilightHierophantEntity || entity instanceof CastleMonstrosityEntity || super.isAlliedTo(entity);
     }
 
     @Override
@@ -148,7 +148,7 @@ public abstract class AdherentMixin extends Monster implements ColoredAdherent {
             LivingEntity ownerTarget = owner.getTarget();
             if (ownerTarget != null && ownerTarget.isAlive() && !ownerTarget.isSpectator()) target = ownerTarget;
         }
-        super.setTarget(target instanceof TheTwilightHierophantEntity ? null : target);
+        super.setTarget(target != null && isAlliedTo(target) ? null : target);
     }
 
     @Override

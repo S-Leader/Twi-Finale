@@ -53,6 +53,7 @@ public class HierophantArmorLayer<T extends TheTwilightHierophantEntity, M exten
     }
 
     public void render(PoseStack poseStack, @NotNull MultiBufferSource bufferSource, int packedLight, @NotNull T entity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
+        if (entity.getPhase() == 4 && entity.isDeadOrDying()) return;
         poseStack.pushPose();
         this.getParentModel().translateArmor(this.modelPart, poseStack, this.innerModel);
         this.renderArmorPiece(poseStack, bufferSource, entity, this.slot, packedLight, this.model);

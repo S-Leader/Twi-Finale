@@ -41,8 +41,10 @@ public class HierophantOuterLayer<T extends TheTwilightHierophantEntity>
             this.getParentModel().copyPropertiesTo(model);
             model.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
             model.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-            VertexConsumer consumer = bufferSource.getBuffer(RenderType.entityTranslucent(texture));
-            model.renderToBuffer(poseStack, consumer, packedLight, LivingEntityRenderer.getOverlayCoords(entity, 0.0f), FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));
+            boolean dissolving = entity.getPhase() == 4 && entity.isDeadOrDying();
+            VertexConsumer consumer = bufferSource.getBuffer(dissolving ? show.twilight.finale.client.renderer.HierophantRenderTypes.disintegration(texture) : RenderType.entityTranslucent(texture));
+            float progress = dissolving ? net.minecraft.util.Mth.clamp((entity.getActionTime() + partialTicks) / TheTwilightHierophantEntity.DEATH_DURATION, 0.001F, 1) : 1;
+            model.renderToBuffer(poseStack, consumer, packedLight, dissolving ? net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY : LivingEntityRenderer.getOverlayCoords(entity, 0.0f), FastColor.ARGB32.colorFromFloat(progress, 1.0f, 1.0f, 1.0f));
         }
     }
 }

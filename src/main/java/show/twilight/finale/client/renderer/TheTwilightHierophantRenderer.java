@@ -50,6 +50,7 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
         ghostOuterSlim = new TheTwilightHierophantModel<>(context.bakeLayer(TheTwilightHierophantModel.LAYER_LOCATION_OUTER_SLIM), true);
         this.addLayer(new show.twilight.finale.client.layer.HierophantHeldItemLayer<>(this, context.getItemInHandRenderer()));
         this.addLayer(new show.twilight.finale.client.layer.HierophantRitualLayer<>(this, context.getItemRenderer()));
+        this.addLayer(new show.twilight.finale.client.layer.HierophantDisintegrationLayer<>(this));
         HierophantArmorLayer.addCustomArmorLayers(this, context, TheTwilightHierophantModel.LAYER_LOCATION_I, TheTwilightHierophantModel.LAYER_LOCATION_O);
         this.addLayer(new HierophantOuterLayer(this, context.getModelSet()));
     }
@@ -90,9 +91,13 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
                 else if (stage == TheTwilightHierophantEntity.SWORD_HOLD) alpha *= smooth(local / 3F);
             }
         }
-        if (action == TheTwilightHierophantEntity.DEATH)
-            alpha *= Mth.clamp((125 - time - partialTicks) / 55F, 0, 1);
-        boolean afterimages = entity.getPhase() == 4 && action != TheTwilightHierophantEntity.REBIRTH;
+        boolean disintegrating = entity.getPhase() == 4 && entity.isDeadOrDying();
+        float dissolve = Mth.clamp((time + partialTicks) / TheTwilightHierophantEntity.DEATH_DURATION, 0.001F, 1);
+        if (action == TheTwilightHierophantEntity.DEATH) {
+            if (disintegrating) alpha = 1;
+            else alpha *= Mth.clamp((TheTwilightHierophantEntity.TRANSFORM_DURATION - time - partialTicks) / 7F, 0, 1);
+        }
+        boolean afterimages = entity.getPhase() == 4 && action != TheTwilightHierophantEntity.REBIRTH && !disintegrating;
         if (alpha > 0) {
             float opacity = alpha;
             stack.pushPose();
@@ -102,7 +107,8 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
                 // planted/vanishing pose at the server's actual contact height.
                 if (entity.isSwordComboGrounded())
                     stack.translate(0, entity.getSwordImpactY() - entity.getPosition(partialTicks).y, 0);
-                super.render(entity, entityYaw, partialTicks, stack, type -> new AlphaVertexConsumer(bufferSource.getBuffer(type), opacity), light);
+                var dissolveType = disintegrating ? HierophantRenderTypes.disintegration(getTextureLocation(entity)) : null;
+                super.render(entity, entityYaw, partialTicks, stack, type -> new AlphaVertexConsumer(bufferSource.getBuffer(type), type == dissolveType ? dissolve : opacity, type == dissolveType), light);
             } finally {
                 stack.popPose();
             }
@@ -123,7 +129,14 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
 
     @Override
     protected net.minecraft.client.renderer.RenderType getRenderType(T entity, boolean visible, boolean translucent, boolean glowing) {
+        if (entity.getPhase() == 4 && entity.isDeadOrDying())
+            return HierophantRenderTypes.disintegration(getTextureLocation(entity));
         return visible || translucent ? net.minecraft.client.renderer.RenderType.entityTranslucent(getTextureLocation(entity)) : super.getRenderType(entity, visible, translucent, glowing);
+    }
+
+    @Override
+    protected float getFlipDegrees(T entity) {
+        return 0;
     }
 
     private void renderShadow(T entity, float partial, PoseStack pose, MultiBufferSource buffers, int light, boolean active, float bodyAlpha) {

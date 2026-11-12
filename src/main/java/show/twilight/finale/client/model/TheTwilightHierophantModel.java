@@ -387,16 +387,16 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
                 weight = 1;
             }
             case TheTwilightHierophantEntity.DEATH -> {
-                float curl = smooth(t / 26F) * (1 - smooth((t - 36) / 5F));
-                applyCurledPose(curl);
-                float spread = smooth((t - 36) / 5F);
-                left_arm.zRot = -1.5F * spread;
-                right_arm.zRot = 1.5F * spread;
-                left_arm.xRot = right_arm.xRot = -0.25F * spread;
-                left_leg.zRot = -0.35F * spread;
-                right_leg.zRot = 0.35F * spread;
-                head.xRot = -0.45F * spread;
-                entity.y -= spread * 2;
+                if (boss.getPhase() == 3) applyCurledPose(smooth(t / 22F));
+                else {
+                    float spread = smooth(t / 45F);
+                    left_arm.zRot = -1.35F * spread;
+                    right_arm.zRot = 1.35F * spread;
+                    left_arm.xRot = right_arm.xRot = -0.25F * spread;
+                    left_leg.zRot = -0.25F * spread;
+                    right_leg.zRot = 0.25F * spread;
+                    head.xRot = -0.4F * spread;
+                }
                 weight = 1;
             }
         }

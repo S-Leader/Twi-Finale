@@ -9,6 +9,7 @@ import show.twilight.finale.entity.TheTwilightHierophantEntity;
  * SynchedEntityData snapshot; client snapshots never feed back into the server.
  */
 public final class HierophantShield implements IHierophantShield {
+    public static final float CAPACITY = 200;
     private final TheTwilightHierophantEntity owner;
     private float health = 200, maxHealth = 200;
     private boolean physical;
@@ -91,12 +92,9 @@ public final class HierophantShield implements IHierophantShield {
 
     public void deserializeNBT(CompoundTag tag) {
         float max = tag.getFloat("MaxHealth"), hp = tag.getFloat("Health");
-        if (tag.getInt("PolarityVersion") < 2) {
-            float replacement = 100;
-            hp = max > 0 ? hp / max * replacement : 0;
-            max = replacement;
-        }
-        applySnapshot(hp, max, tag.getBoolean("RequiresPhysical"));
+        // Migrate the former 100-HP capacity without refilling a damaged or broken shield.
+        float fraction = Float.isFinite(max) && max > 0 && Float.isFinite(hp) ? Mth.clamp(hp / max, 0, 1) : 0;
+        applySnapshot(fraction * CAPACITY, CAPACITY, tag.getBoolean("RequiresPhysical"));
         colourTicks = Mth.clamp(tag.getInt("ColourTicks"), 0, 199);
         changed();
     }

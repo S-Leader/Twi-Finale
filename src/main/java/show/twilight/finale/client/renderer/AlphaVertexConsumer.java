@@ -5,7 +5,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 /**
  * Ordinary vertex buffers only: no framebuffer/postprocessing/OpenGL state.
  */
-record AlphaVertexConsumer(VertexConsumer delegate, float alpha) implements VertexConsumer {
+record AlphaVertexConsumer(VertexConsumer delegate, float alpha, boolean noOverlay) implements VertexConsumer {
+    AlphaVertexConsumer(VertexConsumer delegate, float alpha) {
+        this(delegate, alpha, false);
+    }
+
     @Override
     public VertexConsumer addVertex(float x, float y, float z) {
         delegate.addVertex(x, y, z);
@@ -26,7 +30,8 @@ record AlphaVertexConsumer(VertexConsumer delegate, float alpha) implements Vert
 
     @Override
     public VertexConsumer setUv1(int u, int v) {
-        delegate.setUv1(u, v);
+        if (noOverlay) delegate.setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+        else delegate.setUv1(u, v);
         return this;
     }
 
