@@ -8,16 +8,18 @@ import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import show.twilight.finale.TwilightFinaleMod;
 import show.twilight.finale.block.*;
-import show.twilight.finale.block.entity.AdherentSpawnerBlockEntity;
-import show.twilight.finale.block.entity.FinalTrophyBlockEntity;
-import show.twilight.finale.block.entity.HierophantSpawnerBlockEntity;
-import show.twilight.finale.block.entity.TwilightTrapChestBlockEntity;
+import show.twilight.finale.block.entity.*;
 
 import java.util.function.Supplier;
 
 public class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, TwilightFinaleMod.MOD_ID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, "twilightforest_finale");
+    public static final Supplier<FinaleBossSpawnerBlock> ANNIHILATION_GOLEM_BOSS_SPAWNER = BLOCKS.register("annihilation_golem_boss_spawner", () -> new FinaleBossSpawnerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).noLootTable().noOcclusion().strength(-1, 3600000), ModBossVariant.ANNIHILATION_GOLEM));
+    public static final Supplier<BlockEntityType<AnnihilationGolemSpawnerBlockEntity>> ANNIHILATION_GOLEM_SPAWNER = BLOCK_ENTITIES.register("annihilation_golem_spawner", () -> BlockEntityType.Builder.of(AnnihilationGolemSpawnerBlockEntity::new, ANNIHILATION_GOLEM_BOSS_SPAWNER.get()).build(null));
+    public static final Supplier<FloorAdherentTrophyBlock> ANNIHILATION_GOLEM_TROPHY_BLOCK = BLOCKS.register("annihilation_golem_trophy", () -> new GolemTrophyBlocks.Floor(BlockBehaviour.Properties.of().instabreak(), ModBlocks.ANNIHILATION_GOLEM_TROPHY_ENTITY));
+    public static final Supplier<WallAdherentTrophyBlock> ANNIHILATION_GOLEM_WALL_TROPHY_BLOCK = BLOCKS.register("annihilation_golem_wall_trophy", () -> new GolemTrophyBlocks.Wall(BlockBehaviour.Properties.of().instabreak().dropsLike(ANNIHILATION_GOLEM_TROPHY_BLOCK.get()), ModBlocks.ANNIHILATION_GOLEM_TROPHY_ENTITY));
+    public static final Supplier<BlockEntityType<FinalTrophyBlockEntity>> ANNIHILATION_GOLEM_TROPHY_ENTITY = BLOCK_ENTITIES.register("annihilation_golem_trophy", () -> BlockEntityType.Builder.of(FinalTrophyBlockEntity::annihilationGolem, ANNIHILATION_GOLEM_TROPHY_BLOCK.get(), ANNIHILATION_GOLEM_WALL_TROPHY_BLOCK.get()).build(null));
     public static final Supplier<show.twilight.finale.block.TwilightTrapChestBlock> TWILIGHT_TRAP_CHEST = BLOCKS.register("twilight_trap_chest", () -> new TwilightTrapChestBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).noOcclusion().noLootTable().strength(-1, 3600000)));
     public static final Supplier<BlockEntityType<TwilightTrapChestBlockEntity>> TWILIGHT_TRAP_CHEST_ENTITY = BLOCK_ENTITIES.register("twilight_trap_chest", () -> BlockEntityType.Builder.of(TwilightTrapChestBlockEntity::new, TWILIGHT_TRAP_CHEST.get()).build(null));
     public static final Supplier<FloorAdherentTrophyBlock> ADHERENT_TROPHY_BLOCK = BLOCKS.register("adherent_trophy", () -> new FloorAdherentTrophyBlock(BlockBehaviour.Properties.of().instabreak(), ModBlocks.ADHERENT_TROPHY_ENTITY));

@@ -97,7 +97,7 @@ public class ModClientEvent {
 
     @SubscribeEvent
     public static void registerExtensions(RegisterClientExtensionsEvent event) {
-        event.registerItem(ModWithoutLevelRenderer.ITEM_EXTENSION, ModItem.ADHERENT_TROPHY.get(), ModItem.HIEROPHANT_TROPHY.get());
+        event.registerItem(ModWithoutLevelRenderer.ITEM_EXTENSION, ModItem.ADHERENT_TROPHY.get(), ModItem.HIEROPHANT_TROPHY.get(), ModItem.ANNIHILATION_GOLEM_TROPHY.get());
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

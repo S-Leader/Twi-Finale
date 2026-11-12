@@ -45,6 +45,9 @@ public class ModTab {
         output.accept(ModItem.GLASS_HEART.get());
         output.accept(ModItem.CHARM_OF_LIFE_3.get());
         output.accept(ModItem.ADHERENT_BOSS_SPAWNER.get());
+        output.accept(ModItem.ANNIHILATION_GOLEM_BOSS_SPAWNER.get());
+        output.accept(ModItem.ANNIHILATION_GOLEM_TROPHY.get());
+        output.accept(ModItem.ANNIHILATION_GOLEM_SPAWN_EGG.get());
         output.accept(ModItem.TWILIGHT_HIEROPHANT_BOSS_SPAWNER.get());
         output.accept(ModItem.ADHERENT_TROPHY.get());
         output.accept(ModItem.HIEROPHANT_TROPHY.get());

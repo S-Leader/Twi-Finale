@@ -9,6 +9,10 @@ import show.twilight.finale.init.ModBlocks;
 
 public class FinalTrophyBlockEntity
         extends BlockEntity {
+    public static FinalTrophyBlockEntity annihilationGolem(BlockPos pos, BlockState state) {
+        return new FinalTrophyBlockEntity(ModBlocks.ANNIHILATION_GOLEM_TROPHY_ENTITY.get(), pos, state);
+    }
+
     public static FinalTrophyBlockEntity hierophant(BlockPos pos, BlockState state) {
         return new FinalTrophyBlockEntity(ModBlocks.HIEROPHANT_TROPHY_ENTITY.get(), pos, state);
     }

@@ -76,8 +76,8 @@
   "advancement.twilightforest_finale.all_adherent_colors.desc": "打败所有元素的信徒",
   "advancement.twilightforest_finale.found_purple_adherent": "你到底是怎么发现我的 [NYI]",
   "advancement.twilightforest_finale.found_purple_adherent.desc": "找到紫色信徒",
-  "advancement.twilightforest_finale.poor_view_down_here": "这下面风景不太好 [NYI]",
-  "advancement.twilightforest_finale.poor_view_down_here.desc": "击杀旋转立方以获得立方护符",
+  "advancement.twilightforest_finale.poor_view_down_here": "这下面风景不太好",
+  "advancement.twilightforest_finale.poor_view_down_here.desc": "击杀湮灭傀儡以获得立方护符",
   "advancement.twilightforest_finale.kill_hierophant": "晨光森林",
   "advancement.twilightforest_finale.kill_hierophant.desc": "击败暮光教皇，为无尽暮色森林带来些许黎明",
   "twilightforest.book.castle": "有关高耸的城堡的笔记",
@@ -98,5 +98,10 @@
   "twilightforest_finale.configuration.hierophant.fallbackArenaRadius": "后备场地半径",
   "twilightforest_finale.configuration.hierophant.fallbackArenaRadius.tooltip": "非城堡内手动召唤时的后备方形场地半径，单位为格。城堡战斗使用实际主塔塔顶的结构边界。",
   "entity.twilightforest_finale.castle_monstrosity": "城堡巨兽",
-  "block.twilightforest_finale.twilight_trap_chest": "暮色橡木箱子"
+  "block.twilightforest_finale.twilight_trap_chest": "暮色橡木箱子",
+  "entity.twilightforest_finale.annihilation_golem": "湮灭傀儡",
+  "block.twilightforest_finale.annihilation_golem_boss_spawner": "湮灭傀儡刷怪箱",
+  "block.twilightforest_finale.annihilation_golem_trophy": "湮灭傀儡战利品",
+  "block.twilightforest_finale.annihilation_golem_wall_trophy": "湮灭傀儡战利品",
+  "item.twilightforest_finale.annihilation_golem_spawn_egg": "湮灭傀儡刷怪蛋"
 }

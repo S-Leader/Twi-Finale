@@ -9,7 +9,14 @@
     "labelled_monster_spawns": {
       "0": [],
       "1": [],
-      "2": [],
+      "2": [
+        {
+          "type": "twilightforest:adherent",
+          "weight": 10,
+          "minCount": 1,
+          "maxCount": 2
+        }
+      ],
       "3": []
     },
     "water_spawns": []

@@ -30,6 +30,7 @@ import java.util.function.Supplier;
 public class ModWithoutLevelRenderer extends BlockEntityWithoutLevelRenderer {
     private final AdherentTrophyRenderer adherentTrophyRenderer;
     private final FinalBossTrophyRenderer hierophantTrophyRenderer;
+    private final AnnihilationGolemTrophyRenderer annihilationGolemTrophyRenderer;
     private final HadeanEnforcerTrophyRenderer enforcerTrophyRenderer;
     private final HadeanBlasterTrophyRenderer blasterTrophyRenderer;
     private final HadeanSmasherTrophyRenderer smasherTrophyRenderer;
@@ -49,6 +50,7 @@ public class ModWithoutLevelRenderer extends BlockEntityWithoutLevelRenderer {
         super(dispatcher, modelSet);
         this.adherentTrophyRenderer = new AdherentTrophyRenderer(modelSet);
         this.hierophantTrophyRenderer = new FinalBossTrophyRenderer(modelSet);
+        this.annihilationGolemTrophyRenderer = new AnnihilationGolemTrophyRenderer();
         this.enforcerTrophyRenderer = new HadeanEnforcerTrophyRenderer(modelSet);
         this.blasterTrophyRenderer = new HadeanBlasterTrophyRenderer(modelSet);
         this.smasherTrophyRenderer = new HadeanSmasherTrophyRenderer(modelSet);
@@ -56,6 +58,10 @@ public class ModWithoutLevelRenderer extends BlockEntityWithoutLevelRenderer {
     }
 
     public void renderByItem(ItemStack stack, ItemDisplayContext context, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+        if (stack.is(ModItem.ANNIHILATION_GOLEM_TROPHY.get())) {
+            ModWithoutLevelRenderer.render(stack, context, poseStack, bufferSource, packedLight, packedOverlay, annihilationGolemTrophyRenderer, diamondBackplate);
+            return;
+        }
         if (stack.is(ModItem.HIEROPHANT_TROPHY.get())) {
             ModWithoutLevelRenderer.render(stack, context, poseStack, bufferSource, packedLight, packedOverlay, hierophantTrophyRenderer, diamondBackplate);
             return;

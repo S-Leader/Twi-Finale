@@ -114,8 +114,11 @@ public final class RevivedBasementPiece extends TFStructureComponentOld {
                 // Seal old, off-centre doors before opening only the chosen graph ports.
                 if (state.getBlock().getDescriptionId().contains("castle_door")) state = brick;
                 if ((e.x() == 0 || e.x() == 16 || e.z() == 0 || e.z() == 16) && state.isAir()) state = brick;
+                boolean bossSpawner = BasementBossProcessor.isBlazeSpawner(state, e.data());
+                if (bossSpawner)
+                    state = show.twilight.finale.init.ModBlocks.ANNIHILATION_GOLEM_BOSS_SPAWNER.get().defaultBlockState();
                 level.setBlock(pos, state, 18);
-                if (e.data() != null && state.hasBlockEntity()) {
+                if (!bossSpawner && e.data() != null && state.hasBlockEntity()) {
                     var entity = level.getBlockEntity(pos);
                     if (entity == null)
                         throw new IllegalStateException("Missing randomized room block entity at " + pos);

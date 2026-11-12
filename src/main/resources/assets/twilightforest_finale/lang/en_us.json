@@ -76,8 +76,8 @@
   "advancement.twilightforest_finale.all_adherent_colors.desc": "Slay at all types of Adherent.",
   "advancement.twilightforest_finale.found_purple_adherent": "How Did You Even Find Me? [NYI]",
   "advancement.twilightforest_finale.found_purple_adherent.desc": "Found a special Adherent.",
-  "advancement.twilightforest_finale.poor_view_down_here": "Not Much of a View Down Here [NYI]",
-  "advancement.twilightforest_finale.poor_view_down_here.desc": "Slay a Roving Cube to obtain a Cube Talisman.",
+  "advancement.twilightforest_finale.poor_view_down_here": "Not Much of a View Down Here",
+  "advancement.twilightforest_finale.poor_view_down_here.desc": "Slay a Annihilation Golem to obtain a Cube Talisman.",
   "advancement.twilightforest_finale.kill_hierophant": "Dawnlight Forest",
   "advancement.twilightforest_finale.kill_hierophant.desc": "Defeat the Twilight Hierophant and bring dawn to the endless twilight.",
   "twilightforest.book.castle": "Notes regarding a towering castle",
@@ -98,5 +98,10 @@
   "twilightforest_finale.configuration.hierophant.fallbackArenaRadius": "Fallback arena radius",
   "twilightforest_finale.configuration.hierophant.fallbackArenaRadius.tooltip": "Fallback square half-width, in blocks, for manual summons outside a known castle. Castle encounters use the actual main-tower roof structure bounds.",
   "entity.twilightforest_finale.castle_monstrosity": "Castle Monstrosity",
-  "block.twilightforest_finale.twilight_trap_chest": "Twilight Oak Chest"
+  "block.twilightforest_finale.twilight_trap_chest": "Twilight Oak Chest",
+  "entity.twilightforest_finale.annihilation_golem": "Annihilation Golem",
+  "block.twilightforest_finale.annihilation_golem_boss_spawner": "Annihilation Golem Spawner",
+  "block.twilightforest_finale.annihilation_golem_trophy": "Annihilation Golem Trophy",
+  "block.twilightforest_finale.annihilation_golem_wall_trophy": "Annihilation Golem Trophy",
+  "item.twilightforest_finale.annihilation_golem_spawn_egg": "Annihilation Golem Spawn Egg"
 }

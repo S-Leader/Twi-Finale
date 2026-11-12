@@ -13,6 +13,9 @@ import java.util.function.Supplier;
 
 public class ModItem {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.ITEM, "twilightforest_finale");
+    public static final Supplier<Item> ANNIHILATION_GOLEM_BOSS_SPAWNER = ITEMS.register("annihilation_golem_boss_spawner", () -> new BlockItem(ModBlocks.ANNIHILATION_GOLEM_BOSS_SPAWNER.get(), new Item.Properties()));
+    public static final Supplier<Item> ANNIHILATION_GOLEM_TROPHY = ITEMS.register("annihilation_golem_trophy", () -> new AdherentTrophyItem(ModBlocks.ANNIHILATION_GOLEM_TROPHY_BLOCK.get(), ModBlocks.ANNIHILATION_GOLEM_WALL_TROPHY_BLOCK.get(), new Item.Properties().rarity(Rarity.RARE)));
+    public static final Supplier<Item> ANNIHILATION_GOLEM_SPAWN_EGG = ITEMS.register("annihilation_golem_spawn_egg", () -> new DeferredSpawnEggItem(ModEntity.ANNIHILATION_GOLEM, 0x666A6A, 0x25004D, new Item.Properties()));
     public static final Supplier<Item> FIERY_AXE = ITEMS.register("fiery_axe", () -> new FieryAxeItem(TFToolMaterials.FIERY, new Item.Properties().fireResistant().rarity(Rarity.UNCOMMON)));
     public static final Supplier<Item> FIERY_HOE = ITEMS.register("fiery_hoe", () -> new FieryHoeItem(TFToolMaterials.FIERY, new Item.Properties().fireResistant().rarity(Rarity.UNCOMMON)));
     public static final Supplier<Item> FIERY_SHOVEL = ITEMS.register("fiery_shovel", () -> new FieryShovelItem(TFToolMaterials.FIERY, new Item.Properties().fireResistant().rarity(Rarity.UNCOMMON)));

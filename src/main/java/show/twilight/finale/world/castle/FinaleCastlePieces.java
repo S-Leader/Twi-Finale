@@ -10,6 +10,8 @@ import java.util.function.Supplier;
  * Separate, persisted piece IDs: ordinary/previously generated TF castles stay intact.
  */
 public final class FinaleCastlePieces {
+    public static final DeferredRegister<net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType<?>> PROCESSORS = DeferredRegister.create(Registries.STRUCTURE_PROCESSOR, "twilightforest_finale");
+    public static final Supplier<net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType<BasementBossProcessor>> BASEMENT_BOSS_PROCESSOR = PROCESSORS.register("basement_boss", () -> () -> BasementBossProcessor.CODEC);
     public static final DeferredRegister<StructurePieceType> TYPES = DeferredRegister.create(Registries.STRUCTURE_PIECE, "twilightforest_finale");
     public static final Supplier<StructurePieceType> INTERIOR = TYPES.register("castle_interior", () -> FinaleCastleTemplatePiece::new);
     public static final Supplier<StructurePieceType> ROOM_LOAD = TYPES.register("castle_room_load", () -> FinalCastleRoomStructurePiece::new);

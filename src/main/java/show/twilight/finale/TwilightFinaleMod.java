@@ -9,6 +9,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,6 +17,7 @@ import show.twilight.finale.capabilities.ForceFieldCapabilityList;
 import show.twilight.finale.capabilities.hierophant.HierophantShieldCapabilities;
 import show.twilight.finale.client.animation.TwilightSwordPlayerAnimation;
 import show.twilight.finale.client.event.ModClientSetupEvent;
+import show.twilight.finale.client.renderer.HierophantRenderTypes;
 import show.twilight.finale.compat.curios.ModCuriosCompat;
 import show.twilight.finale.compat.hadean.ModHadeanBlockCompat;
 import show.twilight.finale.config.HierophantConfig;
@@ -25,6 +27,8 @@ import show.twilight.finale.init.*;
 import show.twilight.finale.network.TFNetworkHandler;
 import show.twilight.finale.resource.ModResourcePack;
 import show.twilight.finale.world.castle.FinaleCastlePieces;
+
+import java.io.IOException;
 
 @Mod(TwilightFinaleMod.MOD_ID)
 public class TwilightFinaleMod {
@@ -46,6 +50,7 @@ public class TwilightFinaleMod {
         ForceFieldCapabilityList.TYPES.register(bus);
         bus.addListener(HierophantShieldCapabilities::register);
         FinaleCastlePieces.TYPES.register(bus);
+        FinaleCastlePieces.PROCESSORS.register(bus);
         bus.addListener(TFNetworkHandler::register);
         if (ModList.get().isLoaded("curios")) {
             NeoForge.EVENT_BUS.addListener(ModCuriosCompat::keepCurios);
@@ -66,6 +71,14 @@ public class TwilightFinaleMod {
             bus.addListener(ModClientSetupEvent::registerLayerDefinitions);
             bus.addListener(ModClientSetupEvent::registerEntityRenderers);
             bus.addListener(ModClientSetupEvent::attachRenderLayers);
+
+            bus.addListener((RegisterShadersEvent event) -> {
+                try {
+                    HierophantRenderTypes.registerShaders(event);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
         if (ModList.get().isLoaded("hadean_breathe")) ModHadeanBlockCompat.register(bus);
     }

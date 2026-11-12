@@ -1,11 +1,11 @@
 {
   "parent": "twilightforest_finale:alohomora",
   "criteria": {
-    "roving_cube": {
+    "annihilation_golem": {
       "trigger": "minecraft:player_killed_entity",
       "conditions": {
         "entity": {
-          "type": "twilightforest:roving_cube"
+          "type": "twilightforest_fianle:annihilation_golem"
         }
       }
     },
@@ -52,7 +52,7 @@
   },
   "requirements": [
     [
-      "roving_cube",
+      "annihilation_golem",
       "cube_talisman"
     ],
     [

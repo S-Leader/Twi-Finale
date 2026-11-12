@@ -6,5 +6,7 @@
   "ingredient": {
     "item": "twilightforest:glass_sword"
   },
-  "result": { "id": "twilightforest_finale:glass_heart" }
+  "result": {
+    "id": "twilightforest_finale:glass_heart"
+  }
 }

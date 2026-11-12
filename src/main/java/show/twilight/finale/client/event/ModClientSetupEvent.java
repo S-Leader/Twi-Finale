@@ -59,6 +59,7 @@ public class ModClientSetupEvent {
             ItemProperties.register(ModItem.TRANSFORMATION_TOOL.get(), ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "tool_type"), transformationForm);
             ItemProperties.register(ModItem.TRANSFORMATION_TOOL.get(), ResourceLocation.withDefaultNamespace("blocking"), (stack, level, entity, time) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0f : 0.0f);
             BlockEntityRenderers.register(ModBlocks.ADHERENT_TROPHY_ENTITY.get(), AdherentTrophyRenderer::new);
+            BlockEntityRenderers.register(ModBlocks.ANNIHILATION_GOLEM_TROPHY_ENTITY.get(), c -> new AnnihilationGolemTrophyRenderer());
             BlockEntityRenderers.register(ModBlocks.HIEROPHANT_TROPHY_ENTITY.get(), c -> new FinalBossTrophyRenderer(c.getModelSet()));
             try {
                 Class.forName(AdherentTrophyRenderer.class.getName());
@@ -80,6 +81,7 @@ public class ModClientSetupEvent {
         CuriosRendererRegistry.register(ModItem.CHARM_OF_LIFE_3.get(), () -> new twilightforest.compat.curios.renderer.CharmOfLifeNecklaceRenderer(0xFFFF8080));
         CuriosRendererRegistry.register(ModItem.GLASS_HEART.get(), () -> new twilightforest.compat.curios.renderer.CharmOfLifeNecklaceRenderer(0xFFFF8080));
         CuriosRendererRegistry.register(ModItem.ADHERENT_TROPHY.get(), CurioHeadRenderer::new);
+        CuriosRendererRegistry.register(ModItem.ANNIHILATION_GOLEM_TROPHY.get(), CurioHeadRenderer::new);
         CuriosRendererRegistry.register(ModItem.HIEROPHANT_TROPHY.get(), CurioHeadRenderer::new);
         if (ModList.get().isLoaded("hadean_breathe")) {
             HadeanClientCompat.registerCuriosRenderers();

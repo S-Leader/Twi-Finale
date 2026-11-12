@@ -35,6 +35,7 @@ import show.twilight.finale.init.ModItem;
 import twilightforest.block.ForceFieldBlock;
 import twilightforest.entity.projectile.ITFProjectile;
 import twilightforest.entity.projectile.TFThrowable;
+import twilightforest.init.TFBlocks;
 import twilightforest.init.TFDamageTypes;
 import twilightforest.init.TFParticleType;
 
@@ -128,7 +129,7 @@ public class ProverbsBolt extends TFThrowable implements ITFProjectile, ItemSupp
         if (!this.level().isClientSide()) {
             BlockPos pos = result.getBlockPos();
             BlockState state = this.level().getBlockState(pos);
-            if (state.getBlock() instanceof ForceFieldBlock && this.level().removeBlock(pos, false)) {
+            if (state.getBlock() instanceof ForceFieldBlock && !state.is(TFBlocks.VIOLET_FORCE_FIELD.get()) && this.level().removeBlock(pos, false)) {
                 // A reflected High Priest bolt is not a use of the player's scepter.
                 if (this.getOwner() instanceof ServerPlayer player
                         && this.getPersistentData().hasUUID(SCEPTER_CASTER_TAG)
