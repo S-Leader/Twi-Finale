@@ -92,7 +92,7 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
         }
         if (action == TheTwilightHierophantEntity.DEATH)
             alpha *= Mth.clamp((125 - time - partialTicks) / 55F, 0, 1);
-        boolean afterimages = entity.getPhase() == 3 && action != TheTwilightHierophantEntity.REBIRTH;
+        boolean afterimages = entity.getPhase() == 4 && action != TheTwilightHierophantEntity.REBIRTH;
         if (alpha > 0) {
             float opacity = alpha;
             stack.pushPose();
@@ -127,7 +127,7 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
     }
 
     private void renderShadow(T entity, float partial, PoseStack pose, MultiBufferSource buffers, int light, boolean active, float bodyAlpha) {
-        if (entity.getPhase() != 3 || entity.isDeadOrDying() || entity.getAction() == TheTwilightHierophantEntity.REBIRTH || entity.isSwordComboSmoke() || entity.isSwordComboGrounded()) {
+        if (entity.getPhase() != 4 || entity.isDeadOrDying() || entity.getAction() == TheTwilightHierophantEntity.REBIRTH || entity.isSwordComboSmoke() || entity.isSwordComboGrounded()) {
             histories.remove(entity);
             return;
         }

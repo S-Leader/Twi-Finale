@@ -96,5 +96,7 @@
   "twilightforest_finale.configuration.hierophant": "Twilight Hierophant",
   "twilightforest_finale.configuration.hierophant.tooltip": "Twilight Hierophant arena settings.",
   "twilightforest_finale.configuration.hierophant.fallbackArenaRadius": "Fallback arena radius",
-  "twilightforest_finale.configuration.hierophant.fallbackArenaRadius.tooltip": "Fallback square half-width, in blocks, for manual summons outside a known castle. Castle encounters use the actual main-tower roof structure bounds."
+  "twilightforest_finale.configuration.hierophant.fallbackArenaRadius.tooltip": "Fallback square half-width, in blocks, for manual summons outside a known castle. Castle encounters use the actual main-tower roof structure bounds.",
+  "entity.twilightforest_finale.castle_monstrosity": "Castle Monstrosity",
+  "block.twilightforest_finale.twilight_trap_chest": "Twilight Oak Chest"
 }

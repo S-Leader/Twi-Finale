@@ -7,6 +7,9 @@ import twilightforest.client.model.TFModelLayers;
 
 public class ModRenderer {
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntity.CASTLE_MONSTROSITY.get(), CastleMonstrosityRenderer::new);
+        event.registerEntityRenderer(ModEntity.MONSTROSITY_BOMB.get(), MonstrosityBombRenderer::new);
+        event.registerBlockEntityRenderer(ModBlocks.TWILIGHT_TRAP_CHEST_ENTITY.get(), TwilightTrapChestRenderer::new);
         event.registerEntityRenderer(ModEntity.HIEROPHANT_METEOR.get(), HierophantMeteorRenderer::new);
         event.registerEntityRenderer(ModEntity.HIEROPHANT_THROWN_WEAPON.get(), HierophantThrownWeaponRenderer::new);
         event.registerEntityRenderer(ModEntity.HIEROPHANT_FRAGMENT.get(), HierophantFragmentRenderer::new);

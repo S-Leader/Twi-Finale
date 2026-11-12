@@ -96,5 +96,7 @@
   "twilightforest_finale.configuration.hierophant": "暮光教皇",
   "twilightforest_finale.configuration.hierophant.tooltip": "暮光教皇的战斗场地设置。",
   "twilightforest_finale.configuration.hierophant.fallbackArenaRadius": "后备场地半径",
-  "twilightforest_finale.configuration.hierophant.fallbackArenaRadius.tooltip": "非城堡内手动召唤时的后备方形场地半径，单位为格。城堡战斗使用实际主塔塔顶的结构边界。"
+  "twilightforest_finale.configuration.hierophant.fallbackArenaRadius.tooltip": "非城堡内手动召唤时的后备方形场地半径，单位为格。城堡战斗使用实际主塔塔顶的结构边界。",
+  "entity.twilightforest_finale.castle_monstrosity": "城堡巨兽",
+  "block.twilightforest_finale.twilight_trap_chest": "暮色橡木箱子"
 }

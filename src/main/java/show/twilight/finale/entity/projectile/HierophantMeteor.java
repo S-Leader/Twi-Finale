@@ -83,7 +83,7 @@ public final class HierophantMeteor extends HydraMortar {
     @Override
     public void tick() {
         if (!level().isClientSide()) {
-            if (!(getOwner() instanceof TheTwilightHierophantEntity boss) || !boss.isAlive() || boss.getPhase() != 3
+            if (!(getOwner() instanceof TheTwilightHierophantEntity boss) || !boss.isAlive() || boss.getPhase() != 4
                     || tickCount > 80 || !boss.insideArena(position())
                     || !boss.isAreaLoaded(getBoundingBox().expandTowards(getDeltaMovement()))) {
                 discard();
