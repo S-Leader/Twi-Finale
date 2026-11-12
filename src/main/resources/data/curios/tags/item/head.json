@@ -2,6 +2,7 @@
   "values": [
     "twilightforest_finale:adherent_trophy",
     "twilightforest_finale:hierophant_trophy",
+    "twilightforest_finale:annihilation_golem_trophy",
     {
       "id": "hadean_breathe:hadean_enforcer_trophy",
       "required": false
@@ -17,7 +18,6 @@
     {
       "id": "hadean_breathe:hadean_smasher_trophy",
       "required": false
-    },
-    "twilightforest_finale:annihilation_golem_trophy"
+    }
   ]
 }
