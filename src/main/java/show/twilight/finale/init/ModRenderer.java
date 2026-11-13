@@ -7,6 +7,8 @@ import twilightforest.client.model.TFModelLayers;
 
 public class ModRenderer {
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntity.ENGINEER_ADHERENT.get(), ColoredAdherentRenderer::new);
+        event.registerEntityRenderer(ModEntity.ENGINEER_WRENCH.get(), EngineerWrenchRenderer::new);
         event.registerEntityRenderer(ModEntity.ANNIHILATION_GOLEM.get(), AnnihilationGolemRenderer::new);
         event.registerEntityRenderer(ModEntity.CASTLE_MONSTROSITY.get(), CastleMonstrosityRenderer::new);
         event.registerEntityRenderer(ModEntity.MONSTROSITY_BOMB.get(), MonstrosityBombRenderer::new);

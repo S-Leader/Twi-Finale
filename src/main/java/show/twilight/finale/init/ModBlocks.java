@@ -15,6 +15,8 @@ import java.util.function.Supplier;
 public class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, TwilightFinaleMod.MOD_ID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, "twilightforest_finale");
+    public static final Supplier<FinaleBossSpawnerBlock> ENGINEER_SPAWNER = BLOCKS.register("engineer_spawner", () -> new FinaleBossSpawnerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).noLootTable().noOcclusion().strength(-1, 3600000), ModBossVariant.ENGINEER));
+    public static final Supplier<BlockEntityType<EngineerSpawnerBlockEntity>> ENGINEER_SPAWNER_ENTITY = BLOCK_ENTITIES.register("engineer_spawner", () -> BlockEntityType.Builder.of(EngineerSpawnerBlockEntity::new, ENGINEER_SPAWNER.get()).build(null));
     public static final Supplier<FinaleBossSpawnerBlock> ANNIHILATION_GOLEM_BOSS_SPAWNER = BLOCKS.register("annihilation_golem_boss_spawner", () -> new FinaleBossSpawnerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).noLootTable().noOcclusion().strength(-1, 3600000), ModBossVariant.ANNIHILATION_GOLEM));
     public static final Supplier<BlockEntityType<AnnihilationGolemSpawnerBlockEntity>> ANNIHILATION_GOLEM_SPAWNER = BLOCK_ENTITIES.register("annihilation_golem_spawner", () -> BlockEntityType.Builder.of(AnnihilationGolemSpawnerBlockEntity::new, ANNIHILATION_GOLEM_BOSS_SPAWNER.get()).build(null));
     public static final Supplier<FloorAdherentTrophyBlock> ANNIHILATION_GOLEM_TROPHY_BLOCK = BLOCKS.register("annihilation_golem_trophy", () -> new GolemTrophyBlocks.Floor(BlockBehaviour.Properties.of().instabreak(), ModBlocks.ANNIHILATION_GOLEM_TROPHY_ENTITY));

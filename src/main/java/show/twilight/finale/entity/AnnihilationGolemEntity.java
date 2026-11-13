@@ -2,6 +2,7 @@ package show.twilight.finale.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -31,21 +32,33 @@ import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import show.twilight.finale.runtime.entity.BossEntity;
+import show.twilight.finale.runtime.entity.skill.BaseSkill;
+import show.twilight.finale.runtime.entity.skill.SkillManager;
+import twilightforest.config.TFConfig;
 import twilightforest.entity.EnforcedHomePoint;
+import twilightforest.entity.boss.IBossLootBuffer;
+import twilightforest.init.TFBlocks;
 import twilightforest.init.TFParticleType;
 import twilightforest.init.TFSounds;
+import twilightforest.loot.TFLootTables;
+import twilightforest.util.entities.EntityUtil;
+
+import java.util.List;
 
 /**
  * Independent basement encounter; it never continues the Hierophant fight.
  */
-public final class AnnihilationGolemEntity extends Monster implements EnforcedHomePoint {
+public final class AnnihilationGolemEntity extends BossEntity implements EnforcedHomePoint, IBossLootBuffer {
     public static final int CHASE = 0, SWING = 1, SMOKE = 2, SLAM = 3, DYING = 4;
     public static final int SWING_HIT = 8, SWING_DURATION = 20;
     public static final int SMOKE_START = 32, SMOKE_END = 92, SMOKE_DURATION = 108;
@@ -54,10 +67,28 @@ public final class AnnihilationGolemEntity extends Monster implements EnforcedHo
     private static final EntityDataAccessor<Integer> ACTION = SynchedEntityData.defineId(AnnihilationGolemEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Long> ACTION_START = SynchedEntityData.defineId(AnnihilationGolemEntity.class, EntityDataSerializers.LONG);
     private final ServerBossEvent bossBar = new ServerBossEvent(Component.translatable("entity.twilightforest_finale.annihilation_golem"), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS);
+    private final NonNullList<ItemStack> dyingInventory = NonNullList.withSize(IBossLootBuffer.CONTAINER_SIZE, ItemStack.EMPTY);
+    private final SkillManager<AnnihilationGolemEntity> skillManager = new SkillManager<>(this, List.of(
+            attack(SWING, SWING_DURATION, 4.8), attack(SMOKE, SMOKE_DURATION, 16), attack(SLAM, SLAM_DURATION, 7)));
     private GlobalPos home;
+    private BlockPos deathChestPos;
     private int cooldown = 30, smokeCooldown, slamCooldown, lastAttack;
     private DamageSource deferredDeathSource;
-    private boolean lootDropped;
+    private boolean lootPrepared, lootDropped;
+
+    private static BaseSkill<AnnihilationGolemEntity> attack(int id, int duration, double range) {
+        return new BaseSkill<>(id, duration, range, 0) {
+            @Override
+            public void tick(AnnihilationGolemEntity golem) {
+                golem.holdAttackPose();
+            }
+
+            @Override
+            public void effect(AnnihilationGolemEntity golem) {
+                if (golem.level() instanceof ServerLevel server) golem.tickAttack(server, id, golem.getSkillTick());
+            }
+        };
+    }
 
     public AnnihilationGolemEntity(EntityType<? extends AnnihilationGolemEntity> type, Level level) {
         super(type, level);
@@ -103,6 +134,42 @@ public final class AnnihilationGolemEntity extends Monster implements EnforcedHo
         return (int) Math.max(0, level().getGameTime() - entityData.get(ACTION_START));
     }
 
+    @Override
+    public boolean isUsingSkill() {
+        return getAction() == SWING || getAction() == SMOKE || getAction() == SLAM;
+    }
+
+    @Override
+    public int getSkillType() {
+        return getAction();
+    }
+
+    @Override
+    public int getSkillTick() {
+        return getActionTime();
+    }
+
+    @Override
+    public void beginSkill(int id) {
+        if (level().isClientSide() || !isAlive() || isUsingSkill() || id < SWING || id > SLAM) return;
+        super.beginSkill(id);
+        setAction(id);
+        lastAttack = id;
+        if (id == SMOKE) smokeCooldown = 200;
+        else if (id == SLAM) slamCooldown = 180;
+        else playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.6F, 0.7F);
+    }
+
+    @Override
+    public void endSkill() {
+        int previous = getAction();
+        super.endSkill();
+        if (isAlive() && previous != DYING) {
+            setAction(CHASE);
+            cooldown = previous == SWING ? 18 : 35;
+        }
+    }
+
     public boolean isEmittingSmoke() {
         return getAction() == SMOKE && getActionTime() >= SMOKE_START && getActionTime() < SMOKE_END;
     }
@@ -129,12 +196,13 @@ public final class AnnihilationGolemEntity extends Monster implements EnforcedHo
     @Override
     public void aiStep() {
         super.aiStep();
-        if (!(level() instanceof ServerLevel server) || !isAlive()) return;
+        if (!(level() instanceof ServerLevel) || !isAlive()) return;
+        updatePhase();
         bossBar.setProgress(Mth.clamp(getHealth() / getMaxHealth(), 0, 1));
         if (smokeCooldown > 0) smokeCooldown--;
         if (slamCooldown > 0) slamCooldown--;
         if (!canFight(getTarget())) setTarget(null);
-        int action = getAction(), t = getActionTime();
+        int action = getAction();
         if (action == CHASE) {
             if (cooldown > 0) cooldown--;
             if (getTarget() == null) {
@@ -152,51 +220,36 @@ public final class AnnihilationGolemEntity extends Monster implements EnforcedHo
                 getNavigation().stop();
                 setDeltaMovement(0, getDeltaMovement().y, 0);
             }
-            if (cooldown > 0 || !getSensing().hasLineOfSight(getTarget()) || !isFacingTarget(12)) return;
-            if (distance <= 7 && slamCooldown == 0 && (lastAttack != SLAM && random.nextInt(3) == 0 || distance < 3 && lastAttack == SMOKE)) {
-                setAction(SLAM);
-                slamCooldown = 180;
-                lastAttack = SLAM;
-            } else if (distance <= 16 && smokeCooldown == 0 && (distance > 4.8 || lastAttack == SWING && random.nextBoolean())) {
-                setAction(SMOKE);
-                smokeCooldown = 200;
-                lastAttack = SMOKE;
-            } else if (distance <= 4.8) {
-                setAction(SWING);
-                lastAttack = SWING;
-                playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.6F, 0.7F);
-            }
             return;
         }
+    }
+
+    private void holdAttackPose() {
         getNavigation().stop();
         setSpeed(0);
         setXxa(0);
         setZza(0);
         setDeltaMovement(0, getDeltaMovement().y, 0);
-        if (getTarget() != null && (action == SMOKE || t < 6)) faceTarget(action == SMOKE ? 2 : 8);
+        if (getTarget() != null && (getAction() == SMOKE || getActionTime() < 6))
+            faceTarget(getAction() == SMOKE ? 2 : 8);
+    }
+
+    private void tickAttack(ServerLevel server, int action, int t) {
         switch (action) {
             case SWING -> {
                 if (t == SWING_HIT) swingAttack(server);
-                if (t >= SWING_DURATION) finishAttack(18);
             }
             case SMOKE -> {
                 if (t == 27) playSound(SoundEvents.LEVER_CLICK, 2, 0.65F);
                 if (t >= SMOKE_START && t < SMOKE_END && getTarget() != null) emitSmoke(server);
-                if (t >= SMOKE_DURATION) finishAttack(35);
             }
             case SLAM -> {
                 if (t == SLAM_HIT) slam(server);
                 if (t >= SLAM_HIT + 6 && t <= SLAM_HIT + 18 && t % 6 == 2) dropCeilingBricks(server);
-                if (t >= SLAM_DURATION) finishAttack(35);
             }
             default -> {
             }
         }
-    }
-
-    private void finishAttack(int delay) {
-        setAction(CHASE);
-        cooldown = delay;
     }
 
     private void faceTarget(float speed) {
@@ -323,6 +376,8 @@ public final class AnnihilationGolemEntity extends Monster implements EnforcedHo
         if (dead) return;
         super.die(source);
         if (!dead) return;
+        deathChestPos = EntityUtil.bossChestLocation(this);
+        super.endSkill();
         setAction(DYING);
         bossBar.setVisible(false);
         playSound(SoundEvents.RAVAGER_ROAR, 3, 0.6F);
@@ -331,6 +386,35 @@ public final class AnnihilationGolemEntity extends Monster implements EnforcedHo
     @Override
     protected void dropAllDeathLoot(ServerLevel server, DamageSource source) {
         deferredDeathSource = source;
+        if (lootPrepared) return;
+        lootPrepared = true;
+        if (shouldDropLoot() && server.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+            // Roll once while the original killer/weapon context still exists.
+            // The inventory survives a save during the ninety-tick death animation.
+            var params = TFLootTables.createLootParams(this, lastHurtByPlayerTime > 0, source).create(LootContextParamSets.ENTITY);
+            var table = server.getServer().reloadableRegistries().getLootTable(getLootTable());
+            fill(this, params, table);
+        }
+    }
+
+    @Override
+    protected void dropFromLootTable(DamageSource source, boolean killedByPlayer) {
+        if (!lootPrepared && dyingInventory.stream().allMatch(ItemStack::isEmpty)) {
+            if (!(level() instanceof ServerLevel server)) return;
+            // Restore a single roll for deaths saved before the loot buffer existed.
+            lootPrepared = true;
+            var params = TFLootTables.createLootParams(this, killedByPlayer, source).create(LootContextParamSets.ENTITY);
+            fill(this, params, server.getServer().reloadableRegistries().getLootTable(getLootTable()));
+        }
+        if (dyingInventory.stream().allMatch(ItemStack::isEmpty)) return;
+        if (TFConfig.bossDropChests && level() instanceof ServerLevel server) {
+            BlockPos chest = deathChestPos != null ? deathChestPos : EntityUtil.bossChestLocation(this);
+            IBossLootBuffer.depositDropsIntoChest(this, TFBlocks.TWILIGHT_OAK_CHEST.get().defaultBlockState(), chest, server);
+        } else {
+            for (ItemStack stack : dyingInventory)
+                if (!stack.isEmpty()) spawnAtLocation(stack.copy());
+        }
+        dyingInventory.clear();
     }
 
     @Override
@@ -349,6 +433,7 @@ public final class AnnihilationGolemEntity extends Monster implements EnforcedHo
         if (!lootDropped) {
             lootDropped = true;
             super.dropAllDeathLoot(server, deferredDeathSource != null ? deferredDeathSource : damageSources().generic());
+            dyingInventory.clear();
         }
         remove(RemovalReason.KILLED);
     }
@@ -417,6 +502,11 @@ public final class AnnihilationGolemEntity extends Monster implements EnforcedHo
         tag.putInt("SlamCooldown", slamCooldown);
         tag.putInt("LastGolemAttack", lastAttack);
         tag.putBoolean("GolemLootDropped", lootDropped);
+        tag.putBoolean("GolemLootPrepared", lootPrepared);
+        if (deathChestPos != null) tag.putLong("GolemDeathChestPos", deathChestPos.asLong());
+        CompoundTag inventory = new CompoundTag();
+        addDeathItemsSaveData(inventory, registryAccess());
+        tag.put("GolemLootBuffer", inventory);
     }
 
     @Override
@@ -425,15 +515,74 @@ public final class AnnihilationGolemEntity extends Monster implements EnforcedHo
         loadHomePointFromNbt(tag);
         entityData.set(ACTION, Mth.clamp(tag.getInt("GolemAction"), CHASE, DYING));
         entityData.set(ACTION_START, level().getGameTime() - Math.max(0, tag.getInt("GolemTime")));
-        cooldown = tag.getInt("AttackCooldown");
-        smokeCooldown = tag.getInt("SmokeCooldown");
-        slamCooldown = tag.getInt("SlamCooldown");
-        lastAttack = tag.getInt("LastGolemAttack");
+        cooldown = tag.contains("AttackCooldown") ? Math.max(0, tag.getInt("AttackCooldown")) : 30;
+        smokeCooldown = Math.max(0, tag.getInt("SmokeCooldown"));
+        slamCooldown = Math.max(0, tag.getInt("SlamCooldown"));
+        lastAttack = Mth.clamp(tag.getInt("LastGolemAttack"), CHASE, SLAM);
         lootDropped = tag.getBoolean("GolemLootDropped");
+        lootPrepared = tag.getBoolean("GolemLootPrepared");
+        deathChestPos = tag.contains("GolemDeathChestPos") ? BlockPos.of(tag.getLong("GolemDeathChestPos")) : null;
+        dyingInventory.clear();
+        if (tag.contains("GolemLootBuffer", net.minecraft.nbt.Tag.TAG_COMPOUND))
+            readDeathItemsSaveData(tag.getCompound("GolemLootBuffer"), registryAccess());
+        updatePhase();
         if (getHealth() <= 0) {
             dead = true;
             entityData.set(ACTION, DYING);
             bossBar.setVisible(false);
+        } else if (getAction() == DYING) {
+            setAction(CHASE);
+        } else if (isUsingSkill()) {
+            // AbstractSkillEntity cancels casts on load; restore the golem's
+            // saved action without resetting its animation/impact clock.
+            super.beginSkill(getAction());
         }
+    }
+
+    @Override
+    public void updatePhase() {
+        // This boss has one combat phase; DYING is an action, not another phase.
+        if (!level().isClientSide() && (getPhase() != 1 || updatePhase)) setPhase(1);
+    }
+
+    @Override
+    public void spawn() {
+        if (level().isClientSide() || !isAlive()) return;
+        super.endSkill();
+        setAction(CHASE);
+        cooldown = 30;
+        updatePhase();
+        bossBar.setName(getDisplayName());
+        bossBar.setVisible(true);
+    }
+
+    @Override
+    public boolean hasSpawnProcess() {
+        return false;
+    }
+
+    @Override
+    public SkillManager<AnnihilationGolemEntity> getSkillManager() {
+        return skillManager;
+    }
+
+    @Override
+    public List<Integer> getSkillPool() {
+        LivingEntity target = getTarget();
+        if (isNoAi() || !isAlive() || getAction() != CHASE || cooldown > 0 || !canFight(target)
+                || !getSensing().hasLineOfSight(target) || !isFacingTarget(12)) return List.of();
+        double distance = position().subtract(target.position()).horizontalDistance();
+        if (distance <= 7 && slamCooldown == 0
+                && (lastAttack != SLAM && random.nextInt(3) == 0 || distance < 3 && lastAttack == SMOKE))
+            return List.of(SLAM);
+        if (distance <= 16 && smokeCooldown == 0
+                && (distance > 4.8 || lastAttack == SWING && random.nextBoolean())) return List.of(SMOKE);
+        if (distance <= 4.8) return List.of(SWING);
+        return List.of();
+    }
+
+    @Override
+    public NonNullList<ItemStack> getItemStacks() {
+        return dyingInventory;
     }
 }

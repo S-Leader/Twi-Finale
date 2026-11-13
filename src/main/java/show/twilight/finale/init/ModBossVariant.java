@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.function.Supplier;
 
 public enum ModBossVariant implements StringRepresentable {
+    ENGINEER(null, () -> ModBlocks.ENGINEER_SPAWNER_ENTITY.get()),
     ANNIHILATION_GOLEM(null, () -> ModBlocks.ANNIHILATION_GOLEM_SPAWNER.get()),
     ADHERENT(null, () -> ModBlocks.ADHERENT_SPAWNER.get()),
     HIEROPHANT(null, () -> ModBlocks.TWILIGHT_HIEROPHANT_SPAWNER.get());

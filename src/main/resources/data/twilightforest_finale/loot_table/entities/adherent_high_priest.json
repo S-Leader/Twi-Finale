@@ -19,10 +19,6 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "twilightforest_finale:proverbs_scepter"
-        },
-        {
-          "type": "minecraft:item",
           "name": "twilightforest_finale:force_field_scepter"
         },
         {

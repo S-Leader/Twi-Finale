@@ -23,7 +23,7 @@
             "entity": "this",
             "predicate": {
               "type_specific": {
-                "type": "minecraft:player",
+                "type": "player",
                 "advancements": {
                   "twilightforest:progress_golem": true
                 }

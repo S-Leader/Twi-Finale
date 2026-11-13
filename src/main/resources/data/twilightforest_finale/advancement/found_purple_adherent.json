@@ -1,32 +1,8 @@
 {
   "parent": "twilightforest:progress_castle",
-  "criteria": {
-    "purple": {
-      "trigger": "minecraft:player_killed_entity",
-      "conditions": {
-        "entity": {
-          "type": "twilightforest:adherent",
-          "nbt": "{FinaleAdherentColor:4}"
-        }
-      }
-    },
-    "previous_progression": {
-      "trigger": "minecraft:tick",
-      "conditions": {
-        "player": {
-          "type_specific": {
-            "type": "minecraft:player",
-            "advancements": {
-              "twilightforest:progress_castle": true
-            }
-          }
-        }
-      }
-    }
-  },
   "display": {
     "icon": {
-      "id": "twilightforest:violet_force_field"
+      "id": "minecraft:golden_hoe"
     },
     "title": {
       "translate": "advancement.twilightforest_finale.found_purple_adherent"
@@ -34,18 +10,24 @@
     "description": {
       "translate": "advancement.twilightforest_finale.found_purple_adherent.desc"
     },
-    "frame": "task",
+    "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,
-    "hidden": false
+    "hidden": true
+  },
+  "criteria": {
+    "purple": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "twilightforest_finale:engineer_adherent"
+        }
+      }
+    }
   },
   "requirements": [
     [
       "purple"
-    ],
-    [
-      "previous_progression"
     ]
-  ],
-  "sends_telemetry_event": true
+  ]
 }

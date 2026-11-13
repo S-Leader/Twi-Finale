@@ -55,6 +55,8 @@ public class ModTab {
         output.accept(ModItem.ADHERENT_SPAWN_EGG.get());
         output.accept(ModItem.CASTLE_GUARDIAN_SPAWN_EGG.get());
         output.accept(ModItem.ANNIHILATION_GOLEM_SPAWN_EGG.get());
+        output.accept(ModItem.ENGINEER_SPAWN_EGG.get());
+        output.accept(ModItem.ENGINEER_SPAWNER.get());
         output.accept(ModItem.HIEROPHANT_SPAWN_EGG.get());
     }).build());
 

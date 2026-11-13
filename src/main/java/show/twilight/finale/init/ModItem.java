@@ -13,6 +13,8 @@ import java.util.function.Supplier;
 
 public class ModItem {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.ITEM, "twilightforest_finale");
+    public static final Supplier<Item> ENGINEER_SPAWNER = ITEMS.register("engineer_spawner", () -> new BlockItem(ModBlocks.ENGINEER_SPAWNER.get(), new Item.Properties()));
+    public static final Supplier<Item> ENGINEER_SPAWN_EGG = ITEMS.register("engineer_adherent_spawn_egg", () -> new DeferredSpawnEggItem(ModEntity.ENGINEER_ADHERENT, 0x171722, 0xB9E6F5, new Item.Properties()));
 
     public static final Supplier<Item> FIERY_AXE = ITEMS.register("fiery_axe", () -> new FieryAxeItem(TFToolMaterials.FIERY, new Item.Properties().fireResistant().rarity(Rarity.UNCOMMON)));
     public static final Supplier<Item> FIERY_HOE = ITEMS.register("fiery_hoe", () -> new FieryHoeItem(TFToolMaterials.FIERY, new Item.Properties().fireResistant().rarity(Rarity.UNCOMMON)));

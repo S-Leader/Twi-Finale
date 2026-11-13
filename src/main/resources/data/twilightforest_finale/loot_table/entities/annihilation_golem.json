@@ -34,6 +34,15 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "name": "twilightforest_finale:annihilation_chestplate"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
           "name": "twilightforest_finale:annihilation_golem_trophy"
         }
       ]

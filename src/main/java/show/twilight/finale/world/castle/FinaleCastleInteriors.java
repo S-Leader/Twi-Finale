@@ -69,16 +69,20 @@ final class FinaleCastleInteriors {
 
     private static void add(StructurePiecesBuilder pieces, StructureTemplateManager manager, StructurePiece owner,
                             String name, int x, int y, int z, Mirror mirror) {
-        Rotation rotation = switch (owner.getOrientation()) {
+        Rotation rotation = rotation(owner);
+        var template = new FinaleCastleTemplatePiece(manager, name, local(owner, x, y, z), rotation, mirror);
+        if (template.template().getSize().equals(net.minecraft.core.Vec3i.ZERO))
+            throw new IllegalStateException("Missing Finale castle template: " + name);
+        pieces.addPiece(template);
+    }
+
+    static Rotation rotation(StructurePiece owner) {
+        return switch (owner.getOrientation()) {
             case WEST -> Rotation.CLOCKWISE_90;
             case NORTH -> Rotation.CLOCKWISE_180;
             case EAST -> Rotation.COUNTERCLOCKWISE_90;
             default -> Rotation.NONE;
         };
-        var template = new FinaleCastleTemplatePiece(manager, name, local(owner, x, y, z), rotation, mirror);
-        if (template.template().getSize().equals(net.minecraft.core.Vec3i.ZERO))
-            throw new IllegalStateException("Missing Finale castle template: " + name);
-        pieces.addPiece(template);
     }
 
     /**

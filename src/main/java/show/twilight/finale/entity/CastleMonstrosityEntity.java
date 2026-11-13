@@ -56,8 +56,7 @@ import java.util.*;
  * Server owns attacks, charge accounting and encounter continuation.
  */
 public class CastleMonstrosityEntity extends Monster {
-    public static final int CHASE = 0, SMASH = 1, SPIT = 2, SUMMON = 3, TRAP = 4, FIRE = 5,
-            BROKEN = 6, RECOVER = 7, DYING = 8, ACTIVATE = 9, RETRACT_TRAP = 10, RETRACT_FIRE = 11, TRIPLE_SMASH = 12;
+    public static final int CHASE = 0, SMASH = 1, SPIT = 2, SUMMON = 3, TRAP = 4, FIRE = 5, BROKEN = 6, RECOVER = 7, DYING = 8, ACTIVATE = 9, RETRACT_TRAP = 10, RETRACT_FIRE = 11, TRIPLE_SMASH = 12;
     public static final int COMBO_HIT_1 = 33, COMBO_HIT_2 = 55, COMBO_HIT_3 = 77, COMBO_DURATION = 106;
     public static final int TRAP_PULL_START = 33, TRAP_PULL_END = 93, TRAP_HIT = 108;
     // Hydra's FLAMING state lasts 100 ticks and deals 19 fire damage, with 3 seconds of fire.
@@ -83,9 +82,7 @@ public class CastleMonstrosityEntity extends Monster {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 400).add(Attributes.ATTACK_DAMAGE, 16)
-                .add(Attributes.ARMOR, 10).add(Attributes.MOVEMENT_SPEED, 0.26)
-                .add(Attributes.FOLLOW_RANGE, 64).add(Attributes.KNOCKBACK_RESISTANCE, 1).add(Attributes.STEP_HEIGHT, 1.5);
+        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 400).add(Attributes.ATTACK_DAMAGE, 16).add(Attributes.ARMOR, 10).add(Attributes.MOVEMENT_SPEED, 0.26).add(Attributes.FOLLOW_RANGE, 64).add(Attributes.KNOCKBACK_RESISTANCE, 1).add(Attributes.STEP_HEIGHT, 1.5);
     }
 
     @Override
@@ -205,8 +202,7 @@ public class CastleMonstrosityEntity extends Monster {
 
     @Override
     public boolean isAlliedTo(Entity e) {
-        return e instanceof CastleMonstrosityEntity || e instanceof TheTwilightHierophantEntity || e instanceof Adherent
-                || e.getPersistentData().hasUUID(SUMMONER_TAG) && getUUID().equals(e.getPersistentData().getUUID(SUMMONER_TAG)) || super.isAlliedTo(e);
+        return e instanceof CastleMonstrosityEntity || e instanceof TheTwilightHierophantEntity || e instanceof Adherent || e.getPersistentData().hasUUID(SUMMONER_TAG) && getUUID().equals(e.getPersistentData().getUUID(SUMMONER_TAG)) || super.isAlliedTo(e);
     }
 
     @Override
@@ -517,8 +513,7 @@ public class CastleMonstrosityEntity extends Monster {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        if (!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) &&
-                (source.is(DamageTypeTags.IS_PROJECTILE) || source.is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC) || source.getDirectEntity() instanceof Projectile || source.getEntity() instanceof LivingEntity && source.getDirectEntity() != source.getEntity()))
+        if (!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && (source.is(DamageTypeTags.IS_PROJECTILE) || source.is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC) || source.getDirectEntity() instanceof Projectile || source.getEntity() instanceof LivingEntity && source.getDirectEntity() != source.getEntity()))
             return false;
         if (source.getEntity() != null && isAlliedTo(source.getEntity())) return false;
         boolean hit = super.hurt(source, amount);
@@ -536,11 +531,10 @@ public class CastleMonstrosityEntity extends Monster {
         setAction(DYING);
         super.die(source);
         bossBar.setVisible(false);
-        if (level() instanceof ServerLevel server)
-            for (UUID id : summons) {
-                Entity minion = server.getEntity(id);
-                if (minion != null) minion.discard();
-            }
+        if (level() instanceof ServerLevel server) for (UUID id : summons) {
+            Entity minion = server.getEntity(id);
+            if (minion != null) minion.discard();
+        }
     }
 
     @Override

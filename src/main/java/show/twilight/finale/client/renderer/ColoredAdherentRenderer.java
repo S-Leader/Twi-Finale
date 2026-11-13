@@ -6,29 +6,33 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 import show.twilight.finale.TwilightFinaleMod;
+import show.twilight.finale.client.model.EngineerAdherentModel;
+import show.twilight.finale.entity.EngineerAdherentEntity;
 import show.twilight.finale.entity.combat.ColoredAdherent;
+import twilightforest.client.model.TFModelLayers;
 import twilightforest.client.renderer.entity.AdherentRenderer;
 import twilightforest.entity.monster.Adherent;
 
 /**
- * Five pixel-exact texture palettes; NEVER tint the model's render-buffer RGB.
+ * Pixel-exact glyph palettes, including the engineer's pale wind blue.
  */
 public final class ColoredAdherentRenderer extends AdherentRenderer {
     private static final ResourceLocation ORIGINAL = ResourceLocation.fromNamespaceAndPath("twilightforest", "textures/entity/adherent.png");
     // Native image stores ABGR. Only the original navy glyph ink is replaced.
     // Black/red-black cloth, the four bright blue eye pixels, and alpha stay intact.
     private static final int NATIVE_GLYPH = 0xFF8B0000;
-    private static final int[] GLYPH_RGB = {0x00008B, 0x8B7300, 0x008B00, 0x8B0000, 0x66008B};
-    private static final String[] NAMES = {"blue", "yellow", "green", "red", "purple"};
-    private final ResourceLocation[] palettes = new ResourceLocation[5];
+    private static final int[] GLYPH_RGB = {0x00008B, 0x8B7300, 0x008B00, 0x8B0000, 0x66008B, 0xB9E6F5};
+    private static final String[] NAMES = {"blue", "yellow", "green", "red", "purple", "wind"};
+    private final ResourceLocation[] palettes = new ResourceLocation[6];
 
     public ColoredAdherentRenderer(EntityRendererProvider.Context context) {
         super(context);
+        model = new EngineerAdherentModel(context.bakeLayer(TFModelLayers.ADHERENT));
     }
 
     @Override
     public ResourceLocation getTextureLocation(Adherent mob) {
-        int color = ((ColoredAdherent) mob).finale$getColor();
+        int color = mob instanceof EngineerAdherentEntity ? 5 : ((ColoredAdherent) mob).finale$getColor();
         if (color == ColoredAdherent.BLUE) return ORIGINAL;
         if (palettes[color] != null) return palettes[color];
         var minecraft = Minecraft.getInstance();

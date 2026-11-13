@@ -29,7 +29,7 @@
             "entity": "this",
             "predicate": {
               "type_specific": {
-                "type": "minecraft:player",
+                "type": "player",
                 "advancements": {
                   "twilightforest_finale:alohomora": true
                 }
@@ -37,13 +37,13 @@
             }
           }
         ]
-      }
-    },
-    "trigger": "minecraft:tick"
+      },
+      "trigger": "minecraft:tick"
+    }
   },
   "display": {
     "icon": {
-      "id": "twilightforest:cube_talisman"
+      "id": "twilightforest_finale:annihilation_golem_trophy"
     },
     "title": {
       "translate": "advancement.twilightforest_finale.poor_view_down_here"
