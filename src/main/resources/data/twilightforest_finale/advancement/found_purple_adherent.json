@@ -10,7 +10,7 @@
     "description": {
       "translate": "advancement.twilightforest_finale.found_purple_adherent.desc"
     },
-    "frame": "challenge",
+    "frame": "goal",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": true
