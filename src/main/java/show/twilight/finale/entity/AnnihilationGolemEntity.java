@@ -14,9 +14,12 @@ import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -27,6 +30,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -244,9 +248,13 @@ public final class AnnihilationGolemEntity extends Monster implements EnforcedHo
         }
         if (getActionTime() % 10 == 2) {
             playSound(SoundEvents.FIRE_EXTINGUISH, 1.6F, 0.55F);
-            for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class, new AABB(origin, end).inflate(0.9), this::canFight))
-                if (victim.getBoundingBox().inflate(0.75).contains(origin) || victim.getBoundingBox().inflate(0.75).clip(origin, end).isPresent())
+            for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class, new AABB(origin, end).inflate(0.9), this::canFight)) {
+                if (victim.getBoundingBox().inflate(0.75).contains(origin) || victim.getBoundingBox().inflate(0.75).clip(origin, end).isPresent()) {
                     victim.hurt(damageSources().indirectMagic(this, this), 4);
+                    victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, 1), this);
+                    victim.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 200, 1), this);
+                }
+            }
         }
     }
 
@@ -297,6 +305,17 @@ public final class AnnihilationGolemEntity extends Monster implements EnforcedHo
                 break;
             }
         }
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        if (!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
+                && (source.is(DamageTypeTags.IS_PROJECTILE)
+                || source.is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC)
+                || source.getDirectEntity() instanceof Projectile
+                || source.getEntity() instanceof LivingEntity && source.getDirectEntity() != source.getEntity()))
+            return false;
+        return super.hurt(source, amount);
     }
 
     @Override

@@ -103,5 +103,8 @@
   "block.twilightforest_finale.annihilation_golem_boss_spawner": "湮灭傀儡刷怪箱",
   "block.twilightforest_finale.annihilation_golem_trophy": "湮灭傀儡战利品",
   "block.twilightforest_finale.annihilation_golem_wall_trophy": "湮灭傀儡战利品",
-  "item.twilightforest_finale.annihilation_golem_spawn_egg": "湮灭傀儡刷怪蛋"
+  "item.twilightforest_finale.annihilation_golem_spawn_egg": "湮灭傀儡刷怪蛋",
+  "death.attack.twilightforest_finale.monstrosity_flame": "%1$s 被 %2$s 的火焰焚毁了",
+  "death.attack.twilightforest_finale.monstrosity_flame.player": "%1$s 被 %2$s 的火焰焚毁了",
+  "death.attack.twilightforest_finale.monstrosity_flame.item": "%1$s 被 %2$s 使用 %3$s 的火焰焚毁了"
 }

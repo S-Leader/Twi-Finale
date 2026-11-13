@@ -20,8 +20,10 @@ import java.util.List;
 
 public final class TwilightSwordItem extends SwordItem {
     public static final int MIN_CHARGE_TICKS = 10;
-    public static final float DASH_DISTANCE = 15;
-    public static final double DASH_SPEED = 1.35;
+    // Riptide III launch strength; movement remains native after this impulse.
+    public static final double DASH_SPEED = 3.0;
+    public static final int DASH_TICKS = 20;
+    public static final double GROUND_LIFT = 1.1999999F;
 
     public TwilightSwordItem(Properties properties) {
         super(TFToolMaterials.FIERY, properties.attributes(createAttributes(TFToolMaterials.FIERY, 8F - TFToolMaterials.FIERY.getAttackDamageBonus(), -2.4F)));
@@ -30,7 +32,8 @@ public final class TwilightSwordItem extends SwordItem {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (hand != InteractionHand.MAIN_HAND) return InteractionResultHolder.pass(stack);
+        if (hand != InteractionHand.MAIN_HAND || !player.getOffhandItem().isEmpty())
+            return InteractionResultHolder.pass(stack);
         player.startUsingItem(hand);
         return InteractionResultHolder.consume(stack);
     }

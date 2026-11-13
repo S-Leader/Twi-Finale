@@ -43,8 +43,12 @@ import show.twilight.finale.TwilightFinaleMod;
 import show.twilight.finale.entity.combat.ColoredAdherent;
 import show.twilight.finale.entity.combat.MonstrosityMoveControl;
 import show.twilight.finale.entity.projectile.MonstrosityBomb;
+import show.twilight.finale.init.ModDamageTypes;
 import twilightforest.entity.monster.Adherent;
-import twilightforest.init.*;
+import twilightforest.init.TFEntities;
+import twilightforest.init.TFItems;
+import twilightforest.init.TFParticleType;
+import twilightforest.init.TFSounds;
 
 import java.util.*;
 
@@ -395,7 +399,7 @@ public class CastleMonstrosityEntity extends Monster {
         for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class, new AABB(origin, end).inflate(1.2), this::canDamageWithSkill)) {
             if (victim.getBoundingBox().inflate(1).clip(origin, end).isEmpty() && !victim.getBoundingBox().inflate(1).contains(origin))
                 continue;
-            if (victim.hurt(new DamageSource(server.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(TFDamageTypes.HYDRA_FIRE), this), 19))
+            if (victim.hurt(new DamageSource(server.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(ModDamageTypes.MONSTROSITY_FLAME), this), 19))
                 victim.igniteForSeconds(3);
         }
     }

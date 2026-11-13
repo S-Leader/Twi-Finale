@@ -34,7 +34,7 @@ public final class HierophantMeteor extends HydraMortar {
         this(ModEntity.HIEROPHANT_METEOR.get(), level);
         setOwner(owner);
         this.landing = landing;
-        setPos(landing.add(0, 10, 0));
+        setPos(landing.add(0, 11, 0));
         entityData.set(FORM_TIME, formationTicks());
         setNoGravity(true);
         setDeltaMovement(Vec3.ZERO);

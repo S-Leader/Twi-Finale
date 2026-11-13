@@ -23,6 +23,8 @@ public class ModTab {
         output.accept(ModItem.FIERY_SHOVEL.get());
         output.accept(ModItem.FIERY_HOE.get());
         output.accept(ModItem.TWILIGHT_SWORD.get());
+        output.accept(TFItems.CUBE_TALISMAN.get());
+        output.accept(TFItems.CUBE_OF_ANNIHILATION.get());
         ModTab.generateGearWithEnchants(output, ModItem.FINALSLAYER_SWORD.get(), new EnchantmentInstance(parameters.holders().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SHARPNESS), 4), new EnchantmentInstance(parameters.holders().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.UNBREAKING), 3), new EnchantmentInstance(parameters.holders().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SWEEPING_EDGE), 2), new EnchantmentInstance(parameters.holders().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.LOOTING), 2));
         output.accept(ModItem.TWILIGHT_RETROFITTING_SMITHING_TEMPLATE.get());
         output.accept(ModItem.PHANTOMMETAL_INGOT.get());
@@ -46,13 +48,13 @@ public class ModTab {
         output.accept(ModItem.CHARM_OF_LIFE_3.get());
         output.accept(ModItem.ADHERENT_BOSS_SPAWNER.get());
         output.accept(ModItem.ANNIHILATION_GOLEM_BOSS_SPAWNER.get());
-        output.accept(ModItem.ANNIHILATION_GOLEM_TROPHY.get());
-        output.accept(ModItem.ANNIHILATION_GOLEM_SPAWN_EGG.get());
         output.accept(ModItem.TWILIGHT_HIEROPHANT_BOSS_SPAWNER.get());
         output.accept(ModItem.ADHERENT_TROPHY.get());
+        output.accept(ModItem.ANNIHILATION_GOLEM_TROPHY.get());
         output.accept(ModItem.HIEROPHANT_TROPHY.get());
         output.accept(ModItem.ADHERENT_SPAWN_EGG.get());
         output.accept(ModItem.CASTLE_GUARDIAN_SPAWN_EGG.get());
+        output.accept(ModItem.ANNIHILATION_GOLEM_SPAWN_EGG.get());
         output.accept(ModItem.HIEROPHANT_SPAWN_EGG.get());
     }).build());
 

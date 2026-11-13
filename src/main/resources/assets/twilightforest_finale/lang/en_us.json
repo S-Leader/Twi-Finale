@@ -103,5 +103,8 @@
   "block.twilightforest_finale.annihilation_golem_boss_spawner": "Annihilation Golem Spawner",
   "block.twilightforest_finale.annihilation_golem_trophy": "Annihilation Golem Trophy",
   "block.twilightforest_finale.annihilation_golem_wall_trophy": "Annihilation Golem Trophy",
-  "item.twilightforest_finale.annihilation_golem_spawn_egg": "Annihilation Golem Spawn Egg"
+  "item.twilightforest_finale.annihilation_golem_spawn_egg": "Annihilation Golem Spawn Egg",
+  "death.attack.twilightforest_finale.monstrosity_flame": "%1$s was incinerated by %2$s",
+  "death.attack.twilightforest_finale.monstrosity_flame.player": "%1$s was incinerated by %2$s",
+  "death.attack.twilightforest_finale.monstrosity_flame.item": "%1$s was incinerated by %2$s using %3$s"
 }

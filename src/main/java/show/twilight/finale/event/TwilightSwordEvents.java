@@ -6,10 +6,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -51,11 +51,10 @@ public final class TwilightSwordEvents {
     private static final class DashState {
         final ResourceKey<Level> dimension;
         final Set<UUID> hit = new HashSet<>();
-        Vec3 direction, origin, previous;
+        Vec3 direction, previous;
         ItemStack sword;
-        int charge, dashTicks, stalledTicks;
-        float maximumDistance, attackDamage;
-        double travelled;
+        int charge, dashTicks;
+        float attackDamage;
         boolean dashing, needsRelease;
 
         DashState(Player player) {
@@ -90,10 +89,7 @@ public final class TwilightSwordEvents {
         }
         if (usingSword) {
             if (state.charge == 0) {
-                float yaw = player.getYRot() * Mth.DEG_TO_RAD;
-                state.direction = new Vec3(-Mth.sin(yaw), 0, Mth.cos(yaw));
                 state.sword = player.getMainHandItem();
-                state.origin = player.position();
             }
             if (player.getMainHandItem() != state.sword) {
                 stop(player, state);
@@ -113,22 +109,20 @@ public final class TwilightSwordEvents {
             stop(player, state);
             return;
         }
-        // Aim when the dash actually starts, not when charging began.
-        // After launch this world-space direction stays fixed.
-        float yaw = player.getYRot() * Mth.DEG_TO_RAD;
-        state.direction = new Vec3(-Mth.sin(yaw), 0, Mth.cos(yaw)).normalize();
-        state.maximumDistance = TwilightSwordItem.DASH_DISTANCE;
+        // Riptide applies one impulse along the full look vector. Vanilla travel,
+        // gravity, friction and collision handle every subsequent movement tick.
+        state.direction = player.getLookAngle().normalize();
         state.attackDamage = (float) player.getAttributes().getValue(Attributes.ATTACK_DAMAGE);
-        state.travelled = 0;
-        state.origin = state.previous = player.position();
+        state.previous = player.position();
         state.dashTicks = 0;
-        state.stalledTicks = 0;
         state.hit.clear();
         state.dashing = true;
         state.needsRelease = true;
+        Vec3 impulse = state.direction.scale(TwilightSwordItem.DASH_SPEED);
+        player.push(impulse.x, impulse.y, impulse.z);
+        if (player.onGround()) player.move(MoverType.SELF, new Vec3(0, TwilightSwordItem.GROUND_LIFT, 0));
         sync(player, state, TwilightSwordStatePacket.DASHING);
-        velocity(player, state, state.maximumDistance);
-        player.connection.send(new ClientboundSetEntityMotionPacket(player));
+        sendVelocity(player);
         player.playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 1, 0.65F);
     }
 
@@ -137,42 +131,27 @@ public final class TwilightSwordEvents {
             stop(player, state);
             return;
         }
-        ServerLevel level = player.serverLevel();
-        state.dashTicks++;
-        Vec3 current = player.position(), movement = current.subtract(state.previous);
-        double forward = movement.dot(state.direction);
-        double sideways = movement.x * state.direction.z - movement.z * state.direction.x;
-        double step = Math.max(0, forward), remaining = Math.max(0, state.maximumDistance - state.travelled);
-        if (step > remaining + 0.01) {
-            // Normally the local movement cap already does this. Keep the
-            // server authoritative even if latency/knockback overshoots it.
-            current = state.previous.lerp(current, remaining / step);
-            player.connection.teleport(current.x, current.y, current.z, player.getYRot(), player.getXRot());
-            step = remaining;
-        }
-        if (step > 1.0E-4) {
-            damageAlongPath(player, state, state.previous, current);
-            level.sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() + 0.5, player.getZ(), 12, 0.35, 0.35, 0.35, 0.03);
-        }
-        state.travelled += step;
+        Vec3 current = player.position();
+        boolean hit = damageAlongPath(player, state, state.previous, current);
+        if (current.distanceToSqr(state.previous) > 1.0E-8)
+            player.serverLevel().sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() + 0.5, player.getZ(), 12, 0.35, 0.35, 0.35, 0.03);
         state.previous = current;
-        state.stalledTicks = step < 0.02 ? state.stalledTicks + 1 : 0;
-        // A wall or a crouching ledge can clip just one movement axis.
-        // End the dash instead of repeatedly pushing/sliding along that wall.
-        if (state.travelled >= state.maximumDistance - 0.01 || Math.abs(sideways) > 0.05 || forward < -0.05 || state.dashTicks >= 40 || state.dashTicks > 1 && player.horizontalCollision || state.dashTicks > 6 && state.stalledTicks >= 3) {
-            stop(player, state);
-            return;
+        // Native riptide rebounds on contact, stops its attack at a wall, and
+        // otherwise expires after twenty ticks without deleting the momentum.
+        if (hit) {
+            player.setDeltaMovement(player.getDeltaMovement().scale(-0.2));
+            sendVelocity(player);
         }
-        velocity(player, state, state.maximumDistance - state.travelled);
+        if (hit || player.horizontalCollision || ++state.dashTicks >= TwilightSwordItem.DASH_TICKS)
+            stop(player, state);
     }
 
-    private static void velocity(ServerPlayer player, DashState state, double remaining) {
-        double speed = Math.min(TwilightSwordItem.DASH_SPEED, Math.max(0, remaining));
-        player.setDeltaMovement(state.direction.x * speed, player.getDeltaMovement().y, state.direction.z * speed);
+    private static void sendVelocity(ServerPlayer player) {
         player.hurtMarked = true;
+        player.connection.send(new ClientboundSetEntityMotionPacket(player));
     }
 
-    private static void damageAlongPath(ServerPlayer player, DashState state, Vec3 from, Vec3 to) {
+    private static boolean damageAlongPath(ServerPlayer player, DashState state, Vec3 from, Vec3 to) {
         ServerLevel level = player.serverLevel();
         double halfWidth = player.getBbWidth() / 2D;
         AABB sweep = new AABB(from, to).inflate(halfWidth + 0.4, 0, halfWidth + 0.4).expandTowards(0, player.getBbHeight(), 0);
@@ -192,17 +171,13 @@ public final class TwilightSwordEvents {
                 victim.push(state.direction.x * 0.8, 0.25, state.direction.z * 0.8);
                 victim.hurtMarked = true;
                 player.setLastHurtMob(victim);
-                if (state.sword.isEmpty()) break;
             }
+            return true;
         }
+        return false;
     }
 
     private static void stop(ServerPlayer player, DashState state) {
-        if (state.dashing) {
-            player.setDeltaMovement(0, player.getDeltaMovement().y, 0);
-            player.hurtMarked = true;
-            player.connection.send(new ClientboundSetEntityMotionPacket(player));
-        }
         state.dashing = false;
         state.charge = 0;
         state.needsRelease = true;
@@ -212,9 +187,8 @@ public final class TwilightSwordEvents {
     }
 
     private static void sync(ServerPlayer player, DashState state, int mode) {
-        Vec3 direction = state.direction == null ? Vec3.ZERO : state.direction;
-        Vec3 origin = state.origin == null ? player.position() : state.origin;
-        PacketDistributor.sendToPlayersTrackingEntityAndSelf(player, new TwilightSwordStatePacket(player.getId(), player.getUUID(), mode, state.charge, (float) direction.x, (float) direction.z, state.maximumDistance, origin.x, origin.z));
+        PacketDistributor.sendToPlayersTrackingEntityAndSelf(player,
+                new TwilightSwordStatePacket(player.getId(), player.getUUID(), mode, state.charge));
     }
 
     @SubscribeEvent

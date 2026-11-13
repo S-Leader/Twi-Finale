@@ -13,7 +13,6 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -117,7 +116,6 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         return SynchedEntityData.defineId(TheTwilightHierophantEntity.class, serializer);
     }
 
-    private final ServerBossEvent shieldBar = new ServerBossEvent(Component.empty(), BossEvent.BossBarColor.WHITE, BossEvent.BossBarOverlay.PROGRESS);
     private AABB arena;
     private final HierophantShield cubeShield = new HierophantShield(this);
     private boolean shieldCollision, routeShieldDamage, reflectingDamage;
@@ -215,7 +213,6 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
             cubeShield.restore(hp, hp);
         }
         setDropChance(EquipmentSlot.MAINHAND, 0);
-        shieldBar.setVisible(false);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -911,14 +908,12 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         setNoAi(true);
         setNoGravity(true);
         setDeltaMovement(Vec3.ZERO);
-        shieldBar.setVisible(false);
         getBossBar().setVisible(false);
         if (level() instanceof ServerLevel server) killSummonedAdherents(server);
     }
 
     private void tickMonstrosityBridge(ServerLevel server) {
         getBossBar().setVisible(false);
-        shieldBar.setVisible(false);
         if (monstrosityBridgeStage == 2) {
             // Upgrade old saves: transfer the previously hidden body into its loaded custodian.
             if (encounterMonstrosity != null && server.getEntity(encounterMonstrosity) instanceof CastleMonstrosityEntity beast && beast.storeHierophant(this))
@@ -1947,29 +1942,30 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         }
     }
 
+    @Override
+    protected void tickBossBar() {
+        updateBars();
+    }
+
     private void updateBars() {
-        // The visual never fades below 50%, but the HP bar must still reach zero.
-        shieldBar.setProgress(Mth.clamp(getShieldHealth() / cubeShield.getMaxHealth(), 0, 1));
-        shieldBar.setColor(isShieldRed() ? BossEvent.BossBarColor.RED : BossEvent.BossBarColor.BLUE);
-        shieldBar.setVisible(entityData.get(ARENA_READY) && hasShield() && entityData.get(INTRO_TIME) >= 20 && isAlive());
+        // Like the native Lich: the same bar shows shield HP, then body HP.
+        boolean shielded = getPhase() == 1 && hasShield();
+        var bar = getBossBar();
+        float progress = shielded ? getShieldHealth() / cubeShield.getMaxHealth() : getHealth() / getMaxHealth();
+        bar.setProgress(Mth.clamp(progress, 0, 1));
+        int color = shielded ? (isShieldRed() ? 0xFF3333 : 0x3366FF) : getBossBarColor();
+        var overlay = shielded ? BossEvent.BossBarOverlay.NOTCHED_10 : BossEvent.BossBarOverlay.PROGRESS;
+        if (bar.getBarColor() != color || bar.getOverlay() != overlay) bar.updateStyle(color, overlay, true);
     }
 
     @Override
     public void startSeenByPlayer(ServerPlayer player) {
         super.startSeenByPlayer(player);
-        shieldBar.addPlayer(player);
         updateBars();
     }
 
     @Override
-    public void stopSeenByPlayer(ServerPlayer player) {
-        super.stopSeenByPlayer(player);
-        shieldBar.removePlayer(player);
-    }
-
-    @Override
     public void remove(RemovalReason reason) {
-        shieldBar.removeAllPlayers();
         if (reason == RemovalReason.DISCARDED && level() instanceof ServerLevel server) {
             summoningCircles.clear();
             for (Adherent minion : server.getEntitiesOfClass(Adherent.class, getBoundingBox().inflate(48), e -> e.getPersistentData().hasUUID("FinaleHierophantOwner") && getUUID().equals(e.getPersistentData().getUUID("FinaleHierophantOwner"))))
@@ -2025,7 +2021,6 @@ public class TheTwilightHierophantEntity extends BaseTFBoss implements ISkillEnt
         setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         updateShieldCollision();
-        shieldBar.setVisible(false);
         if (getPhase() == 4) {
             setNoGravity(true);
             noPhysics = true;

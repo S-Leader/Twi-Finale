@@ -4,7 +4,7 @@ license = "Finale: All Rights Reserved; Twilight Forest-derived code: LGPL-2.1-o
 
 [[mods]]
 modId = "twilightforest_finale"
-version = "0.0.2"
+version = "0.0.3"
 displayName = "Twilight Forest Finale"
 authors = "Vzling, shuixingshow, keletu."
 description = '''Final bosses for twilight forest'''

@@ -13,7 +13,9 @@
     "ForceFieldBlockMixin",
     "GiantSwordItemMixin",
     "HierophantIceBombMixin",
-    "ToolEventsMixin"
+    "ToolEventsMixin",
+    "VioletCastleRuneBlockMixin",
+    "VioletCastleRuneStateMixin"
   ],
   "client": [
     "ItemInHandRendererMixin",

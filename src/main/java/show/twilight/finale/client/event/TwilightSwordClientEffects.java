@@ -14,18 +14,15 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
-import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import show.twilight.finale.TwilightFinaleMod;
 import show.twilight.finale.client.animation.TwilightSwordPlayerAnimation;
-import show.twilight.finale.init.ModItem;
 import show.twilight.finale.item.TwilightSwordItem;
 import show.twilight.finale.network.TwilightSwordStatePacket;
 
@@ -41,24 +38,7 @@ public final class TwilightSwordClientEffects {
     private static final Map<PlayerRenderer, PlayerModel<AbstractClientPlayer>> GHOST_MODELS = new WeakHashMap<>();
     private static ClientLevel lastLevel;
 
-    private static final class State {
-        final int mode;
-        final Vec3 direction;
-        final double maximumDistance;
-        final long received;
-        Vec3 previous;
-        double travelled;
-        boolean movementFinished;
-
-        State(TwilightSwordStatePacket packet, AbstractClientPlayer player, long time) {
-            mode = packet.mode();
-            direction = new Vec3(packet.directionX(), 0, packet.directionZ()).normalize();
-            maximumDistance = packet.distance();
-            previous = player.position();
-            travelled = Math.max(0, player.position()
-                    .subtract(new Vec3(packet.originX(), player.getY(), packet.originZ())).dot(direction));
-            received = time;
-        }
+    private record State(int mode, long received) {
     }
 
     private record Bone(PartPose pose, float xScale, float yScale, float zScale, boolean visible, boolean skipDraw) {
@@ -80,11 +60,15 @@ public final class TwilightSwordClientEffects {
         if (!(mc.level.getEntity(packet.entityId()) instanceof AbstractClientPlayer player)
                 || !player.getUUID().equals(packet.playerId())) return;
         TwilightSwordPlayerAnimation.update(player, packet.mode());
+        State previous = STATES.get(packet.playerId());
         if (packet.mode() == TwilightSwordStatePacket.IDLE) {
-            State old = STATES.remove(packet.playerId());
-            if (player == mc.player && old != null && old.mode == TwilightSwordStatePacket.DASHING)
-                player.setDeltaMovement(0, player.getDeltaMovement().y, 0);
-        } else STATES.put(packet.playerId(), new State(packet, player, mc.level.getGameTime()));
+            STATES.remove(packet.playerId());
+        } else {
+            STATES.put(packet.playerId(), new State(packet.mode(), mc.level.getGameTime()));
+            if (player == mc.player && packet.mode() == TwilightSwordStatePacket.DASHING
+                    && (previous == null || previous.mode != TwilightSwordStatePacket.DASHING) && player.onGround())
+                player.move(MoverType.SELF, new Vec3(0, TwilightSwordItem.GROUND_LIFT, 0));
+        }
     }
 
     private static void resetLevel(ClientLevel level) {
@@ -104,51 +88,6 @@ public final class TwilightSwordClientEffects {
         long now = level.getGameTime();
         STATES.entrySet().removeIf(entry -> now - entry.getValue().received > 45);
         HISTORIES.entrySet().removeIf(entry -> now - entry.getValue().updated > 12);
-    }
-
-    @SubscribeEvent
-    public static void movement(PlayerTickEvent.Pre event) {
-        var player = Minecraft.getInstance().player;
-        if (player == null || event.getEntity() != player) return;
-        State state = STATES.get(player.getUUID());
-        if (state == null || state.mode != TwilightSwordStatePacket.DASHING) return;
-        if (!player.isAlive() || !player.getMainHandItem().is(ModItem.TWILIGHT_SWORD.get())) {
-            STATES.remove(player.getUUID());
-            player.setDeltaMovement(0, player.getDeltaMovement().y, 0);
-            return;
-        }
-        double remaining = Math.max(0, state.maximumDistance - state.travelled);
-        double speed = state.movementFinished ? 0 : Math.min(TwilightSwordItem.DASH_SPEED, remaining);
-        player.setDeltaMovement(state.direction.x * speed, player.getDeltaMovement().y, state.direction.z * speed);
-    }
-
-    @SubscribeEvent
-    public static void afterMovement(PlayerTickEvent.Post event) {
-        var player = Minecraft.getInstance().player;
-        if (player == null || event.getEntity() != player) return;
-        State state = STATES.get(player.getUUID());
-        if (state == null || state.mode != TwilightSwordStatePacket.DASHING) return;
-        Vec3 movement = player.position().subtract(state.previous);
-        double forward = movement.dot(state.direction);
-        double sideways = movement.x * state.direction.z - movement.z * state.direction.x;
-        state.travelled += Math.max(0, forward);
-        state.previous = player.position();
-        if (player.horizontalCollision || Math.abs(sideways) > 0.05 || forward < -0.05
-                || state.travelled >= state.maximumDistance - 0.01) {
-            state.movementFinished = true;
-            player.setDeltaMovement(0, player.getDeltaMovement().y, 0);
-        }
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void input(MovementInputUpdateEvent event) {
-        State state = STATES.get(event.getEntity().getUUID());
-        if (state == null || state.mode != TwilightSwordStatePacket.DASHING) return;
-        var input = event.getInput();
-        input.leftImpulse = input.forwardImpulse = 0;
-        input.up = input.down = input.left = input.right = false;
-        input.jumping = false;
-        event.getEntity().xxa = event.getEntity().zza = 0;
     }
 
     /**

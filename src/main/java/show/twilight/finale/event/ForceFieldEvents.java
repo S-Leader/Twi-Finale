@@ -17,6 +17,7 @@ import show.twilight.finale.capabilities.shield.IForceFieldCapability;
 import show.twilight.finale.entity.AdherentHighPriestEntity;
 import show.twilight.finale.entity.projectile.ProverbsBolt;
 import show.twilight.finale.network.UpdateForceFieldPacket;
+import twilightforest.entity.projectile.CubeOfAnnihilation;
 
 @EventBusSubscriber
 public class ForceFieldEvents {
@@ -32,7 +33,7 @@ public class ForceFieldEvents {
         ForceFieldCapabilityList.get(entity).ifPresent(cap -> {
             if (cap.getFieldsLeft() > 0 && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
                 if (entity instanceof AdherentHighPriestEntity) {
-                    if (source.getDirectEntity() instanceof ProverbsBolt) {
+                    if (source.getDirectEntity() instanceof ProverbsBolt || source.getDirectEntity() instanceof CubeOfAnnihilation) {
                         cap.breakField();
                     } else {
                         cap.triggerShake();

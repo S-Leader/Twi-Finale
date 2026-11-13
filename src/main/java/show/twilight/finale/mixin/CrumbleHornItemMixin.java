@@ -31,7 +31,7 @@ public abstract class CrumbleHornItemMixin {
     private void onCrumbleBlock(ServerLevel world, LivingEntity living, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
-        if (state.isAir()) {
+        if (state.isAir() || state.is(TFBlocks.VIOLET_CASTLE_RUNE_BRICK.get())) {
             cir.setReturnValue(false);
         } else if (living instanceof Player && NeoForge.EVENT_BUS.post(new BlockEvent.BreakEvent(world, pos, state, (Player) living)).isCanceled()) {
             cir.setReturnValue(false);
