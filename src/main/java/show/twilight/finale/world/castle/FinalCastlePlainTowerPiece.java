@@ -12,10 +12,6 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import twilightforest.init.TFBlocks;
 
-/**
- * Saved final pass for ONLY the tower whose roof contains the Finalslayer.
- * Never changes the shared castle decorator or any neighbouring tower's palette.
- */
 public final class FinalCastlePlainTowerPiece extends StructurePiece {
     private final BoundingBox towerBounds;
     private final int roofBaseY;
@@ -36,7 +32,7 @@ public final class FinalCastlePlainTowerPiece extends StructurePiece {
         if (b.length != 6) throw new IllegalArgumentException("Missing Finalslayer tower bounds");
         towerBounds = new BoundingBox(b[0], b[1], b[2], b[3], b[4], b[5]);
         roofBaseY = tag.getInt("TreasureRoofBaseY");
-        fillSpire = tag.getBoolean("FillTreasureSpire"); // Old saved starts retain their old hollow roof.
+        fillSpire = tag.getBoolean("FillTreasureSpire");
     }
 
     @Override
@@ -58,8 +54,7 @@ public final class FinalCastlePlainTowerPiece extends StructurePiece {
                     var state = level.getBlockState(pos);
                     if (y < roofBaseY && !towerBounds.isInside(pos)) continue;
                     if (state.is(TFBlocks.CASTLE_ROOF_TILE)) underRoof = true;
-                    // Follow the ACTUAL placed black roof column, not its rectangular
-                    // bounds. This preserves the stepped silhouette, trims and facade.
+
                     if (fillSpire && underRoof && y >= roofBaseY && state.isAir()
                             && x >= towerBounds.minX() && x <= towerBounds.maxX()
                             && z >= towerBounds.minZ() && z <= towerBounds.maxZ())

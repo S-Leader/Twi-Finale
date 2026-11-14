@@ -14,9 +14,6 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-/**
- * Three walkable flights; the lower entrance is in the next reserved bay, not inside this shaft.
- */
 public final class RevivedBasementDescent extends TFStructureComponentOld {
     private final BlockPos top;
 
@@ -59,8 +56,7 @@ public final class RevivedBasementDescent extends TFStructureComponentOld {
     public void postProcess(WorldGenLevel level, StructureManager structures, ChunkGenerator generator, RandomSource random,
                             BoundingBox clip, ChunkPos chunk, BlockPos pivot) {
         fill(level, clip, 5, -48, 1, 19, -1, 24, deco.blockState);
-        // The top platform stays INSIDE the exit room, so no missing north-side
-        // maze edge can leave the stairhead inaccessible behind a wall.
+
         fill(level, clip, 6, 0, 5, 13, 0, 5, deco.blockState);
         fill(level, clip, 6, 1, 5, 13, 4, 5, AIR);
         fill(level, clip, 11, 1, 5, 13, 4, 12, AIR);
@@ -75,7 +71,7 @@ public final class RevivedBasementDescent extends TFStructureComponentOld {
         fill(level, clip, 6, -47, 22, 18, -44, 24, AIR);
         fill(level, clip, 10, -48, 22, 14, -43, 28, deco.blockState);
         fill(level, clip, 11, -47, 22, 13, -44, 28, AIR);
-        // Reopen the side of the bottom landing after adding the narrow corridor walls.
+
         fill(level, clip, 6, -47, 22, 18, -44, 24, AIR);
     }
 }

@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:advancement_reward",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:written_book",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "minecraft:item_name": {
+                  "translate": "twilightforest.book.castle"
+                },
+                "minecraft:written_book_content": {
+                  "title": "",
+                  "author": "twilightforest.book.author",
+                  "generation": 3,
+                  "pages": [
+                    {
+                      "raw": "{\"translate\":\"twilightforest.book.castle.1\"}"
+                    },
+                    {
+                      "raw": "{\"translate\":\"twilightforest.book.castle.2\"}"
+                    },
+                    {
+                      "raw": "{\"translate\":\"twilightforest.book.castle.3\"}"
+                    },
+                    {
+                      "raw": "{\"translate\":\"twilightforest.book.castle.4\"}"
+                    }
+                  ],
+                  "resolved": true
+                },
+                "twilightforest:translatable_book": {}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

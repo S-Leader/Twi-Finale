@@ -4,10 +4,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 
-/**
- * Authoritative capability state. The owner saves its NBT and publishes a
- * SynchedEntityData snapshot; client snapshots never feed back into the server.
- */
 public final class HierophantShield implements IHierophantShield {
     public static final float CAPACITY = 200;
     private final TheTwilightHierophantEntity owner;
@@ -64,7 +60,7 @@ public final class HierophantShield implements IHierophantShield {
 
     public void resetMotion() {
         if (owner.level().isClientSide()) return;
-        // Target loss/skill cancellation must not shorten the stop window.
+
         changed();
     }
 
@@ -86,13 +82,13 @@ public final class HierophantShield implements IHierophantShield {
         tag.putBoolean("RequiresPhysical", physical);
         tag.putInt("PolarityVersion", 2);
         tag.putInt("ColourTicks", colourTicks);
-        // A collision flight is cancelled on reload, never resumed into a wall.
+
         return tag;
     }
 
     public void deserializeNBT(CompoundTag tag) {
         float max = tag.getFloat("MaxHealth"), hp = tag.getFloat("Health");
-        // Migrate the former 100-HP capacity without refilling a damaged or broken shield.
+
         float fraction = Float.isFinite(max) && max > 0 && Float.isFinite(hp) ? Mth.clamp(hp / max, 0, 1) : 0;
         applySnapshot(fraction * CAPACITY, CAPACITY, tag.getBoolean("RequiresPhysical"));
         colourTicks = Mth.clamp(tag.getInt("ColourTicks"), 0, 199);

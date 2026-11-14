@@ -14,7 +14,6 @@ import twilightforest.world.components.structures.TFStructureComponentOld;
 
 import java.util.ArrayList;
 
-
 public class FinalCastleWreckedTowerComponent extends FinalCastleDamagedTowerComponent {
 
     public FinalCastleWreckedTowerComponent(StructurePieceSerializationContext ctx, CompoundTag nbt) {
@@ -32,23 +31,10 @@ public class FinalCastleWreckedTowerComponent extends FinalCastleDamagedTowerCom
             this.deco = ((TFStructureComponentOld) parent).deco;
         }
 
-//    		// add foundation
-//    		Foundation13 foundation = new Foundation13(rand, 4, this);
-//    		list.add(foundation);
-//    		foundation.buildComponent(this, list, rand);
-
-        // add thorns
         FinalCastleFoundation13Component thorns = new FinalCastleFoundation13ComponentThorns(0, this, getLocatorPosition().getX(), getLocatorPosition().getY(), getLocatorPosition().getZ());
         list.addPiece(thorns);
         thorns.addChildren(this, list, rand);
 
-//    		// add roof
-//    		StructureTFComponentOld roof = rand.nextBoolean() ? new Roof13Conical(rand, 4, this) :  new Roof13Crenellated(rand, 4, this);
-//    		list.add(roof);
-//    		roof.buildComponent(this, list, rand);
-
-        // keep on building?
-//    		this.buildNonCriticalTowers(parent, list, rand);
     }
 
     @Override

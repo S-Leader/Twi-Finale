@@ -12,7 +12,6 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-
 public class FinalCastleDungeonForgeRoomComponent extends TFStructureComponentOld {
     private final boolean revivedEntrance;
 
@@ -30,10 +29,9 @@ public class FinalCastleDungeonForgeRoomComponent extends TFStructureComponentOl
     public FinalCastleDungeonForgeRoomComponent(int i, int x, int y, int z, Direction direction, boolean revivedEntrance) {
         super(FinaleCastlePieces.TFFCDunBoR.get(), i, x, y, z);
         this.revivedEntrance = revivedEntrance;
-        this.spawnListIndex = 3; // forge monsters
+        this.spawnListIndex = 3;
         this.setOrientation(direction);
-        // local (15,0,15) is the stair landing anchor in every orientation.
-        // The legacy helper's EAST branch otherwise widens Z to 66 blocks.
+
         this.boundingBox = switch (direction) {
             case WEST -> new BoundingBox(x - 35, y, z - 15, x + 15, y + 30, z + 35);
             case NORTH -> new BoundingBox(x - 35, y, z - 35, x + 15, y + 30, z + 15);
@@ -56,7 +54,5 @@ public class FinalCastleDungeonForgeRoomComponent extends TFStructureComponentOl
     public void postProcess(WorldGenLevel world, StructureManager manager, ChunkGenerator generator, RandomSource rand, BoundingBox sbb, ChunkPos chunkPosIn, BlockPos blockPos) {
         this.generateAirBox(world, sbb, 0, 0, 0, 50, 30, 50);
 
-        // sign
-        // The four saved templates are independent, chunk-clipped pieces.
     }
 }

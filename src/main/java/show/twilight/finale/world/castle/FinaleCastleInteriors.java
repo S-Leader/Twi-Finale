@@ -1,6 +1,9 @@
 package show.twilight.finale.world.castle;
 
+import java.util.List;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -8,15 +11,12 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
-import java.util.List;
-
 final class FinaleCastleInteriors {
     private FinaleCastleInteriors() {
     }
 
     static void append(StructurePiecesBuilder pieces, StructureTemplateManager manager, long worldSeed) {
-        // Interiors are placed after all shells. A neighbouring shell must not erase
-        // the already placed parkour, boss spawner, or quarter of the forge room.
+
         for (StructurePiece piece : List.copyOf(pieces.pieces)) {
             if (piece instanceof FinalCastleLargeTowerComponent) {
                 add(pieces, manager, piece, "parkour_large", 11, 1, 1, Mirror.FRONT_BACK);
@@ -25,12 +25,11 @@ final class FinaleCastleInteriors {
                 add(pieces, manager, piece, "parkour_bell_top", 1, 57, 1, Mirror.NONE);
                 add(pieces, manager, piece, "bell_entry_platform", 1, 8, 1, Mirror.NONE);
             } else if (piece instanceof FinalCastleDungeonForgeRoomComponent) {
-                // A single dense 51x31x51 template owns all AIR and solid blocks.
-                // Keep the old four assets/readers for already saved structure starts.
+
                 add(pieces, manager, piece, "forge_room_complete", 0, 0, 0, Mirror.NONE);
                 pieces.addPiece(new FinalCastleForgeAccessComponent((FinalCastleDungeonForgeRoomComponent) piece));
             } else if (piece.getClass() == FinalCastleDungeonRoom31Component.class) {
-                // No random-layout RNG consumption, no new rooms, no changes to maze edges.
+
                 var b = piece.getBoundingBox();
                 var random = RandomSource.create(worldSeed ^ b.minX() * 321534781L ^ b.minZ() * 756839L ^ b.minY() * 1099511628211L);
                 int variant = random.nextInt(7);
@@ -39,8 +38,7 @@ final class FinaleCastleInteriors {
                 pieces.addPiece(new FinalCastleRoomStructurePiece(center, variant, rotation, random.nextLong()));
             }
         }
-        // Exactly one saved treasure placement per accepted castle, chosen once,
-        // after all shells/templates so nothing later erases the hidden reward.
+
         var spires = pieces.pieces.stream().filter(p -> p instanceof FinalCastleRoof13ConicalComponent).toList();
         if (spires.isEmpty())
             spires = pieces.pieces.stream().filter(p -> p instanceof FinalCastleRoof13PeakedComponent).toList();
@@ -55,14 +53,12 @@ final class FinaleCastleInteriors {
                         && p.getBoundingBox().minZ() - 2 == roof.minZ() && p.getBoundingBox().maxZ() + 2 == roof.maxZ()
                         && p.getBoundingBox().maxY() - 1 == roof.minY()).findFirst().orElseThrow(
                         () -> new IllegalStateException("Missing owner of the Finalslayer spire"));
-        // The legacy cone draws higher than its recorded bounding box. Cover the
-        // complete real tip when filling, but leave all OTHER spires unchanged.
+
         int roofTop = roofPiece instanceof FinalCastleRoof13ConicalComponent cone
                 ? roof.minY() + cone.slope * 7 + 2 : Math.max(roof.maxY(), roof.minY() + 19);
         int chestFloor = roof.minY() + (roofPiece instanceof FinalCastleRoof13ConicalComponent cone ? cone.slope * 4 : 12);
         pieces.addPiece(new FinalCastlePlainTowerPiece(tower.getBoundingBox(), roof, roofTop));
-        // Centre the 3x5x3 trap on the spire. Its barrel is two blocks above
-        // the base, at the same height as the former chest.
+
         BlockPos at = new BlockPos(roof.getCenter().getX() - 1, Math.min(chestFloor - 1, roofTop - 4), roof.getCenter().getZ() - 1);
         pieces.addPiece(new FinaleCastleTemplatePiece(manager, "spire_treasure", at, Rotation.NONE, Mirror.NONE));
     }
@@ -71,7 +67,7 @@ final class FinaleCastleInteriors {
                             String name, int x, int y, int z, Mirror mirror) {
         Rotation rotation = rotation(owner);
         var template = new FinaleCastleTemplatePiece(manager, name, local(owner, x, y, z), rotation, mirror);
-        if (template.template().getSize().equals(net.minecraft.core.Vec3i.ZERO))
+        if (template.template().getSize().equals(Vec3i.ZERO))
             throw new IllegalStateException("Missing Finale castle template: " + name);
         pieces.addPiece(template);
     }
@@ -85,9 +81,6 @@ final class FinaleCastleInteriors {
         };
     }
 
-    /**
-     * Coordinates match TFStructureComponentOld, not vanilla's mirrored NORTH mapping.
-     */
     static BlockPos local(StructurePiece owner, int x, int y, int z) {
         var b = owner.getBoundingBox();
         return switch (owner.getOrientation()) {

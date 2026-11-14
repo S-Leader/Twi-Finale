@@ -10,12 +10,16 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+
 import show.twilight.finale.client.model.TheTwilightHierophantModel;
+import show.twilight.finale.client.renderer.HierophantRenderTypes;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 
 public class HierophantOuterLayer<T extends TheTwilightHierophantEntity>
@@ -42,9 +46,9 @@ public class HierophantOuterLayer<T extends TheTwilightHierophantEntity>
             model.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
             model.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
             boolean dissolving = entity.getPhase() == 4 && entity.isDeadOrDying();
-            VertexConsumer consumer = bufferSource.getBuffer(dissolving ? show.twilight.finale.client.renderer.HierophantRenderTypes.disintegration(texture) : RenderType.entityTranslucent(texture));
-            float progress = dissolving ? net.minecraft.util.Mth.clamp((entity.getActionTime() + partialTicks) / TheTwilightHierophantEntity.DEATH_DURATION, 0.001F, 1) : 1;
-            model.renderToBuffer(poseStack, consumer, packedLight, dissolving ? net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY : LivingEntityRenderer.getOverlayCoords(entity, 0.0f), FastColor.ARGB32.colorFromFloat(progress, 1.0f, 1.0f, 1.0f));
+            VertexConsumer consumer = bufferSource.getBuffer(dissolving ? HierophantRenderTypes.disintegration(texture) : RenderType.entityTranslucent(texture));
+            float progress = dissolving ? Mth.clamp((entity.getActionTime() + partialTicks) / TheTwilightHierophantEntity.DEATH_DURATION, 0.001F, 1) : 1;
+            model.renderToBuffer(poseStack, consumer, packedLight, dissolving ? OverlayTexture.NO_OVERLAY : LivingEntityRenderer.getOverlayCoords(entity, 0.0f), FastColor.ARGB32.colorFromFloat(progress, 1.0f, 1.0f, 1.0f));
         }
     }
 }

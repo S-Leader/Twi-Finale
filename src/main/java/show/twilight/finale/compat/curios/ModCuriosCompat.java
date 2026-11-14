@@ -4,8 +4,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import show.twilight.finale.init.ModItem;
-import show.twilight.finale.item.FinalTrophyItem;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
@@ -13,6 +11,10 @@ import top.theillusivec4.curios.api.event.DropRulesEvent;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
 import twilightforest.compat.curios.renderer.CharmOfLifeNecklaceRenderer;
 import twilightforest.compat.curios.renderer.CurioHeadRenderer;
+
+import show.twilight.finale.init.ModItem;
+import show.twilight.finale.item.CurioItem;
+import show.twilight.finale.item.FinalTrophyItem;
 
 public final class ModCuriosCompat {
     private ModCuriosCompat() {
@@ -26,11 +28,10 @@ public final class ModCuriosCompat {
             }
         };
         ModItem.ITEMS.getEntries().forEach(item -> {
-            if (item.get() instanceof show.twilight.finale.item.CurioItem) CuriosApi.registerCurio(item.get(), curio);
+            if (item.get() instanceof CurioItem) CuriosApi.registerCurio(item.get(), curio);
         });
     }
 
-    // Modern Twilight Forest itself handles Charm of Keeping for Curios slots.
     public static void keepCurios(DropRulesEvent event) {
     }
 

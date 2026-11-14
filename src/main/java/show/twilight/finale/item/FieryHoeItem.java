@@ -1,6 +1,9 @@
 package show.twilight.finale.item;
 
+import java.util.List;
+
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,9 +13,8 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.common.EventBusSubscriber;
-import show.twilight.finale.util.EnchantmentsUtil;
 
-import java.util.List;
+import show.twilight.finale.util.EnchantmentsUtil;
 
 @EventBusSubscriber(modid = "twilightforest")
 public class FieryHoeItem
@@ -21,7 +23,7 @@ public class FieryHoeItem
         super(toolMaterial, properties.attributes(HoeItem.createAttributes(toolMaterial, -2, -2.2f)));
     }
 
-    public boolean isPrimaryItemFor(ItemStack stack, net.minecraft.core.Holder<Enchantment> enchantment) {
+    public boolean isPrimaryItemFor(ItemStack stack, Holder<Enchantment> enchantment) {
         return !enchantment.is(Enchantments.FIRE_ASPECT) && super.isPrimaryItemFor(stack, enchantment);
     }
 

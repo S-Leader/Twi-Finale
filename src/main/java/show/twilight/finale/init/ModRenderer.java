@@ -1,9 +1,12 @@
 package show.twilight.finale.init;
 
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import twilightforest.client.model.TFModelLayers;
+import twilightforest.init.TFEntities;
+
 import show.twilight.finale.client.model.LoyalWraithModel;
 import show.twilight.finale.client.renderer.*;
-import twilightforest.client.model.TFModelLayers;
 
 public class ModRenderer {
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -16,8 +19,8 @@ public class ModRenderer {
         event.registerEntityRenderer(ModEntity.HIEROPHANT_METEOR.get(), HierophantMeteorRenderer::new);
         event.registerEntityRenderer(ModEntity.HIEROPHANT_THROWN_WEAPON.get(), HierophantThrownWeaponRenderer::new);
         event.registerEntityRenderer(ModEntity.HIEROPHANT_FRAGMENT.get(), HierophantFragmentRenderer::new);
-        event.registerEntityRenderer(twilightforest.init.TFEntities.ADHERENT.get(), ColoredAdherentRenderer::new);
-        event.registerEntityRenderer(ModEntity.HOMING_VIS_SHARD.get(), net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+        event.registerEntityRenderer(TFEntities.ADHERENT.get(), ColoredAdherentRenderer::new);
+        event.registerEntityRenderer(ModEntity.HOMING_VIS_SHARD.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(ModEntity.ADHERENT_HIGH_PRIEST.get(), AdherentHighPriestRenderer::new);
         event.registerEntityRenderer(ModEntity.CASTLE_GUARDIAN.get(), CastleGuardianRenderer::new);
         event.registerEntityRenderer(ModEntity.THE_TWILIGHT_HIEROPHANT.get(), TheTwilightHierophantRenderer::new);

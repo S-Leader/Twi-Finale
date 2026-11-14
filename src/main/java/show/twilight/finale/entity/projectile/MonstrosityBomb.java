@@ -3,6 +3,7 @@ package show.twilight.finale.entity.projectile;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -11,9 +12,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import twilightforest.init.TFParticleType;
+
 import show.twilight.finale.entity.CastleMonstrosityEntity;
 import show.twilight.finale.init.ModEntity;
-import twilightforest.init.TFParticleType;
 
 public class MonstrosityBomb extends ThrowableProjectile {
     public MonstrosityBomb(EntityType<? extends MonstrosityBomb> type, Level level) {
@@ -57,7 +59,7 @@ public class MonstrosityBomb extends ThrowableProjectile {
         server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0, 0, 0, 0);
         server.sendParticles(TFParticleType.ANNIHILATE.get(), at.x, at.y, at.z, 70, 1.6, 1.6, 1.6, 0.12);
         server.sendParticles(TFParticleType.HUGE_SMOKE.get(), at.x, at.y, at.z, 25, 1.6, 1.6, 1.6, 0.04);
-        playSound(net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE.value(), 3, 0.65F);
+        playSound(SoundEvents.GENERIC_EXPLODE.value(), 3, 0.65F);
         for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class, new AABB(at, at).inflate(4))) {
             if (victim.distanceToSqr(at) > 16) continue;
             if (getOwner() instanceof CastleMonstrosityEntity beast ? !beast.canDamageWithSkill(victim) : getOwner() != null && getOwner().isAlliedTo(victim))

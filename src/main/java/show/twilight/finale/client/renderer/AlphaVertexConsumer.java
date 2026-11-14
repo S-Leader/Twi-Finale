@@ -1,10 +1,8 @@
 package show.twilight.finale.client.renderer;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 
-/**
- * Ordinary vertex buffers only: no framebuffer/postprocessing/OpenGL state.
- */
 record AlphaVertexConsumer(VertexConsumer delegate, float alpha, boolean noOverlay) implements VertexConsumer {
     AlphaVertexConsumer(VertexConsumer delegate, float alpha) {
         this(delegate, alpha, false);
@@ -30,7 +28,7 @@ record AlphaVertexConsumer(VertexConsumer delegate, float alpha, boolean noOverl
 
     @Override
     public VertexConsumer setUv1(int u, int v) {
-        if (noOverlay) delegate.setOverlay(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+        if (noOverlay) delegate.setOverlay(OverlayTexture.NO_OVERLAY);
         else delegate.setUv1(u, v);
         return this;
     }

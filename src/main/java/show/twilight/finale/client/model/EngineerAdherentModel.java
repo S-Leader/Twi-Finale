@@ -18,7 +18,7 @@ public final class EngineerAdherentModel extends AdherentModel {
         if (!(entity instanceof EngineerAdherentEntity engineer)) return;
         float time = engineer.getThrowTime() + age - entity.tickCount;
         if (time < 0 || time >= EngineerAdherentEntity.THROW_DURATION) return;
-        // A brief overhand throw: draw the hand back, release, then follow through.
+
         if (time <= EngineerAdherentEntity.THROW_TICK) {
             float windup = Mth.sin(time / EngineerAdherentEntity.THROW_TICK * Mth.HALF_PI);
             rightArm.xRot = Mth.lerp(windup, -0.2F, -2.5F);

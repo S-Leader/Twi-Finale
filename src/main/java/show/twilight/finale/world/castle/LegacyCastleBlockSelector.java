@@ -5,9 +5,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import twilightforest.init.TFBlocks;
 
-/**
- * Port of 1.7.10 StructureTFCastleBlocks; no external injection framework.
- */
 final class LegacyCastleBlockSelector extends StructurePiece.BlockSelector {
     @Override
     public void next(RandomSource random, int x, int y, int z, boolean wall) {

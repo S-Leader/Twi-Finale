@@ -14,9 +14,6 @@ import show.twilight.finale.block.entity.FinalTrophyBlockEntity;
 
 import java.util.function.Supplier;
 
-/**
- * Hierophant-only interaction. The existing High Priest trophy is not changed.
- */
 public final class HierophantTrophyBlocks {
     private HierophantTrophyBlocks() {
     }
@@ -25,7 +22,7 @@ public final class HierophantTrophyBlocks {
         if (level instanceof ServerLevel server)
             server.sendParticles(ParticleTypes.TOTEM_OF_UNDYING, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
                     18, 0.45, 0.4, 0.45, 0.05);
-        // No temporary Phantom sound: this trophy is intentionally silent.
+
         return InteractionResult.sidedSuccess(level.isClientSide());
     }
 

@@ -9,9 +9,6 @@ import show.twilight.finale.init.ModEntity;
 import twilightforest.block.entity.spawner.BossSpawnerBlockEntity;
 import twilightforest.init.TFParticleType;
 
-/**
- * Native TF one-shot boss spawning, including home assignment and self-removal.
- */
 public final class HierophantSpawnerBlockEntity extends BossSpawnerBlockEntity<TheTwilightHierophantEntity> {
     public HierophantSpawnerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.TWILIGHT_HIEROPHANT_SPAWNER.get(), ModEntity.THE_TWILIGHT_HIEROPHANT.get(), pos, state);

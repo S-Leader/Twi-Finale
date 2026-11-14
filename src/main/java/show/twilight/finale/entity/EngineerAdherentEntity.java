@@ -36,7 +36,6 @@ import show.twilight.finale.world.CastleEncounterProgress;
 import twilightforest.entity.EnforcedHomePoint;
 import twilightforest.entity.monster.Adherent;
 
-/** A unique workshop occupant: a short throwing swing, never an adherent charge. */
 public final class EngineerAdherentEntity extends Adherent implements EnforcedHomePoint {
     public static final int THROW_TICK = 5, THROW_DURATION = 12;
     private static final EntityDataAccessor<Long> THROW_START = SynchedEntityData.defineId(EngineerAdherentEntity.class, EntityDataSerializers.LONG);
@@ -114,7 +113,7 @@ public final class EngineerAdherentEntity extends Adherent implements EnforcedHo
         if (dead) return;
         ServerPlayer killer = source.getEntity() instanceof ServerPlayer player ? player
                 : getKillCredit() instanceof ServerPlayer player ? player : null;
-        // Vanilla can award player_killed_entity inside super.die, before loot generation.
+
         boolean giveNotes = killer != null && !EngineeringNotes.hasDiscovered(killer);
         int storyState = 0;
         if (level() instanceof ServerLevel level) {

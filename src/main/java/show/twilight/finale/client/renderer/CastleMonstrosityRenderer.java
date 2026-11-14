@@ -23,9 +23,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
 
-/**
- * Per-face Blockbench renderer: preserves the supplied compact UVs and bone hierarchy.
- */
 public class CastleMonstrosityRenderer extends EntityRenderer<CastleMonstrosityEntity> {
     private static final ResourceLocation TEXTURE = TwilightFinaleMod.prefix("textures/entity/castle_monstrosity.png");
     private static final ResourceLocation EMISSIVE = TwilightFinaleMod.prefix("textures/entity/castle_monstrosity_e.png");
@@ -67,7 +64,7 @@ public class CastleMonstrosityRenderer extends EntityRenderer<CastleMonstrosityE
     public void render(CastleMonstrosityEntity beast, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
         Map<String, Map<String, Vector3f>> animation = poseFor(beast, partial);
         pose.pushPose();
-        // Attack direction is the body's yaw, independently of vanilla head look interpolation.
+
         pose.mulPose(Axis.YP.rotationDegrees(180 - Mth.rotLerp(partial, beast.yBodyRotO, beast.yBodyRot)));
         pose.scale(0.8F, 0.8F, 0.8F);
         int color = beast.hurtTime > 0 ? 0xFFFF9999 : 0xFFFFFFFF;
@@ -111,7 +108,7 @@ public class CastleMonstrosityRenderer extends EntityRenderer<CastleMonstrosityE
                 sample(trap ? "GHAST_TRAP_BRACE" : "FIRE_JET_BRACE", 1, result, blend);
                 sample((trap ? "GHAST_TRAP_" : "FIRE_JET_") + (retract ? "RETRACT" : "EXTEND"), retract ? t / 20 : Math.max(0, (t - 20) / 20), result, 1);
                 if (trap && !retract && beast.hasCapturedTarget() && t >= CastleMonstrosityEntity.TRAP_PULL_END) {
-                    // Lift for eight ticks, then bring the bracing arm down exactly on TRAP_HIT.
+
                     float lift = t < 101 ? (float) Mth.smoothstep(Mth.clamp((t - 93) / 8, 0, 1)) : 1 - (float) Mth.smoothstep(Mth.clamp((t - 101) / 7, 0, 1));
                     add(result, "left_arm", "rotation", -75 * lift, -10 * lift, 30 * lift);
                     add(result, "left_middle", "rotation", 40 * lift, 0, 0);
@@ -119,7 +116,7 @@ public class CastleMonstrosityRenderer extends EntityRenderer<CastleMonstrosityE
             }
             default -> sample("IDLE", age / 20, result, 1);
         }
-        // Pistons are recessed while the relevant device is unused.
+
         if (action != CastleMonstrosityEntity.TRAP && action != CastleMonstrosityEntity.RETRACT_TRAP)
             put(result, "ghast_trap_piston", "position", new Vector3f(0, 7, 0));
         if (action != CastleMonstrosityEntity.FIRE && action != CastleMonstrosityEntity.RETRACT_FIRE)

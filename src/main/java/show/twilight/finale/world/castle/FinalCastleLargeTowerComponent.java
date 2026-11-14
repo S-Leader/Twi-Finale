@@ -47,7 +47,7 @@ public class FinalCastleLargeTowerComponent extends TowerWingComponent {
         if (parent != null && parent instanceof TFStructureComponentOld) {
             this.deco = ((TFStructureComponentOld) parent).deco;
         }
-        // add crown
+
         FinalCastleRoof9CrenellatedComponent roof = new FinalCastleRoof9CrenellatedComponent(4, this, getLocatorPosition().getX(), getLocatorPosition().getY(), getLocatorPosition().getZ());
         list.addPiece(roof);
         roof.addChildren(this, list, rand);
@@ -60,26 +60,19 @@ public class FinalCastleLargeTowerComponent extends TowerWingComponent {
 
         generateBox(world, sbb, 0, 0, 0, 12, 59, 12, false, rand, deco.randomBlocks);
 
-        // add branching runes
         int numBranches = 6 + decoRNG.nextInt(4);
         for (int i = 0; i < numBranches; i++) {
             makeGlyphBranches(world, decoRNG, this.getGlyphMeta(), sbb);
         }
 
-        // beard
         for (int i = 1; i < 4; i++) {
             generateBox(world, sbb, i, -(i * 2), i, 8 - i, 1 - (i * 2), 8 - i, false, rand, deco.randomBlocks);
         }
         this.placeBlock(world, deco.blockState, 4, -7, 4, sbb);
 
-        // door, first floor
         final BlockState castleDoor = TFBlocks.YELLOW_CASTLE_DOOR.get().defaultBlockState();
         this.generateBox(world, sbb, 0, 1, 1, 0, 4, 3, castleDoor, AIR, false);
 
-        // sign placed by template
-        // this.placeSignAtCurrentPosition(world, 6, 1, 6, "Parkour area 1", "Unique monster?", sbb);
-
-        // this.placeBlock(world, Blocks.JIGSAW.defaultBlockState().setValue(BlockStateProperties.ORIENTATION, FrontAndTop.WEST_UP), 0, 1, 2, sbb);
     }
 
     public BlockState getGlyphMeta() {

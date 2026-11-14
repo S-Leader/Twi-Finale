@@ -50,7 +50,7 @@ public class FinalCastleDungeonRoom31Component extends TowerWingComponent {
     public FinalCastleDungeonRoom31Component(StructurePieceType piece, int i, int x, int y, int z, Direction direction, int level) {
         super(piece, i, x, y, z);
         this.setOrientation(direction);
-        this.spawnListIndex = 2; // dungeon monsters
+        this.spawnListIndex = 2;
         this.size = 31;
         this.height = 7;
         this.level = level;
@@ -66,7 +66,6 @@ public class FinalCastleDungeonRoom31Component extends TowerWingComponent {
         int mySpread = this.getGenDepth() - parent.getGenDepth();
         int maxSpread = (this.level == 1) ? 2 : 3;
 
-        // add exit if we're far enough away and don't have one
         if (mySpread == maxSpread && !isExitBuildForLevel(parent)) {
             Rotation direction = RotationUtil.getRandomRotation(rand);
             for (int i = 0; i < 8 && !isExitBuildForLevel(parent); i++) {
@@ -77,7 +76,6 @@ public class FinalCastleDungeonRoom31Component extends TowerWingComponent {
             }
         }
 
-        // add other rooms
         if (mySpread < maxSpread) {
             Rotation direction = RotationUtil.getRandomRotation(rand);
             for (int i = 0; i < 12; i++) {
@@ -123,8 +121,6 @@ public class FinalCastleDungeonRoom31Component extends TowerWingComponent {
 
     protected boolean addDungeonExit(StructurePieceAccessor list, RandomSource rand, Rotation rotation) {
 
-        //TODO: check if we are sufficiently near the castle center
-
         rotation = rotation.getRotated(this.getRotation());
         BlockPos rc = this.getNewRoomCoords(rand, rotation);
         FinalCastleDungeonExitComponent dRoom = new FinalCastleDungeonExitComponent(this.genDepth + 1, rc.getX(), rc.getY(), rc.getZ(), rotation.rotate(Direction.SOUTH), this.level);
@@ -132,8 +128,7 @@ public class FinalCastleDungeonRoom31Component extends TowerWingComponent {
             if (!CastleGenerationBounds.allows(start, dRoom)) return false;
             StructurePiece intersect = TFStructureComponentOld.findIntersectingExcluding(start.pieces, dRoom.getBoundingBox(), this);
             if (intersect == null) {
-                // The exit, its descent, the next floor and ultimately the forge
-                // form one transaction. A failed far-away branch must not set hasExit.
+
                 StructurePiecesBuilder branch = new StructurePiecesBuilder();
                 branch.pieces.addAll(start.pieces);
                 branch.addPiece(dRoom);
@@ -148,7 +143,7 @@ public class FinalCastleDungeonRoom31Component extends TowerWingComponent {
     }
 
     private BlockPos getNewRoomCoords(RandomSource rand, Rotation rotation) {
-        // make the rooms connect around the corners, not the centers
+
         int offset = rand.nextInt(15) - 9;
         if (rand.nextBoolean()) {
             offset += this.size;
@@ -168,13 +163,10 @@ public class FinalCastleDungeonRoom31Component extends TowerWingComponent {
 
     @Override
     public void postProcess(WorldGenLevel world, StructureManager manager, ChunkGenerator generator, RandomSource rand, BoundingBox sbb, ChunkPos chunkPosIn, BlockPos blockPos) {
-        // The plan was accepted as a whole. Never silently omit individual
-        // rooms at biome borders and leave the next stairs leading into rock.
+
         RandomSource decoRNG = RandomSource.create(world.getSeed() + (this.boundingBox.minX() * 321534781L) ^ (this.boundingBox.minZ() * 756839L));
 
-        //TODO add a deadrock tag, or a tag for castle replaceables
         Predicate<BlockState> replacing = state -> state.isAir() || state.is(TFBlocks.DEADROCK) || state.is(TFBlocks.CRACKED_DEADROCK) || state.is(TFBlocks.WEATHERED_DEADROCK);
-
 
         this.fillWithAir(world, sbb, 0, 0, 0, this.size - 1, this.height - 1, this.size - 1, replacing);
 
@@ -192,11 +184,11 @@ public class FinalCastleDungeonRoom31Component extends TowerWingComponent {
         for (Rotation rotation : RotationUtil.ROTATIONS) {
 
             this.fillBlocksRotated(world, sbb, cs, 0, cs + 1, cs, this.height - 1, this.size - 2 - cs, forceField, rotation);
-            // verticals
+
             for (int z = cs; z < ((this.size - 1) - cs); z += 4) {
 
                 this.fillBlocksRotated(world, sbb, cs, 0, z, cs, this.height - 1, z, castleMagic, rotation);
-                // horizontals
+
                 int y = ((z - cs) % 8 == 0) ? decoRNG.nextInt(3) : decoRNG.nextInt(3) + 4;
                 this.fillBlocksRotated(world, sbb, cs, y, z + 1, cs, y, z + 3, castleMagic, rotation);
             }

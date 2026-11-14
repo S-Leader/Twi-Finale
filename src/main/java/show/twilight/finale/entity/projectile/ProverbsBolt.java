@@ -29,15 +29,17 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import show.twilight.finale.init.ModCriteriaTriggers;
-import show.twilight.finale.init.ModEntity;
-import show.twilight.finale.init.ModItem;
+import net.neoforged.neoforge.event.EventHooks;
 import twilightforest.block.ForceFieldBlock;
 import twilightforest.entity.projectile.ITFProjectile;
 import twilightforest.entity.projectile.TFThrowable;
 import twilightforest.init.TFBlocks;
 import twilightforest.init.TFDamageTypes;
 import twilightforest.init.TFParticleType;
+
+import show.twilight.finale.init.ModCriteriaTriggers;
+import show.twilight.finale.init.ModEntity;
+import show.twilight.finale.init.ModItem;
 
 @OnlyIn(value = Dist.CLIENT, _interface = ItemSupplier.class)
 public class ProverbsBolt extends TFThrowable implements ITFProjectile, ItemSupplier {
@@ -72,7 +74,7 @@ public class ProverbsBolt extends TFThrowable implements ITFProjectile, ItemSupp
                 return shape.clip(start, end, pos);
             }, bolt -> null);
             HitResult first = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-            if (field != null && this.level().getBlockState(field.getBlockPos()).getBlock() instanceof ForceFieldBlock && (first.getType() == HitResult.Type.MISS || start.distanceToSqr(field.getLocation()) <= start.distanceToSqr(first.getLocation()) + 1.0E-7) && !net.neoforged.neoforge.event.EventHooks.onProjectileImpact(this, field)) {
+            if (field != null && this.level().getBlockState(field.getBlockPos()).getBlock() instanceof ForceFieldBlock && (first.getType() == HitResult.Type.MISS || start.distanceToSqr(field.getLocation()) <= start.distanceToSqr(first.getLocation()) + 1.0E-7) && !EventHooks.onProjectileImpact(this, field)) {
                 this.setPos(field.getLocation());
                 this.onHit(field);
                 return;
@@ -130,7 +132,7 @@ public class ProverbsBolt extends TFThrowable implements ITFProjectile, ItemSupp
             BlockPos pos = result.getBlockPos();
             BlockState state = this.level().getBlockState(pos);
             if (state.getBlock() instanceof ForceFieldBlock && !state.is(TFBlocks.VIOLET_FORCE_FIELD.get()) && this.level().removeBlock(pos, false)) {
-                // A reflected High Priest bolt is not a use of the player's scepter.
+
                 if (this.getOwner() instanceof ServerPlayer player
                         && this.getPersistentData().hasUUID(SCEPTER_CASTER_TAG)
                         && player.getUUID().equals(this.getPersistentData().getUUID(SCEPTER_CASTER_TAG))) {

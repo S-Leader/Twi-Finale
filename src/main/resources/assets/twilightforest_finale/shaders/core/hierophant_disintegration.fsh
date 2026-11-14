@@ -17,11 +17,11 @@ out vec4 fragColor;
 
 void main() {
     vec4 color = texture(Sampler0, texCoord0);
-    // Apply the skin's own transparency before the dissolve. No separate white geometry.
+
     if (color.a < 0.1) discard;
     vec2 pixel = floor(texCoord0 * vec2(textureSize(Sampler0, 0)));
     float noise = fract(sin(dot(pixel, vec2(12.9898, 78.233))) * 43758.5453);
-    // Vertex alpha carries death progress, independently for each entity and robe pass.
+
     if (noise < vertexColor.a) discard;
     color *= vec4(vertexColor.rgb, 1.0) * ColorModulator;
     color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);

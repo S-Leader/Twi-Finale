@@ -15,10 +15,6 @@ import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-
-/**
- * Stair blocks heading to the entrance tower doors
- */
 public class FinalCastleEntranceStairsComponent extends TFStructureComponentOld {
 
     public FinalCastleEntranceStairsComponent(StructurePieceSerializationContext ctx, CompoundTag nbt) {

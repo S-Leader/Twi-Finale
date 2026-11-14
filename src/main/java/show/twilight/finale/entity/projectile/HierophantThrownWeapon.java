@@ -29,9 +29,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * Snowball movement/collision, with a knight weapon's item and impact damage.
- */
 public final class HierophantThrownWeapon extends ThrowableItemProjectile {
     private static final EntityDataAccessor<Boolean> SLAM_AXE = SynchedEntityData.defineId(HierophantThrownWeapon.class, EntityDataSerializers.BOOLEAN);
     private final Set<UUID> pierced = new HashSet<>();
@@ -76,9 +73,7 @@ public final class HierophantThrownWeapon extends ThrowableItemProjectile {
             Vec3 from = position(), to = from.add(getDeltaMovement());
             BlockHitResult wall = level().clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
             Vec3 end = wall.getType() == HitResult.Type.MISS ? to : wall.getLocation();
-            // Sweep every victim up to the first wall. Disabling vanilla's
-            // single entity hit below keeps its block sweep intact, even when
-            // several mobs stand directly in front of the landing surface.
+
             for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class,
                     getBoundingBox().expandTowards(getDeltaMovement()).inflate(0.3),
                     target -> target.isAlive() && !target.isSpectator() && target != boss
@@ -90,7 +85,7 @@ public final class HierophantThrownWeapon extends ThrowableItemProjectile {
                         TheTwilightHierophantEntity.AXE_SLAM_DAMAGE);
             }
         }
-        // Inherited ThrowableProjectile: gravity 0.03, air drag 0.99, water drag 0.8.
+
         super.tick();
         if (!level().isClientSide() && tickCount > 200) discard();
     }
@@ -116,8 +111,7 @@ public final class HierophantThrownWeapon extends ThrowableItemProjectile {
         if (isSlamAxe()) {
             if (hit instanceof BlockHitResult block) {
                 if (block.getDirection() != Direction.UP) {
-                    // A side/ceiling hit drops the axe down that surface. Only
-                    // landing on its top triggers the shock; no wall explosion.
+
                     Vec3 normal = Vec3.atLowerCornerOf(block.getDirection().getNormal());
                     setPos(block.getLocation().add(normal.scale(0.15)));
                     setDeltaMovement(0, Math.min(-0.2, getDeltaMovement().y), 0);

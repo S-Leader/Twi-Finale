@@ -25,9 +25,6 @@ import twilightforest.init.TFMobEffects;
 
 import java.util.UUID;
 
-/**
- * A real colliding projectile: first hovers above its caster, then launches and steers.
- */
 public final class HomingVisShard extends Projectile implements ItemSupplier {
     private UUID targetId;
     private int slot, age;

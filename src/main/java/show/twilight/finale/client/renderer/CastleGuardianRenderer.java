@@ -1,18 +1,22 @@
 package show.twilight.finale.client.renderer;
 
+import javax.annotation.Nonnull;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+
 import show.twilight.finale.client.model.CastleGuardianModel;
 import show.twilight.finale.entity.CastleGuardianEntity;
 import show.twilight.finale.runtime.client.layer.GlowLayer;
-
-import javax.annotation.Nonnull;
 
 public class CastleGuardianRenderer extends MobRenderer<CastleGuardianEntity, CastleGuardianModel<CastleGuardianEntity>> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "textures/entity/castle_guardian.png");
@@ -44,12 +48,12 @@ public class CastleGuardianRenderer extends MobRenderer<CastleGuardianEntity, Ca
     }
 
     @Override
-    public boolean shouldRender(CastleGuardianEntity entity, net.minecraft.client.renderer.culling.Frustum frustum, double x, double y, double z) {
+    public boolean shouldRender(CastleGuardianEntity entity, Frustum frustum, double x, double y, double z) {
         return super.shouldRender(entity, frustum, x, y, z) || entity.getLaserPhase() > 0 && frustum.isVisible(new AABB(entity.getBeamOrigin(), entity.getBeamEnd()).inflate(0.3));
     }
 
     @Override
-    public void render(CastleGuardianEntity entity, float yaw, float partial, PoseStack pose, net.minecraft.client.renderer.MultiBufferSource buffers, int light) {
+    public void render(CastleGuardianEntity entity, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
         super.render(entity, yaw, partial, pose, buffers, light);
         if (entity.getLaserPhase() == 0) return;
         var start = entity.getBeamOrigin().subtract(entity.position());
@@ -60,7 +64,7 @@ public class CastleGuardianRenderer extends MobRenderer<CastleGuardianEntity, Ca
         double width = entity.getLaserPhase() == 3 ? 0.16 : 0.012 + 0.018 * entity.getChargeProgress();
         side = side.normalize().scale(width);
         var up = direction.cross(side).normalize().scale(width);
-        var vertices = buffers.getBuffer(net.minecraft.client.renderer.RenderType.lightning());
+        var vertices = buffers.getBuffer(RenderType.lightning());
         int color = entity.getLaserPhase() == 3 ? 0xFF8EEBFF : 0xDF309CFF;
         beamQuad(pose, vertices, start, end, side, color);
         beamQuad(pose, vertices, start, end, up, color);

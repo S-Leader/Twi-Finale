@@ -1,7 +1,11 @@
 package show.twilight.finale.item;
 
+import java.util.List;
+import javax.annotation.Nonnull;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -11,10 +15,9 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import show.twilight.finale.capabilities.ForceFieldCapabilityList;
+import twilightforest.util.TFItemStackUtils;
 
-import javax.annotation.Nonnull;
-import java.util.List;
+import show.twilight.finale.capabilities.ForceFieldCapabilityList;
 
 public class ForceFieldWandItem extends FinaleScepterItem {
     public ForceFieldWandItem(Item.Properties properties) {
@@ -30,7 +33,7 @@ public class ForceFieldWandItem extends FinaleScepterItem {
         if (!level.isClientSide()) {
             ForceFieldCapabilityList.get(player).ifPresent(cap -> {
                 cap.replenishFields();
-                twilightforest.util.TFItemStackUtils.hurtButDontBreak(stack, 1, (net.minecraft.server.level.ServerLevel) level, player);
+                TFItemStackUtils.hurtButDontBreak(stack, 1, (ServerLevel) level, player);
             });
         }
         if (!player.isCreative()) {

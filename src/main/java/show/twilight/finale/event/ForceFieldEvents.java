@@ -11,18 +11,20 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import twilightforest.entity.projectile.CubeOfAnnihilation;
+
 import show.twilight.finale.capabilities.ForceFieldCapabilityList;
 import show.twilight.finale.capabilities.shield.IForceFieldCapability;
 import show.twilight.finale.entity.AdherentHighPriestEntity;
 import show.twilight.finale.entity.projectile.ProverbsBolt;
 import show.twilight.finale.network.UpdateForceFieldPacket;
-import twilightforest.entity.projectile.CubeOfAnnihilation;
 
 @EventBusSubscriber
 public class ForceFieldEvents {
     @SubscribeEvent
-    public static void updateCaps(net.neoforged.neoforge.event.tick.EntityTickEvent.Post event) {
+    public static void updateCaps(EntityTickEvent.Post event) {
         ForceFieldCapabilityList.get(event.getEntity()).ifPresent(IForceFieldCapability::update);
     }
 

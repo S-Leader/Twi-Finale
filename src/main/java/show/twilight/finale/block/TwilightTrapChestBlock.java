@@ -15,9 +15,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import show.twilight.finale.block.entity.TwilightTrapChestBlockEntity;
 import show.twilight.finale.init.ModBlocks;
 
-/**
- * This is a block, with a block entity for its saved opening sequence.
- */
 public class TwilightTrapChestBlock extends ChestBlock {
     public static final MapCodec<TwilightTrapChestBlock> CODEC = simpleCodec(TwilightTrapChestBlock::new);
 

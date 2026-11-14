@@ -1,10 +1,16 @@
 package show.twilight.finale.item;
 
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import twilightforest.entity.projectile.IceArrow;
+import twilightforest.entity.projectile.IceBomb;
 
 public class IceCrossbowItem extends CrossbowItem {
     public IceCrossbowItem(Properties properties) {
@@ -13,8 +19,8 @@ public class IceCrossbowItem extends CrossbowItem {
 
     @Override
     protected Projectile createProjectile(Level level, LivingEntity entity, ItemStack weapon, ItemStack ammo, boolean critical) {
-        if (ammo.is(net.minecraft.world.item.Items.FIREWORK_ROCKET)) {
-            var bomb = new twilightforest.entity.projectile.IceBomb(level, entity.position().add(0, entity.getEyeHeight() - 0.15, 0));
+        if (ammo.is(Items.FIREWORK_ROCKET)) {
+            var bomb = new IceBomb(level, entity.position().add(0, entity.getEyeHeight() - 0.15, 0));
             bomb.setOwner(entity);
             return bomb;
         }
@@ -22,15 +28,15 @@ public class IceCrossbowItem extends CrossbowItem {
     }
 
     @Override
-    public net.minecraft.world.entity.projectile.AbstractArrow customArrow(
-            net.minecraft.world.entity.projectile.AbstractArrow arrow, ItemStack ammo, ItemStack weapon) {
-        return new twilightforest.entity.projectile.IceArrow(arrow, ammo, weapon);
+    public AbstractArrow customArrow(
+            AbstractArrow arrow, ItemStack ammo, ItemStack weapon) {
+        return new IceArrow(arrow, ammo, weapon);
     }
 
     @Override
     public boolean isValidRepairItem(ItemStack toRepair, ItemStack material) {
-        return material.getItem() instanceof net.minecraft.world.item.BlockItem block
-                && block.getBlock().defaultBlockState().is(net.minecraft.tags.BlockTags.ICE)
+        return material.getItem() instanceof BlockItem block
+                && block.getBlock().defaultBlockState().is(BlockTags.ICE)
                 || super.isValidRepairItem(toRepair, material);
     }
 }

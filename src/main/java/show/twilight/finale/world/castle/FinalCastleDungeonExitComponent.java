@@ -8,6 +8,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -19,9 +20,8 @@ import twilightforest.init.TFBlocks;
 import twilightforest.util.BoundingBoxUtils;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-
 public class FinalCastleDungeonExitComponent extends FinalCastleDungeonRoom31Component {
-    // Build-time edges: validate the descent before committing the complete layout.
+
     private FinalCastleDungeonStepsComponent descent;
     private StructurePiece lowerRoom;
 
@@ -40,9 +40,6 @@ public class FinalCastleDungeonExitComponent extends FinalCastleDungeonRoom31Com
             this.deco = ((TFStructureComponentOld) parent).deco;
         }
 
-        // no need for additional rooms, we're along the outside anyways
-
-        // add stairway down
         Rotation bestDir = this.findStairDirectionTowards(parent.getBoundingBox().minX(), parent.getBoundingBox().minZ());
 
         BlockPos center = FinaleCastleInteriors.local(this, 15, 0, 15);
@@ -52,7 +49,6 @@ public class FinalCastleDungeonExitComponent extends FinalCastleDungeonRoom31Com
         list.addPiece(steps0);
         steps0.addChildren(this, list, rand);
 
-        // another level!?
         if (this.level == 1) {
             this.lowerRoom = steps0.buildLevelUnder(list, rand, this.level + 1);
         } else {
@@ -87,10 +83,9 @@ public class FinalCastleDungeonExitComponent extends FinalCastleDungeonRoom31Com
 
         super.postProcess(world, manager, generator, rand, sbb, chunkPosIn, blockPos);
 
-        // No reappearing door on either lower-level exit; keep the barrier intact.
         final BlockState castleDoor = TFBlocks.PINK_FORCE_FIELD.get().defaultBlockState()
-                .setValue(net.minecraft.world.level.block.PipeBlock.UP, true).setValue(net.minecraft.world.level.block.PipeBlock.DOWN, true)
-                .setValue(net.minecraft.world.level.block.PipeBlock.NORTH, true).setValue(net.minecraft.world.level.block.PipeBlock.SOUTH, true);
+                .setValue(PipeBlock.UP, true).setValue(PipeBlock.DOWN, true)
+                .setValue(PipeBlock.NORTH, true).setValue(PipeBlock.SOUTH, true);
 
         this.generateBox(world, sbb, 7, 0, 16, 7, 3, 18, castleDoor, AIR, false);
         this.generateBox(world, sbb, 7, 4, 16, 7, 4, 18, deco.blockState, deco.blockState, false);
@@ -98,7 +93,7 @@ public class FinalCastleDungeonExitComponent extends FinalCastleDungeonRoom31Com
 
     public Rotation findStairDirectionTowards(int x, int z) {
         Vec3i center = BoundingBoxUtils.getCenter(this.boundingBox);
-        // difference
+
         int dx = center.getX() - x;
         int dz = center.getZ() - z;
 

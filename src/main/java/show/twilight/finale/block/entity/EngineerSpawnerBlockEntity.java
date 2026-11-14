@@ -9,7 +9,6 @@ import show.twilight.finale.init.ModBlocks;
 import show.twilight.finale.init.ModEntity;
 import twilightforest.block.entity.spawner.BossSpawnerBlockEntity;
 
-/** Native one-shot spawner removes its cage after a successful spawn. */
 public final class EngineerSpawnerBlockEntity extends BossSpawnerBlockEntity<EngineerAdherentEntity> {
     public EngineerSpawnerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlocks.ENGINEER_SPAWNER_ENTITY.get(), ModEntity.ENGINEER_ADHERENT.get(), pos, state);

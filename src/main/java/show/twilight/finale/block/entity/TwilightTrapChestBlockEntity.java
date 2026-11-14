@@ -1,5 +1,7 @@
 package show.twilight.finale.block.entity;
 
+import java.util.UUID;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
@@ -11,16 +13,16 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import twilightforest.init.TFParticleType;
+
 import show.twilight.finale.entity.CastleMonstrosityEntity;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.init.ModBlocks;
 import show.twilight.finale.init.ModEntity;
-import twilightforest.init.TFParticleType;
-
-import java.util.UUID;
 
 public class TwilightTrapChestBlockEntity extends ChestBlockEntity {
     public static final int OPEN_DURATION = 160;
@@ -43,7 +45,7 @@ public class TwilightTrapChestBlockEntity extends ChestBlockEntity {
         hierophant = owner.getUUID();
         hierophantData = owner.saveWithoutId(new CompoundTag());
         setChanged();
-        // Discard bypasses death rewards/conquest. There is no living boss behind the block.
+
         owner.discard();
         return true;
     }
@@ -84,7 +86,7 @@ public class TwilightTrapChestBlockEntity extends ChestBlockEntity {
             CastleMonstrosityEntity beast = ModEntity.CASTLE_MONSTROSITY.get().create(server);
             if (beast == null) return;
             beast.setUUID(chest.monstrosity);
-            beast.moveTo(centre.x, centre.y, centre.z, state.getValue(net.minecraft.world.level.block.ChestBlock.FACING).toYRot(), 0);
+            beast.moveTo(centre.x, centre.y, centre.z, state.getValue(ChestBlock.FACING).toYRot(), 0);
             if (chest.hierophant != null) beast.bindHierophant(chest.hierophant, chest.hierophantData);
             if (chest.opener != null && server.getPlayerByUUID(chest.opener) instanceof Player player)
                 beast.setTarget(player);
@@ -118,7 +120,7 @@ public class TwilightTrapChestBlockEntity extends ChestBlockEntity {
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-        // Only the opening clock is visual; encounter NBT belongs exclusively on the server.
+
         CompoundTag tag = new CompoundTag();
         tag.putLong("TrapOpenedAt", openedAt);
         return tag;

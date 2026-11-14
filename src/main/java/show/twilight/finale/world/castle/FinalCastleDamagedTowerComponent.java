@@ -18,7 +18,6 @@ import twilightforest.world.components.structures.TFStructureComponentOld;
 
 import java.util.ArrayList;
 
-
 public class FinalCastleDamagedTowerComponent extends FinalCastleMazeTower13Component {
 
     public FinalCastleDamagedTowerComponent(StructurePieceSerializationContext ctx, CompoundTag nbt) {
@@ -31,7 +30,7 @@ public class FinalCastleDamagedTowerComponent extends FinalCastleMazeTower13Comp
     }
 
     public FinalCastleDamagedTowerComponent(StructurePieceType piece, RandomSource rand, int i, int x, int y, int z, Direction direction) {
-        super(piece, rand, i, x, y, z, TFBlocks.YELLOW_CASTLE_RUNE_BRICK.get().defaultBlockState(), direction);  //TODO: change rune color
+        super(piece, rand, i, x, y, z, TFBlocks.YELLOW_CASTLE_RUNE_BRICK.get().defaultBlockState(), direction);
     }
 
     @Override
@@ -40,23 +39,14 @@ public class FinalCastleDamagedTowerComponent extends FinalCastleMazeTower13Comp
             this.deco = ((TFStructureComponentOld) parent).deco;
         }
 
-        // add foundation
         FinalCastleFoundation13Component foundation = new FinalCastleFoundation13Component(FinaleCastlePieces.TFFCToF13.get(), 0, this, getLocatorPosition().getX(), getLocatorPosition().getY(), getLocatorPosition().getZ());
         list.addPiece(foundation);
         foundation.addChildren(this, list, rand);
 
-        // add thorns
         FinalCastleFoundation13Component thorns = new FinalCastleFoundation13ComponentThorns(0, this, getLocatorPosition().getX(), getLocatorPosition().getY(), getLocatorPosition().getZ());
         list.addPiece(thorns);
         thorns.addChildren(this, list, rand);
 
-//    		// add roof
-//    		StructureTFComponentOld roof = rand.nextBoolean() ? new Roof13Conical(rand, 4, this) :  new Roof13Crenellated(rand, 4, this);
-//    		list.add(roof);
-//    		roof.buildComponent(this, list, rand);
-
-
-        // keep on building?
         this.buildNonCriticalTowers(list, rand);
     }
 
@@ -75,13 +65,10 @@ public class FinalCastleDamagedTowerComponent extends FinalCastleMazeTower13Comp
 
     public void destroyTower(WorldGenLevel world, RandomSource rand, BoundingBox sbb) {
 
-        // make list of destroyed areas
         ArrayList<DestroyArea> areas = makeInitialDestroyList(rand);
 
         boolean hitDeadRock = false;
 
-        // go down from the top of the tower to the ground, taking out rectangular chunks
-        //for (int y = this.boundingBox.maxY; y > this.boundingBox.minY; y--) {
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         for (int y = this.boundingBox.maxY(); !hitDeadRock && y > 64; y--) {
             for (int x = this.boundingBox.minX() - 2; x <= this.boundingBox.maxX() + 2; x++) {
@@ -96,7 +83,6 @@ public class FinalCastleDamagedTowerComponent extends FinalCastleMazeTower13Comp
                 }
             }
 
-            // check to see if any of our DestroyAreas are entirely above the current y value
             DestroyArea removeArea = null;
 
             for (DestroyArea dArea : areas) {
@@ -104,7 +90,7 @@ public class FinalCastleDamagedTowerComponent extends FinalCastleMazeTower13Comp
                     removeArea = dArea;
                 }
             }
-            // if so, replace them with new ones
+
             if (removeArea != null) {
                 areas.remove(removeArea);
                 areas.add(DestroyArea.createNonIntersecting(this.getBoundingBox(), rand, y, areas));

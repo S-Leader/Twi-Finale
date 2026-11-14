@@ -1,5 +1,7 @@
 package show.twilight.finale.entity;
 
+import java.util.List;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
@@ -7,6 +9,7 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -19,6 +22,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -41,9 +45,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import show.twilight.finale.runtime.entity.BossEntity;
-import show.twilight.finale.runtime.entity.skill.BaseSkill;
-import show.twilight.finale.runtime.entity.skill.SkillManager;
+import net.neoforged.neoforge.event.EventHooks;
 import twilightforest.config.TFConfig;
 import twilightforest.entity.EnforcedHomePoint;
 import twilightforest.entity.boss.IBossLootBuffer;
@@ -53,11 +55,10 @@ import twilightforest.init.TFSounds;
 import twilightforest.loot.TFLootTables;
 import twilightforest.util.entities.EntityUtil;
 
-import java.util.List;
+import show.twilight.finale.runtime.entity.BossEntity;
+import show.twilight.finale.runtime.entity.skill.BaseSkill;
+import show.twilight.finale.runtime.entity.skill.SkillManager;
 
-/**
- * Independent basement encounter; it never continues the Hierophant fight.
- */
 public final class AnnihilationGolemEntity extends BossEntity implements EnforcedHomePoint, IBossLootBuffer {
     public static final int CHASE = 0, SWING = 1, SMOKE = 2, SLAM = 3, DYING = 4;
     public static final int SWING_HIT = 8, SWING_DURATION = 20;
@@ -283,7 +284,7 @@ public final class AnnihilationGolemEntity extends BossEntity implements Enforce
     }
 
     public Vec3 smokeOrigin() {
-        // Shared with the settled SMOKE animation's lowered left-hand pose.
+
         Vec3 forward = forward(), left = new Vec3(forward.z, 0, -forward.x);
         return position().add(left.scale(1.076931)).add(forward.scale(1.639051)).add(0, 0.639404, 0);
     }
@@ -348,7 +349,7 @@ public final class AnnihilationGolemEntity extends BossEntity implements Enforce
                 if (state.getCollisionShape(server, pos).isEmpty()) continue;
                 var id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
                 if (id.getNamespace().equals("twilightforest") && id.getPath().contains("castle_brick") && server.getBlockEntity(pos) == null
-                        && state.canEntityDestroy(server, pos, this) && net.neoforged.neoforge.event.EventHooks.onEntityDestroyBlock(this, pos, state)) {
+                        && state.canEntityDestroy(server, pos, this) && EventHooks.onEntityDestroyBlock(this, pos, state)) {
                     server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), pos.getX() + .5, pos.getY() - .1, pos.getZ() + .5, 12, .4, .1, .4, .05);
                     FallingBlockEntity brick = FallingBlockEntity.fall(server, pos, state);
                     brick.setHurtsEntities(2, 16);
@@ -364,7 +365,7 @@ public final class AnnihilationGolemEntity extends BossEntity implements Enforce
     public boolean hurt(DamageSource source, float amount) {
         if (!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
                 && (source.is(DamageTypeTags.IS_PROJECTILE)
-                || source.is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC)
+                || source.is(DamageTypes.INDIRECT_MAGIC)
                 || source.getDirectEntity() instanceof Projectile
                 || source.getEntity() instanceof LivingEntity && source.getDirectEntity() != source.getEntity()))
             return false;
@@ -389,8 +390,7 @@ public final class AnnihilationGolemEntity extends BossEntity implements Enforce
         if (lootPrepared) return;
         lootPrepared = true;
         if (shouldDropLoot() && server.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-            // Roll once while the original killer/weapon context still exists.
-            // The inventory survives a save during the ninety-tick death animation.
+
             var params = TFLootTables.createLootParams(this, lastHurtByPlayerTime > 0, source).create(LootContextParamSets.ENTITY);
             var table = server.getServer().reloadableRegistries().getLootTable(getLootTable());
             fill(this, params, table);
@@ -401,7 +401,7 @@ public final class AnnihilationGolemEntity extends BossEntity implements Enforce
     protected void dropFromLootTable(DamageSource source, boolean killedByPlayer) {
         if (!lootPrepared && dyingInventory.stream().allMatch(ItemStack::isEmpty)) {
             if (!(level() instanceof ServerLevel server)) return;
-            // Restore a single roll for deaths saved before the loot buffer existed.
+
             lootPrepared = true;
             var params = TFLootTables.createLootParams(this, killedByPlayer, source).create(LootContextParamSets.ENTITY);
             fill(this, params, server.getServer().reloadableRegistries().getLootTable(getLootTable()));
@@ -523,7 +523,7 @@ public final class AnnihilationGolemEntity extends BossEntity implements Enforce
         lootPrepared = tag.getBoolean("GolemLootPrepared");
         deathChestPos = tag.contains("GolemDeathChestPos") ? BlockPos.of(tag.getLong("GolemDeathChestPos")) : null;
         dyingInventory.clear();
-        if (tag.contains("GolemLootBuffer", net.minecraft.nbt.Tag.TAG_COMPOUND))
+        if (tag.contains("GolemLootBuffer", Tag.TAG_COMPOUND))
             readDeathItemsSaveData(tag.getCompound("GolemLootBuffer"), registryAccess());
         updatePhase();
         if (getHealth() <= 0) {
@@ -533,15 +533,14 @@ public final class AnnihilationGolemEntity extends BossEntity implements Enforce
         } else if (getAction() == DYING) {
             setAction(CHASE);
         } else if (isUsingSkill()) {
-            // AbstractSkillEntity cancels casts on load; restore the golem's
-            // saved action without resetting its animation/impact clock.
+
             super.beginSkill(getAction());
         }
     }
 
     @Override
     public void updatePhase() {
-        // This boss has one combat phase; DYING is an action, not another phase.
+
         if (!level().isClientSide() && (getPhase() != 1 || updatePhase)) setPhase(1);
     }
 

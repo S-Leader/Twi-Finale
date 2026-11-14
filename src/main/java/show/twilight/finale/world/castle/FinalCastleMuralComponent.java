@@ -15,7 +15,6 @@ import twilightforest.init.TFBlocks;
 import twilightforest.util.WorldUtil;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-
 public class FinalCastleMuralComponent extends TFStructureComponentOld {
 
     private final FinalCastleMural mural;
@@ -52,13 +51,12 @@ public class FinalCastleMuralComponent extends TFStructureComponentOld {
 
         final BlockState castleMagic = TFBlocks.YELLOW_CASTLE_RUNE_BRICK.get().defaultBlockState();
 
-        // copy mural to world
         for (int x = 0; x < this.mural.width; x++) {
             for (int y = 0; y < this.mural.height; y++) {
                 if (this.mural.get(x, y) > 0) {
                     this.placeBlock(world, castleMagic, 0, y, x, sbb);
                 } else {
-                    //this.setBlockState(world, TFBlocks.forceField, 0, 0, y, x, sbb);
+
                 }
             }
         }

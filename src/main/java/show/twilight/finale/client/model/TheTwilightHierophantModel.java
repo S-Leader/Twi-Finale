@@ -1,5 +1,9 @@
 package show.twilight.finale.client.model;
 
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.ArmedModel;
@@ -15,6 +19,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+
 import show.twilight.finale.client.animation.TheTwilightHierophantAnimation;
 import show.twilight.finale.client.layer.HierophantArmorLayer;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
@@ -45,12 +50,12 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
     private final boolean slim;
     private int swordComboStage;
     private float swordComboTime, swordFlip, meteorSwordRaise;
-    private final java.util.Map<T, PoseTransition> transitions = new java.util.WeakHashMap<>();
+    private final Map<T, PoseTransition> transitions = new WeakHashMap<>();
 
     private static final class PoseTransition {
         int action;
         float changedAt, lastAge;
-        java.util.List<ShadowBone> from, last;
+        List<ShadowBone> from, last;
     }
 
     public TheTwilightHierophantModel(ModelPart root, boolean slim) {
@@ -96,9 +101,7 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
 
     private static void addJointedLeg(PartDefinition entity, String side, float hipX, float boxX,
                                       int skinU, int skinV, boolean mirrorOuter, float deformation) {
-        // Keep the existing hip names for walking/keyframes. In the neutral
-        // pose the two six-pixel segments still form the original straight leg;
-        // their side UVs continue at the exact original skin/robe texture rows.
+
         PartDefinition thigh = entity.addOrReplaceChild(side + "_leg",
                 legSegment(boxX, skinU, skinV, 48, mirrorOuter, deformation), PartPose.offset(hipX, 6, 0));
         thigh.addOrReplaceChild(side + "_shin",
@@ -121,18 +124,15 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
         return this.head;
     }
 
-    /**
-     * New skill poses must be frozen too, rather than replayed at the live cast time.
-     */
     public record ShadowBone(PartPose pose, float xScale, float yScale, float zScale, boolean visible,
                              boolean skipDraw) {
     }
 
-    public java.util.List<ShadowBone> captureShadowPose() {
+    public List<ShadowBone> captureShadowPose() {
         return root.getAllParts().map(p -> new ShadowBone(p.storePose(), p.xScale, p.yScale, p.zScale, p.visible, p.skipDraw)).toList();
     }
 
-    public void applyShadowPose(java.util.List<ShadowBone> snapshot) {
+    public void applyShadowPose(List<ShadowBone> snapshot) {
         var parts = root.getAllParts().toList();
         if (parts.size() != snapshot.size()) throw new IllegalStateException("Mismatched Hierophant shadow skeleton");
         for (int i = 0; i < parts.size(); i++) {
@@ -204,9 +204,7 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
                 float sinceFirst = t - TheTwilightHierophantEntity.METEOR_WINDUP_TICKS;
                 float pulse = sinceFirst >= 0 && t <= boss.getMeteorRainEndTick() + 4
                         ? 1 - smooth((sinceFirst % boss.getMeteorInterval()) / 4F) : 0;
-                // Castle Crashers' Demon Sword phase: a quick airborne lift,
-                // one arm extended almost vertically, free arm trailing and
-                // bent, asymmetric legs. Each summon gives the raised arm a pulse.
+
                 swordArm.xRot = Mth.lerp(raise, swordArm.xRot, -3.12F + pulse * 0.12F);
                 swordArm.yRot = 0;
                 swordArm.zRot = (left ? 0.16F : -0.16F) * raise;
@@ -235,10 +233,7 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
                 };
                 if (swordComboStage == TheTwilightHierophantEntity.SWORD_PLANTED) kneel = smooth(local / 6F);
                 if (swordComboStage == TheTwilightHierophantEntity.SWORD_FINISH) kneel = 1 - smooth(local / 12F);
-                // Hammer-of-Justice down-swing reference: hold the weapon high,
-                // tuck the legs and somersault into an inverted downward strike.
-                // Keep that impact pose while dissolving: no rebound/unflip
-                // between hits. Reset to the overhead pose during hidden travel.
+
                 entity.xRot = Mth.wrapDegrees(swordFlip * Mth.RAD_TO_DEG) * Mth.DEG_TO_RAD;
                 entity.y += 4 * kneel;
                 body.xRot = Mth.lerp(kneel, -0.12F, 0.15F);
@@ -254,8 +249,7 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
                 head.xRot = 0.1F;
                 if (swordComboStage == TheTwilightHierophantEntity.SWORD_PLANTED
                         || swordComboStage == TheTwilightHierophantEntity.SWORD_FINISH) {
-                    // Fifth impact plants the blade immediately. Unfold into the
-                    // existing single-knee stance while the one-second fuse runs.
+
                     ModelPart kneeling = boss.getMainArm() == HumanoidArm.LEFT ? left_leg : right_leg;
                     ModelPart kneelingShin = boss.getMainArm() == HumanoidArm.LEFT ? left_shin : right_shin;
                     ModelPart forward = boss.getMainArm() == HumanoidArm.LEFT ? right_leg : left_leg;
@@ -295,7 +289,7 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
                 left_arm.xRot = right_arm.xRot = -Mth.HALF_PI;
                 left_arm.yRot = right_arm.yRot = left_arm.zRot = right_arm.zRot = 0;
                 body.xRot = body.zRot = 0;
-                weight = smooth(t / 12F); // Hold the firing pose until the accelerating barrage actually ends.
+                weight = smooth(t / 12F);
             }
             case TheTwilightHierophantEntity.SMOKE_MOVE -> {
                 body.xRot += 0.7F;
@@ -303,8 +297,7 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
                 weight = motionWindow(t, TheTwilightHierophantEntity.getActionDuration(action), 8, 10);
             }
             case TheTwilightHierophantEntity.FAN -> {
-                // ItemInHandLayer follows getMainArm(), including randomly
-                // left-handed bosses. Animate that same arm, not always the right.
+
                 boolean leftHanded = boss.getMainArm() == HumanoidArm.LEFT;
                 ModelPart fanArm = leftHanded ? left_arm : right_arm;
                 ModelPart freeArm = leftHanded ? right_arm : left_arm;
@@ -353,7 +346,7 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
             case TheTwilightHierophantEntity.AXE_SLAM -> {
                 float lift = smooth(t / 20F);
                 float release = smooth((t - TheTwilightHierophantEntity.AXE_WINDUP_TICKS + 8) / 8F);
-                // Two-second overhead windup, then throw forward; no ground slam.
+
                 body.xRot = Mth.lerp(release, -0.15F * lift, 0.2F);
                 left_arm.xRot = right_arm.xRot = Mth.lerp(release, -2.9F * lift, -1.2F);
                 left_arm.yRot = 0.45F * (1 - release);
@@ -404,7 +397,6 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
         blendActionChange(boss, action, age);
     }
 
-
     private static void aimHandAt(ModelPart arm, Matrix4f inverseTorso, float x, float y, float z) {
         Vector3f grip = inverseTorso.transformPosition(new Vector3f(x / 16, y / 16, z / 16));
         float dx = grip.x * 16 - arm.x, dy = grip.y * 16 - arm.y, dz = grip.z * 16 - arm.z;
@@ -446,8 +438,7 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
         Vector3f grip = hand.last().pose().transformPosition(new Vector3f(0, 9 / 16F, 0));
         root.translateAndRotate(stack);
         stack.translate(grip.x, grip.y, grip.z);
-        // Match the sampled raised hand but keep the blade vertical, independent
-        // of the diagonal arm angle and native third-person item transforms.
+
         stack.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(meteorSwordRaise, 150, 225)));
         stack.scale(0.85F, 0.85F, 0.85F);
         stack.translate(0.25, 0.25, 0);
@@ -461,10 +452,6 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
         left_arm.xRot = right_arm.xRot = -1.3F * curl;
         left_arm.yRot = right_arm.yRot = left_arm.zRot = right_arm.zRot = 0;
 
-        // A floor-level crouch leaves the boss below its cube. Tuck the body
-        // into the shield instead: place the rotated torso midpoint at the
-        // collision-box centre. Model coordinates are 16 units/block, Y down;
-        // LivingEntityRenderer's flipped model origin is 1.501 blocks above the feet.
         float torsoY = entity.y + body.y - 6 * Mth.cos(body.xRot);
         float torsoZ = entity.z + body.z - 6 * Mth.sin(body.xRot);
         float shieldCentreY = (1.501F - TheTwilightHierophantEntity.SHIELD_SIZE / 2) * 16;
@@ -481,7 +468,7 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
         return smooth(time / in) * smooth((duration - time) / out);
     }
 
-    private void blendFromRest(java.util.List<ShadowBone> rest, float weight) {
+    private void blendFromRest(List<ShadowBone> rest, float weight) {
         var parts = root.getAllParts().toList();
         for (int i = 0; i < parts.size(); i++) {
             var part = parts.get(i);
@@ -496,8 +483,7 @@ public class TheTwilightHierophantModel<T extends TheTwilightHierophantEntity>
     }
 
     private void blendActionChange(T boss, int action, float age) {
-        // Each model is shared by many entities: keep independent transitions,
-        // and use weak keys so an unloaded boss is not retained by the renderer.
+
         PoseTransition transition = transitions.get(boss);
         if (transition == null || age < transition.lastAge || age - transition.lastAge > 6) {
             transition = new PoseTransition();

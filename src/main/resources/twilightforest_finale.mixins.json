@@ -13,11 +13,14 @@
     "ForceFieldBlockMixin",
     "GiantSwordItemMixin",
     "HierophantIceBombMixin",
+    "MapItemSavedDataAccessor",
+    "TFMagicMapDataMixin",
     "ToolEventsMixin",
     "VioletCastleRuneBlockMixin",
     "VioletCastleRuneStateMixin"
   ],
   "client": [
+    "FinalCastleMapIconMixin",
     "ItemInHandRendererMixin",
     "JappaPackRepositoryMixin",
     "TwilightSwordPlayerModelMixin"

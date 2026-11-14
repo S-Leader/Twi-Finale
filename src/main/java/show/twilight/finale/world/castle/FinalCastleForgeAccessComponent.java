@@ -13,9 +13,6 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-/**
- * Last, chunk-clipped pass: join the second basement landing to the forge floor.
- */
 public final class FinalCastleForgeAccessComponent extends TFStructureComponentOld {
     private final boolean revivedEntrance;
 
@@ -45,22 +42,15 @@ public final class FinalCastleForgeAccessComponent extends TFStructureComponentO
     @Override
     public void postProcess(WorldGenLevel level, StructureManager structures, ChunkGenerator generator,
                             RandomSource random, BoundingBox chunk, ChunkPos chunkPos, BlockPos pivot) {
-        // Existing descent ends just above the forge ceiling. Open that ceiling and
-        // provide stairs, instead of leaving a sealed roof or a thirty-block drop.
+
         if (revivedEntrance) {
-            // Replace the second copy's abandoned vertical shaft with a real
-            // floor/roof entrance, not a lateral attachment or an extra arena.
+
             generateBox(level, chunk, 8, 31, 8, 22, 31, 22, deco.blockState, deco.blockState, false);
             generateAirBox(level, chunk, 8, 32, 8, 22, 38, 22);
         }
         generateBox(level, chunk, 13, 30, 11, 17, 30, 14, deco.blockState, deco.blockState, false);
         generateAirBox(level, chunk, 13, 31, 11, 17, revivedEntrance ? 38 : 35, 15);
-        // The actual forge template has TWO floors (y=0 and y=15). A single
-        // thirty-step flight cuts straight through its mezzanine. Use a real
-        // landing on y=15, then a separate return flight to the lowest hall.
-        // TFStructureComponentOld rotates block states 180 degrees relative to
-        // its local coordinate mapping. Pre-flip stair facing so it rises toward
-        // the previous (higher) tread, including the SOUTH-oriented new forge.
+
         var upper = deco.stairState.setValue(StairBlock.FACING, Direction.SOUTH);
         for (int step = 0; step <= 15; step++) {
             int y = 30 - step, z = 15 + step;

@@ -15,9 +15,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import twilightforest.block.ForceFieldBlock;
 
-/**
- * A solid ceiling remains a valid anchor even when three other arms are connected.
- */
 @Mixin(ForceFieldBlock.class)
 public abstract class ForceFieldBlockMixin {
     @Unique

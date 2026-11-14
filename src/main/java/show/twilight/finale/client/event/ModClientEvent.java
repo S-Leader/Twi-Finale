@@ -54,8 +54,7 @@ public class ModClientEvent {
         float previous = LAST_TOOL_FORMS.getOrDefault(stack, ItemData.getFloat(stack, "toolType"));
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
-        // Hand/GUI renderers can supply a copy of the held stack, or omit the
-        // holder. Object identity alone must not prevent tool selection.
+
         if (holder == null && player != null && stack.getEntityRepresentation() == null && ItemStack.isSameItemSameComponents(stack, player.getMainHandItem()))
             holder = player;
         if (holder == null || !ItemStack.isSameItemSameComponents(stack, holder.getMainHandItem())) return previous;
@@ -64,8 +63,6 @@ public class ModClientEvent {
         if (local && (result == null || result.getType() == HitResult.Type.MISS))
             result = player.pick(player.blockInteractionRange(), 1, false);
 
-        // Slider always takes the pickaxe form, even during a fall. Server-side
-        // hit handling uses the same target tag instead of mace-only effects.
         if (result instanceof EntityHitResult hit && AbstractTransformationItem.isPickaxeTarget(hit.getEntity())) {
             LAST_TOOL_FORMS.put(stack, 2.0F);
             return 2;
@@ -88,9 +85,7 @@ public class ModClientEvent {
         } else if (result instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity target) {
             form = target.isBlocking() ? 3 : 1;
         }
-        // Resolve at render time, without CUSTOM_DATA writes that fight server
-        // synchronization or trigger re-equip animations. Keep the last normal
-        // form while looking into air and restore it after a mace smash.
+
         LAST_TOOL_FORMS.put(stack, form);
         return form;
     }
@@ -102,7 +97,7 @@ public class ModClientEvent {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void unrenderHeadWithTrophies(RenderLivingEvent.Pre<?, ?> event) {
-        // RenderLivingEvent itself is abstract and cannot be registered on the NeoForge event bus.
+
         LivingEntity entity = event.getEntity();
         EntityModel<?> model = event.getRenderer().getModel();
         HeadVisibility previous = HIDDEN_HEADS.remove(model);
@@ -119,7 +114,7 @@ public class ModClientEvent {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void restoreHeadAfterTrophies(RenderLivingEvent.Post<?, ?> event) {
-        // Renderers share their model: hiding a trophy wearer's head must not affect the next entity.
+
         HeadVisibility previous = HIDDEN_HEADS.remove(event.getRenderer().getModel());
         if (previous != null) previous.restore();
     }

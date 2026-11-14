@@ -1,14 +1,22 @@
 package show.twilight.finale.entity.projectile;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
@@ -16,20 +24,15 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.*;
-import show.twilight.finale.entity.TheTwilightHierophantEntity;
-import show.twilight.finale.init.ModEntity;
+import twilightforest.entity.monster.Adherent;
 import twilightforest.init.TFParticleType;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import show.twilight.finale.entity.TheTwilightHierophantEntity;
+import show.twilight.finale.init.ModEntity;
 
-/**
- * Colliding cube projectile. Returning fragments retrace their original ray,
- * not a homing path to the caster's new position.
- */
 public final class HierophantFragment extends Projectile {
     private static final ResourceKey<DamageType> SHIELD_MISSILE_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE,
             ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "hierophant_shield_missile"));
@@ -104,20 +107,19 @@ public final class HierophantFragment extends Projectile {
                 return;
             }
         }
-        // Swept block and entity traces, so high-speed fragments cannot tunnel.
+
         Vec3 start = position(), end = start.add(getDeltaMovement());
         if (!boss.insideArena(end) || !boss.isAreaLoaded(new AABB(start, end).inflate(0.3))) {
             discard();
             return;
         }
-        BlockHitResult wall = level().clip(new net.minecraft.world.level.ClipContext(start, end, net.minecraft.world.level.ClipContext.Block.COLLIDER, net.minecraft.world.level.ClipContext.Fluid.NONE, this));
+        BlockHitResult wall = level().clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
         Vec3 limited = wall.getType() == HitResult.Type.MISS ? end : wall.getLocation();
         EntityHitResult hit = ProjectileUtil.getEntityHitResult(level(), this, start, limited, getBoundingBox().expandTowards(getDeltaMovement()).inflate(0.2), this::canHitEntity);
         if (hit != null && hit.getEntity() instanceof LivingEntity victim) {
             hitThisLeg.add(victim.getUUID());
             if (!entityData.get(EXPLOSIVE)) {
-                // Use vanilla's per-source cooldown tag, without resetting the
-                // victim's invulnerability timer for unrelated incoming attacks.
+
                 DamageSource source = bypassesCooldown
                         ? new DamageSource(registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(SHIELD_MISSILE_DAMAGE), this, boss)
                         : damageSources().indirectMagic(this, boss);
@@ -153,7 +155,7 @@ public final class HierophantFragment extends Projectile {
     private void burst(Vec3 at) {
         if (entityData.get(EXPLOSIVE)) {
             level().explode(this, damageSources().explosion(this, getOwner()), null, at.x, at.y, at.z, 2, false,
-                    Level.ExplosionInteraction.NONE, TFParticleType.ANNIHILATE.get(), TFParticleType.ANNIHILATE.get(), net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE);
+                    Level.ExplosionInteraction.NONE, TFParticleType.ANNIHILATE.get(), TFParticleType.ANNIHILATE.get(), SoundEvents.GENERIC_EXPLODE);
             ((ServerLevel) level()).sendParticles(TFParticleType.ANNIHILATE.get(), at.x, at.y, at.z, 48, 0.7, 0.7, 0.7, 0.12);
             return;
         }
@@ -162,7 +164,7 @@ public final class HierophantFragment extends Projectile {
 
     @Override
     protected boolean canHitEntity(Entity entity) {
-        return entity instanceof LivingEntity && !(entity instanceof twilightforest.entity.monster.Adherent)
+        return entity instanceof LivingEntity && !(entity instanceof Adherent)
                 && !hitThisLeg.contains(entity.getUUID()) && super.canHitEntity(entity);
     }
 
@@ -177,8 +179,8 @@ public final class HierophantFragment extends Projectile {
         tag.putInt("StageTicks", stageTicks);
         tag.put("Origin", newDoubleList(origin.x, origin.y, origin.z));
         tag.put("Direction", newDoubleList(direction.x, direction.y, direction.z));
-        var hits = new net.minecraft.nbt.ListTag();
-        for (UUID id : hitThisLeg) hits.add(net.minecraft.nbt.NbtUtils.createUUID(id));
+        var hits = new ListTag();
+        for (UUID id : hitThisLeg) hits.add(NbtUtils.createUUID(id));
         tag.put("HitThisLeg", hits);
     }
 
@@ -191,11 +193,11 @@ public final class HierophantFragment extends Projectile {
         age = tag.getInt("Age");
         stage = tag.getInt("Stage");
         stageTicks = tag.getInt("StageTicks");
-        var o = tag.getList("Origin", net.minecraft.nbt.Tag.TAG_DOUBLE);
+        var o = tag.getList("Origin", Tag.TAG_DOUBLE);
         if (o.size() == 3) origin = new Vec3(o.getDouble(0), o.getDouble(1), o.getDouble(2));
-        var d = tag.getList("Direction", net.minecraft.nbt.Tag.TAG_DOUBLE);
+        var d = tag.getList("Direction", Tag.TAG_DOUBLE);
         if (d.size() == 3) direction = new Vec3(d.getDouble(0), d.getDouble(1), d.getDouble(2));
-        for (var raw : tag.getList("HitThisLeg", net.minecraft.nbt.Tag.TAG_INT_ARRAY))
-            hitThisLeg.add(net.minecraft.nbt.NbtUtils.loadUUID(raw));
+        for (var raw : tag.getList("HitThisLeg", Tag.TAG_INT_ARRAY))
+            hitThisLeg.add(NbtUtils.loadUUID(raw));
     }
 }

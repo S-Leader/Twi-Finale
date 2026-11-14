@@ -1,8 +1,12 @@
 package show.twilight.finale.block;
 
+import java.util.function.Supplier;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -22,9 +26,8 @@ import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import show.twilight.finale.block.entity.FinalTrophyBlockEntity;
 
-import java.util.function.Supplier;
+import show.twilight.finale.block.entity.FinalTrophyBlockEntity;
 
 
 public class FloorDuckTrophyBlock extends FloorFinalTrophyBlock {
@@ -52,14 +55,14 @@ public class FloorDuckTrophyBlock extends FloorFinalTrophyBlock {
     }
 
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        level.playSound(player, pos, net.minecraft.sounds.SoundEvents.CHICKEN_AMBIENT, SoundSource.BLOCKS, 1.0f, 1.0f);
+        level.playSound(player, pos, SoundEvents.CHICKEN_AMBIENT, SoundSource.BLOCKS, 1.0f, 1.0f);
         if (!level.isClientSide()) {
             ServerLevel serverLevel = (ServerLevel) level;
             for (int i = 0; i < 18; ++i) {
                 double x = (double) pos.getX() + 0.5 + (level.getRandom().nextDouble() - 0.5);
                 double y = (double) pos.getY() + 0.5 + (level.getRandom().nextDouble() - 0.5);
                 double z = (double) pos.getZ() + 0.5 + (level.getRandom().nextDouble() - 0.5);
-                serverLevel.sendParticles((ParticleOptions) net.minecraft.core.particles.ParticleTypes.NOTE, x, y, z, 1, 0.0, 0.05, 0.0, 0.0);
+                serverLevel.sendParticles((ParticleOptions) ParticleTypes.NOTE, x, y, z, 1, 0.0, 0.05, 0.0, 0.0);
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide());

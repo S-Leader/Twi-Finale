@@ -3,9 +3,6 @@ package show.twilight.finale.runtime.animation;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.AnimationState;
 
-/**
- * Vanilla AnimationState with a local identifier. Definitions are client-only.
- */
 public final class VzlingAnimation {
     private final ResourceLocation id;
     public final AnimationState state = new AnimationState();

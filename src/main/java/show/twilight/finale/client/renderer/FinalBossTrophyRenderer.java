@@ -9,14 +9,13 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
+
 import show.twilight.finale.block.entity.FinalTrophyBlockEntity;
 import show.twilight.finale.client.model.TheTwilightHierophantModel;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 
-/**
- * Same block/item/worn-head renderer path as the existing priest trophy.
- */
 public final class FinalBossTrophyRenderer implements BlockEntityRenderer<FinalTrophyBlockEntity>, RenderWithoutEntity {
     private final ModelPart model;
     private final ModelPart outer;
@@ -24,8 +23,7 @@ public final class FinalBossTrophyRenderer implements BlockEntityRenderer<FinalT
     private final RenderType slimOuterType;
 
     public FinalBossTrophyRenderer(EntityModelSet models) {
-        // Reuse the boss's actual head mesh AND robe/hood layer, not a substitute
-        // player-skull cube. Each bake is independent from the living renderer.
+
         model = new TheTwilightHierophantModel<TheTwilightHierophantEntity>(
                 models.bakeLayer(TheTwilightHierophantModel.LAYER_LOCATION_SLIM), true).getHead();
         outer = new TheTwilightHierophantModel<TheTwilightHierophantEntity>(
@@ -46,12 +44,12 @@ public final class FinalBossTrophyRenderer implements BlockEntityRenderer<FinalT
         pose.pushPose();
         pose.translate(0.5, 0, 0.5);
         pose.scale(1, -1, -1);
-        // Same viewer-skin selection as the living Hierophant / TF giants.
+
         var camera = Minecraft.getInstance().getCameraEntity();
         ResourceLocation skin = camera instanceof AbstractClientPlayer player ? player.getSkin().texture() : DefaultPlayerSkin.getDefaultTexture();
         RenderType type = RenderType.entityCutoutNoCull(skin);
         boolean slim = camera instanceof AbstractClientPlayer player
-                && player.getSkin().model() == net.minecraft.client.resources.PlayerSkin.Model.SLIM;
+                && player.getSkin().model() == PlayerSkin.Model.SLIM;
         model.render(pose, buffers.getBuffer(type), light, overlay);
         outer.render(pose, buffers.getBuffer(slim ? slimOuterType : normalOuterType), light, overlay);
         pose.popPose();

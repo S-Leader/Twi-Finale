@@ -1,6 +1,11 @@
 package show.twilight.finale.entity;
 
+import java.util.EnumSet;
+import java.util.List;
+import javax.annotation.Nullable;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -29,19 +34,17 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import show.twilight.finale.init.ModEntity;
 import twilightforest.entity.ai.control.NoClipMoveControl;
 import twilightforest.entity.ai.goal.SimplifiedAttackGoal;
 import twilightforest.init.TFDamageTypes;
 import twilightforest.init.TFSounds;
 
-import javax.annotation.Nullable;
-import java.util.EnumSet;
-import java.util.List;
+import show.twilight.finale.init.ModEntity;
 
 public class LoyalWraithEntity
         extends TamableAnimal
@@ -50,7 +53,7 @@ public class LoyalWraithEntity
     public AdherentHighPriestEntity master;
 
     @Override
-    public boolean isFood(net.minecraft.world.item.ItemStack stack) {
+    public boolean isFood(ItemStack stack) {
         return false;
     }
 
@@ -152,7 +155,7 @@ public class LoyalWraithEntity
                 double tx = startPos.x() + (endPos.x() - startPos.x()) * trailFactor + this.level().getRandom().nextGaussian() * 0.01;
                 double ty = startPos.y() + (endPos.y() - startPos.y()) * trailFactor + this.level().getRandom().nextGaussian() * 0.01;
                 double tz = startPos.z() + (endPos.z() - startPos.z()) * trailFactor + this.level().getRandom().nextGaussian() * 0.01;
-                serverLevel.sendParticles(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, (float) red, (float) green, (float) blue), tx, ty, tz, 1, 0.0, 0.0, 0.0, 0.0);
+                serverLevel.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, (float) red, (float) green, (float) blue), tx, ty, tz, 1, 0.0, 0.0, 0.0, 0.0);
             }
         }
     }

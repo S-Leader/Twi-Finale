@@ -24,10 +24,6 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-/**
- * Vanilla LOAD, not TemplateStructurePiece's per-chunk clipped placement.
- * Incomplete markers survive saving/unloading; completed rooms never refill loot.
- */
 @EventBusSubscriber(modid = TwilightFinaleMod.MOD_ID)
 public final class FinalCastleRoomLoader {
     private record Scan(WeakReference<ServerLevel> level, ChunkPos chunk, int retries) {
@@ -44,7 +40,7 @@ public final class FinalCastleRoomLoader {
 
     @SubscribeEvent
     public static void afterTick(ServerTickEvent.Post event) {
-        // Load events can precede FULL promotion. Never query neighbours on that thread.
+
         for (int i = 0, n = Math.min(32, SCANS.size()); i < n; i++) {
             Scan scan = SCANS.poll();
             if (scan == null) break;
@@ -67,7 +63,7 @@ public final class FinalCastleRoomLoader {
             for (var iterator = entry.getValue().iterator(); iterator.hasNext(); ) {
                 BlockPos pos = iterator.next();
                 LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
-                // Its persisted marker will be discovered again when this chunk reloads.
+
                 if (chunk == null) {
                     iterator.remove();
                     continue;
@@ -84,7 +80,7 @@ public final class FinalCastleRoomLoader {
                     continue;
                 }
                 BlockPos center = BlockPos.of(data.getLong("Center"));
-                // One extra block for vanilla's neighbour-shape updates, no forced loads.
+
                 boolean ready = true;
                 for (int x = (center.getX() - 9) >> 4; x <= (center.getX() + 9) >> 4; x++)
                     for (int z = (center.getZ() - 9) >> 4; z <= (center.getZ() + 9) >> 4; z++)
@@ -96,7 +92,7 @@ public final class FinalCastleRoomLoader {
                     continue;
                 if (!prepareFarmLight(level, loader, data)) continue;
                 if (!loader.placeStructureIfSameSize(level)) continue;
-                // One server-thread operation: place all 2,601 cells, then consume the marker.
+
                 data.putBoolean("Complete", true);
                 loader.setChanged();
                 completed.add(pos);
@@ -113,8 +109,7 @@ public final class FinalCastleRoomLoader {
         var settings = new StructurePlaceSettings().setRotation(loader.getRotation()).setMirror(loader.getMirror());
         BlockPos origin = loader.getBlockPos().offset(loader.getStructurePos());
         if (!data.getBoolean("FarmLightingPrepared")) {
-            // Structure-block LOAD immediately validates plants. Seed the lamps first,
-            // let the normal lighting engine propagate, THEN load the complete room.
+
             for (var light : template.filterBlocks(origin, settings, Blocks.SEA_LANTERN))
                 level.setBlock(light.pos(), light.state(), 2);
             data.putBoolean("FarmLightingPrepared", true);
@@ -137,9 +132,6 @@ public final class FinalCastleRoomLoader {
         WAITING.clear();
     }
 
-    /**
-     * Per-dimension, serialized completion journal; never persisted only in a static set.
-     */
     private static final class Completed extends SavedData {
         private final Set<Long> positions = new HashSet<>();
 

@@ -1,11 +1,16 @@
 package show.twilight.finale.item;
 
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -17,6 +22,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
@@ -27,10 +33,6 @@ import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.ItemAbility;
 import org.jetbrains.annotations.NotNull;
 import twilightforest.util.TFToolMaterials;
-
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 public class TransformationRootItem extends AbstractTransformationItem implements Equipable {
     private static final Set<ItemAbility> ACTIONS = Util.make(Collections.newSetFromMap(new IdentityHashMap()), actions -> {
@@ -59,8 +61,8 @@ public class TransformationRootItem extends AbstractTransformationItem implement
         return true;
     }
 
-    public boolean isPrimaryItemFor(ItemStack stack, net.minecraft.core.Holder<Enchantment> enchantment) {
-        return enchantment.value().isSupportedItem(new ItemStack(net.minecraft.world.item.Items.DIAMOND_SWORD)) || enchantment.value().isSupportedItem(new ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE));
+    public boolean isPrimaryItemFor(ItemStack stack, Holder<Enchantment> enchantment) {
+        return enchantment.value().isSupportedItem(new ItemStack(Items.DIAMOND_SWORD)) || enchantment.value().isSupportedItem(new ItemStack(Items.DIAMOND_PICKAXE));
     }
 
     @NotNull

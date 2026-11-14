@@ -15,7 +15,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 import twilightforest.util.RotationUtil;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-
 public class FinalCastleRoof13PeakedComponent extends TFStructureComponentOld {
 
     public FinalCastleRoof13PeakedComponent(StructurePieceSerializationContext ctx, CompoundTag nbt) {
@@ -42,7 +41,7 @@ public class FinalCastleRoof13PeakedComponent extends TFStructureComponentOld {
 
     @Override
     public void postProcess(WorldGenLevel world, StructureManager manager, ChunkGenerator generator, RandomSource randomIn, BoundingBox sbb, ChunkPos chunkPosIn, BlockPos blockPos) {
-        // peaky roof, loop unrolled as it was getting dumb
+
         for (int i = 0; i < 3; i++) {
             this.generateBox(world, sbb, 1, i, i, 15, i, i, deco.roofState, deco.roofState, false);
             this.generateBox(world, sbb, 1, i, 16 - i, 15, i, 16 - i, deco.roofState, deco.roofState, false);
@@ -80,22 +79,20 @@ public class FinalCastleRoof13PeakedComponent extends TFStructureComponentOld {
             this.generateBox(world, sbb, 15, 12 + ((i - 1) * 3), dz, 15, 11 + (i * 3), dz + 1, deco.blockState, deco.blockState, false);
         }
 
-        // top roof bobbles
         this.generateBox(world, sbb, 1, 18, 8, 5, 18, 8, deco.roofState, deco.roofState, false);
         this.generateBox(world, sbb, 11, 18, 8, 14, 18, 8, deco.roofState, deco.roofState, false);
         this.generateBox(world, sbb, 0, 17, 8, 1, 19, 8, deco.roofState, deco.roofState, false);
         this.generateBox(world, sbb, 15, 17, 8, 16, 19, 8, deco.roofState, deco.roofState, false);
 
         for (Rotation rotation : new Rotation[]{Rotation.CLOCKWISE_90, Rotation.COUNTERCLOCKWISE_90}) {
-            // this might be one of my more confusing instances of code recycling
+
             this.fillBlocksRotated(world, sbb, 4, 0, 1, 12, 1, 1, deco.blockState, rotation);
-            // more teeny crenellations
+
             for (int i = 3; i < 13; i += 2) {
                 this.fillBlocksRotated(world, sbb, i, -1, 1, i, 2, 1, deco.blockState, rotation);
             }
         }
 
-        // corners
         for (Rotation rotation : RotationUtil.ROTATIONS) {
             this.fillBlocksRotated(world, sbb, 0, -1, 0, 3, 2, 3, deco.blockState, rotation);
             this.setBlockStateRotated(world, deco.blockState, 1, -2, 2, rotation, sbb);

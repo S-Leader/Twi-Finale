@@ -24,15 +24,13 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import twilightforest.entity.monster.Adherent;
+
 import show.twilight.finale.entity.CastleMonstrosityEntity;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.entity.combat.AdherentAttackGoal;
 import show.twilight.finale.entity.combat.ColoredAdherent;
-import twilightforest.entity.monster.Adherent;
 
-/**
- * Preserve the original entity ID, eggs, loot, and structure spawn tables.
- */
 @Mixin(Adherent.class)
 public abstract class AdherentMixin extends Monster implements ColoredAdherent {
     @Unique
@@ -72,7 +70,7 @@ public abstract class AdherentMixin extends Monster implements ColoredAdherent {
     }
 
     @Inject(method = "performRangedAttack", at = @At("HEAD"), cancellable = true, remap = false)
-    private void finale$replaceAttack(net.minecraft.world.entity.LivingEntity target, float power, CallbackInfo ci) {
+    private void finale$replaceAttack(LivingEntity target, float power, CallbackInfo ci) {
         ci.cancel();
     }
 
@@ -84,13 +82,13 @@ public abstract class AdherentMixin extends Monster implements ColoredAdherent {
             if (owner != null) {
                 finale$ownerMissingTicks = 0;
                 if (!owner.trackSummonedAdherent((Adherent) (Object) this)) {
-                    // Includes a reloaded minion whose owner has already left phase two.
+
                     kill();
                     return;
                 }
                 setTarget(owner.getTarget());
             } else if (++finale$ownerMissingTicks >= 40) {
-                // Allow entity-load ordering without keeping orphaned summons alive.
+
                 kill();
                 return;
             }
@@ -129,7 +127,7 @@ public abstract class AdherentMixin extends Monster implements ColoredAdherent {
     public boolean hurt(DamageSource source, float amount) {
         Entity attacker = source.getEntity();
         if (attacker instanceof TheTwilightHierophantEntity) return false;
-        if (attacker != null && attacker.getPersistentData().hasUUID("FinaleHierophantOwner") && level() instanceof net.minecraft.server.level.ServerLevel server && server.getEntity(attacker.getPersistentData().getUUID("FinaleHierophantOwner")) instanceof TheTwilightHierophantEntity)
+        if (attacker != null && attacker.getPersistentData().hasUUID("FinaleHierophantOwner") && level() instanceof ServerLevel server && server.getEntity(attacker.getPersistentData().getUUID("FinaleHierophantOwner")) instanceof TheTwilightHierophantEntity)
             return false;
         boolean damaged = !(finale$getColor() == RED && source.is(DamageTypeTags.IS_FIRE)) && super.hurt(source, amount);
         if (attacker instanceof CastleMonstrosityEntity) setLastHurtByMob(null);

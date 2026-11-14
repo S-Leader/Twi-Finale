@@ -19,9 +19,6 @@ import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.init.ModEntity;
 import twilightforest.entity.boss.HydraMortar;
 
-/**
- * Native Hydra mortar model/texture, but immediate impact and no arena-floor destruction.
- */
 public final class HierophantMeteor extends HydraMortar {
     private static final EntityDataAccessor<Integer> FORM_TIME = SynchedEntityData.defineId(HierophantMeteor.class, EntityDataSerializers.INT);
     private Vec3 landing = Vec3.ZERO;
@@ -97,8 +94,7 @@ public final class HierophantMeteor extends HydraMortar {
         super.tick();
         if (isRemoved()) return;
         if (level() instanceof ServerLevel server) {
-            // The warning is fixed at summon time. Faster projectiles increase
-            // pressure without moving the danger circle after a player dodges.
+
             if (tickCount % 2 == 0 && server.hasChunkAt(BlockPos.containing(landing))) {
                 for (int i = 0; i < 12; i++) {
                     double angle = i * Math.PI / 6;

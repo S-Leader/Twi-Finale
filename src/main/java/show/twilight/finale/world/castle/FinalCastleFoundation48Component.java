@@ -15,7 +15,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 import twilightforest.util.RotationUtil;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-
 public class FinalCastleFoundation48Component extends TFStructureComponentOld {
 
     public FinalCastleFoundation48Component(StructurePieceSerializationContext ctx, CompoundTag nbt) {
@@ -40,7 +39,7 @@ public class FinalCastleFoundation48Component extends TFStructureComponentOld {
 
     @Override
     public void postProcess(WorldGenLevel world, StructureManager manager, ChunkGenerator generator, RandomSource randomIn, BoundingBox sbb, ChunkPos chunkPosIn, BlockPos blockPos) {
-        // foundation
+
         for (int x = 4; x < 45; x++) {
             for (int z = 4; z < 45; z++) {
                 this.fillColumnDown(world, deco.blockState, x, -1, z, sbb);
@@ -49,15 +48,13 @@ public class FinalCastleFoundation48Component extends TFStructureComponentOld {
 
         int mid = 16;
         for (Rotation rotation : RotationUtil.ROTATIONS) {
-            // do corner
+
             this.replaceAirAndLiquidDownwardsRotated(world, deco.blockState, 3, -2, 3, rotation, sbb);
 
-            // directly under castle
             this.fillBlocksRotated(world, sbb, 2, -2, 1, 46, -1, 1, deco.blockState, rotation);
             this.fillBlocksRotated(world, sbb, 2, -4, 2, 45, -1, 2, deco.blockState, rotation);
             this.fillBlocksRotated(world, sbb, 4, -6, 3, 44, -1, 3, deco.blockState, rotation);
 
-            // pilings
             for (int i = 9; i < 45; i += 6) {
                 makePiling(world, sbb, mid, rotation, i);
             }
@@ -66,7 +63,6 @@ public class FinalCastleFoundation48Component extends TFStructureComponentOld {
             makePiling(world, sbb, mid, rotation, 44);
         }
 
-        // add supports for entrance bridge
         this.replaceAirAndLiquidDownwardsRotated(world, deco.blockState, 21, -2, 0, Rotation.CLOCKWISE_90, sbb);
         this.replaceAirAndLiquidDownwardsRotated(world, deco.blockState, 21, -4, 1, Rotation.CLOCKWISE_90, sbb);
         this.replaceAirAndLiquidDownwardsRotated(world, deco.blockState, 21, -6, 2, Rotation.CLOCKWISE_90, sbb);

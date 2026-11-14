@@ -60,5 +60,10 @@
       "castle"
     ]
   ],
+  "rewards": {
+    "loot": [
+      "twilightforest_finale:advancements/castle_notes"
+    ]
+  },
   "sends_telemetry_event": true
 }

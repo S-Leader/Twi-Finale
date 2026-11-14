@@ -12,7 +12,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilde
 import twilightforest.init.TFBlocks;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-
 public class FinalCastleEntranceBottomTowerComponent extends FinalCastleMazeTower13Component {
 
     public FinalCastleEntranceBottomTowerComponent(StructurePieceSerializationContext ctx, CompoundTag nbt) {
@@ -31,18 +30,14 @@ public class FinalCastleEntranceBottomTowerComponent extends FinalCastleMazeTowe
             this.deco = ((TFStructureComponentOld) parent).deco;
         }
 
-        // stairs
         addStairs(list, rand, this.getGenDepth() + 1, this.size - 1, 1, size / 2, Rotation.NONE);
         addStairs(list, rand, this.getGenDepth() + 1, 0, 1, size / 2, Rotation.CLOCKWISE_180);
         addStairs(list, rand, this.getGenDepth() + 1, this.size / 2, 1, 0, Rotation.COUNTERCLOCKWISE_90);
         addStairs(list, rand, this.getGenDepth() + 1, this.size / 2, 1, this.size - 1, Rotation.CLOCKWISE_90);
     }
 
-    /**
-     * Add some stairs leading to this tower
-     */
     private boolean addStairs(StructurePieceAccessor list, RandomSource rand, int index, int x, int y, int z, Rotation rotation) {
-        // add door
+
         this.addOpening(x, y, z, rotation);
 
         Direction direction = getStructureRelativeRotation(rotation);

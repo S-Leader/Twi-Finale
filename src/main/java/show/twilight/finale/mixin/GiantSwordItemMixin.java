@@ -1,6 +1,9 @@
 package show.twilight.finale.mixin;
 
+import java.util.function.Predicate;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,10 +26,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
-import show.twilight.finale.util.EnchantmentsUtil;
 import twilightforest.item.GiantSwordItem;
 
-import java.util.function.Predicate;
+import show.twilight.finale.util.EnchantmentsUtil;
 
 @Mixin(value = {GiantSwordItem.class})
 public abstract class GiantSwordItemMixin extends SwordItem {
@@ -42,7 +44,7 @@ public abstract class GiantSwordItemMixin extends SwordItem {
         return 15;
     }
 
-    public boolean isPrimaryItemFor(ItemStack stack, net.minecraft.core.Holder<Enchantment> enchantment) {
+    public boolean isPrimaryItemFor(ItemStack stack, Holder<Enchantment> enchantment) {
         if (enchantment.is(Enchantments.POWER) || enchantment.is(Enchantments.PIERCING)) {
             return true;
         }

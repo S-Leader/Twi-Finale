@@ -1,12 +1,13 @@
 package show.twilight.finale.item;
 
+import java.util.List;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.SmithingTemplateItem;
 
-import java.util.List;
-
-public class SmithingTemplateItem extends net.minecraft.world.item.SmithingTemplateItem {
+public class FinaleSmithingTemplateItem extends SmithingTemplateItem {
     private static final ChatFormatting TITLE_FORMAT = ChatFormatting.GRAY;
     private static final ChatFormatting DESCRIPTION_FORMAT = ChatFormatting.BLUE;
     private static final Component TWILIGHT_RETROFITTING = Component.translatable("item.twilightforest_finale.twilight_retrofitting.desc").withStyle(TITLE_FORMAT);
@@ -20,12 +21,12 @@ public class SmithingTemplateItem extends net.minecraft.world.item.SmithingTempl
     private static final ResourceLocation EMPTY_SLOT_INGOT = ResourceLocation.withDefaultNamespace("item/empty_slot_ingot");
     private static final ResourceLocation EMPTY_SLOT_ROOT = ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "item/empty_slot_root");
 
-    public SmithingTemplateItem(Component appliesTo, Component ingredients, Component upgradeDescription, Component baseSlotDescription, Component additionsSlotDescription, List<ResourceLocation> baseSlotEmptyIcons, List<ResourceLocation> additionalSlotEmptyIcons) {
+    public FinaleSmithingTemplateItem(Component appliesTo, Component ingredients, Component upgradeDescription, Component baseSlotDescription, Component additionsSlotDescription, List<ResourceLocation> baseSlotEmptyIcons, List<ResourceLocation> additionalSlotEmptyIcons) {
         super(appliesTo, ingredients, upgradeDescription, baseSlotDescription, additionsSlotDescription, baseSlotEmptyIcons, additionalSlotEmptyIcons);
     }
 
-    public static SmithingTemplateItem createTwilightRetrofittingTemplate() {
-        return new SmithingTemplateItem(TWILIGHT_RETROFITTING_APPLIES_TO, TWILIGHT_RETROFITTING_INGREDIENTS, TWILIGHT_RETROFITTING, TWILIGHT_RETROFITTING_BASE_SLOT_DESCRIPTION, TWILIGHT_RETROFITTING_ADDITIONS_SLOT_DESCRIPTION, SmithingTemplateItem.createUpgradeIconList(), SmithingTemplateItem.createUpgradeMaterialList());
+    public static FinaleSmithingTemplateItem createTwilightRetrofittingTemplate() {
+        return new FinaleSmithingTemplateItem(TWILIGHT_RETROFITTING_APPLIES_TO, TWILIGHT_RETROFITTING_INGREDIENTS, TWILIGHT_RETROFITTING, TWILIGHT_RETROFITTING_BASE_SLOT_DESCRIPTION, TWILIGHT_RETROFITTING_ADDITIONS_SLOT_DESCRIPTION, FinaleSmithingTemplateItem.createUpgradeIconList(), FinaleSmithingTemplateItem.createUpgradeMaterialList());
     }
 
     private static List<ResourceLocation> createUpgradeIconList() {

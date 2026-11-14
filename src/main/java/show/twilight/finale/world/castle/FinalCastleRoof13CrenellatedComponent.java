@@ -15,7 +15,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 import twilightforest.util.RotationUtil;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-
 public class FinalCastleRoof13CrenellatedComponent extends TFStructureComponentOld {
 
     public FinalCastleRoof13CrenellatedComponent(StructurePieceSerializationContext ctx, CompoundTag nbt) {
@@ -42,20 +41,18 @@ public class FinalCastleRoof13CrenellatedComponent extends TFStructureComponentO
 
     @Override
     public void postProcess(WorldGenLevel world, StructureManager manager, ChunkGenerator generator, RandomSource randomIn, BoundingBox sbb, ChunkPos chunkPosIn, BlockPos blockPos) {
-        // assume square
+
         int size = this.boundingBox.maxX() - this.boundingBox.minX();
 
         for (Rotation rotation : RotationUtil.ROTATIONS) {
-            // corner
+
             this.fillBlocksRotated(world, sbb, 0, -1, 0, 3, 3, 3, deco.blockState, rotation);
             this.setBlockStateRotated(world, deco.blockState, 1, -2, 2, rotation, sbb);
             this.setBlockStateRotated(world, deco.blockState, 1, -2, 1, rotation, sbb);
             this.setBlockStateRotated(world, deco.blockState, 2, -2, 1, rotation, sbb);
 
-            // walls
             this.fillBlocksRotated(world, sbb, 4, 0, 1, size - 4, 1, 1, deco.blockState, rotation);
 
-            // smaller crenellations
             for (int x = 5; x < size - 5; x += 4) {
                 this.fillBlocksRotated(world, sbb, x, 0, 0, x + 2, 3, 2, deco.blockState, rotation);
                 this.setBlockStateRotated(world, deco.blockState, x + 1, -1, 1, rotation, sbb);

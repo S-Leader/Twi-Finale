@@ -7,6 +7,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -15,7 +16,6 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import twilightforest.init.TFBlocks;
-
 
 public class FinalCastleDungeonEntranceComponent extends FinalCastleDungeonRoom31Component {
 
@@ -36,7 +36,6 @@ public class FinalCastleDungeonEntranceComponent extends FinalCastleDungeonRoom3
         this.deco.blockState = TFBlocks.PINK_CASTLE_RUNE_BRICK.get().defaultBlockState();
         this.deco.fenceState = TFBlocks.PINK_FORCE_FIELD.get().defaultBlockState();
 
-        // this is going to be the parent for all rooms on this level
         super.addChildren(this, list, rand);
     }
 
@@ -47,7 +46,7 @@ public class FinalCastleDungeonEntranceComponent extends FinalCastleDungeonRoom3
 
         final BlockState stairs = deco.stairState.setValue(StairBlock.FACING, Direction.SOUTH);
         final BlockState deadRock = TFBlocks.DEADROCK.get().defaultBlockState();
-        // stairs
+
         for (int y = 0; y <= this.height; y++) {
             int x = (this.size / 2) - 2;
             int z = (this.size / 2) - y + 2;
@@ -57,10 +56,9 @@ public class FinalCastleDungeonEntranceComponent extends FinalCastleDungeonRoom3
             this.generateAirBox(world, sbb, x, y + 1, z, x + 4, y + 6, z);
         }
 
-        // Only the first basement entrance retains a reappearing door.
         final BlockState field = TFBlocks.PINK_FORCE_FIELD.get().defaultBlockState()
-                .setValue(net.minecraft.world.level.block.PipeBlock.UP, true).setValue(net.minecraft.world.level.block.PipeBlock.DOWN, true)
-                .setValue(net.minecraft.world.level.block.PipeBlock.NORTH, true).setValue(net.minecraft.world.level.block.PipeBlock.SOUTH, true);
+                .setValue(PipeBlock.UP, true).setValue(PipeBlock.DOWN, true)
+                .setValue(PipeBlock.NORTH, true).setValue(PipeBlock.SOUTH, true);
         final BlockState castleDoor = this.level == 1 ? TFBlocks.PINK_CASTLE_DOOR.get().defaultBlockState() : field;
         this.generateBox(world, sbb, 23, 0, 12, 23, 3, 14, castleDoor, AIR, false);
         this.generateBox(world, sbb, 23, 4, 12, 23, 4, 14, deco.blockState, deco.blockState, false);

@@ -12,9 +12,6 @@ import net.minecraft.world.level.Level;
 import twilightforest.enchantment.RechargeScepterEffect;
 import twilightforest.init.TFEnchantments;
 
-/**
- * The same Renewal recharge path as the native Twilight Forest scepters.
- */
 public abstract class FinaleScepterItem extends Item {
     protected FinaleScepterItem(Properties properties) {
         super(properties);
@@ -44,7 +41,7 @@ public abstract class FinaleScepterItem extends Item {
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
         super.inventoryTick(stack, level, entity, slot, selected);
-        // In-hand renewal is handled by the enchantment's native tick effect.
+
         if (!selected && entity.tickCount % 20 == 0 && level instanceof ServerLevel server && stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).getLevel(level.holderOrThrow(TFEnchantments.RENEWAL)) > 0)
             RechargeScepterEffect.applyRecharge(server, stack, entity);
     }

@@ -59,15 +59,13 @@ public final class AdherentAttackGoal extends Goal {
         int color = ((ColoredAdherent) mob).finale$getColor();
         mob.getLookControl().setLookAt(target, active && color == ColoredAdherent.RED ? 3 : 20, 20);
         if (color == ColoredAdherent.RED) {
-            // LookControl turns the head, whereas getLookAngle uses entity yaw.
-            // Keep both aligned before tracing this tick's breath, not next tick.
+
             mob.lookAt(target, active ? 3F : 20F, 20F);
             mob.setYHeadRot(mob.getYRot());
             mob.setYBodyRot(mob.getYRot());
             Vec3 facing = Vec3.directionFromRotation(mob.getXRot(), mob.getYHeadRot());
             Vec3 look = mob.getEyePosition().add(facing.scale(16));
-            // LookControl runs after goals: reapply this exact orientation there
-            // instead of turning twice or resetting the flame's vertical pitch.
+
             mob.getLookControl().setLookAt(look.x, look.y, look.z, 360F, 360F);
         }
         boolean visible = mob.getSensing().hasLineOfSight(target);
@@ -96,8 +94,7 @@ public final class AdherentAttackGoal extends Goal {
             return;
         }
         if (color == ColoredAdherent.RED) {
-            // Keep the five-second breath; red adherents now charge twice as
-            // long and deal one third of their former 19-point direct fire hit.
+
             if (casting < chargeTicks + RED_BREATH_TICKS) breathe(level);
             else finish(80);
         } else if (color == ColoredAdherent.PURPLE) {

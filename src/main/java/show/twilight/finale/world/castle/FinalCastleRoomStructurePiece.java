@@ -20,10 +20,6 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import show.twilight.finale.TwilightFinaleMod;
 
-/**
- * Worldgen writes ONE load block, never a clipped slice of the furniture.
- * Actual LOAD runs on the server thread only after every room chunk is FULL.
- */
 public final class FinalCastleRoomStructurePiece extends StructurePiece {
     static final String MARKER = "FinaleCompleteRoom";
     static final Vec3i ROOM_SIZE = new Vec3i(17, 9, 17);

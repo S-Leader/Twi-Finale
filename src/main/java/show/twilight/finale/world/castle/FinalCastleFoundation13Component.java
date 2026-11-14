@@ -50,7 +50,7 @@ public class FinalCastleFoundation13Component extends TFStructureComponentOld {
 
     @Override
     public void postProcess(WorldGenLevel world, StructureManager manager, ChunkGenerator generator, RandomSource randomIn, BoundingBox sbb, ChunkPos chunkPosIn, BlockPos blockPos) {
-        // offset bounding box to average ground level
+
         if (this.groundLevel < 0) {
             this.groundLevel = this.findGroundLevel(world, sbb, Math.min(world.getMaxBuildHeight() - 1, boundingBox.maxY()), isDeadrock);
 
@@ -59,15 +59,13 @@ public class FinalCastleFoundation13Component extends TFStructureComponentOld {
             }
         }
 
-        // how tall are we
         int height = Math.max(0, this.boundingBox.maxY() - this.groundLevel);
         int mid = height / 2;
 
-        // assume square
         int size = this.boundingBox.maxX() - this.boundingBox.minX();
 
         for (Rotation rotation : RotationUtil.ROTATIONS) {
-            // do corner
+
             this.replaceAirAndLiquidDownwardsRotated(world, deco.blockState, 1, -1, 1, rotation, sbb);
             this.replaceAirAndLiquidDownwardsRotated(world, deco.blockState, 2, -1, 1, rotation, sbb);
             this.replaceAirAndLiquidDownwardsRotated(world, deco.blockState, 2, -mid, 0, rotation, sbb);

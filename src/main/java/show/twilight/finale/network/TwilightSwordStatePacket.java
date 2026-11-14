@@ -7,9 +7,6 @@ import show.twilight.finale.TwilightFinaleMod;
 
 import java.util.UUID;
 
-/**
- * Server-owned charge/dash state, shared with the wielder and nearby viewers.
- */
 public record TwilightSwordStatePacket(int entityId, UUID playerId, int mode,
                                        int chargeTicks) implements CustomPacketPayload {
     public static final int IDLE = 0, CHARGING = 1, DASHING = 2;

@@ -7,9 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Server-authoritative casting, independent of the monster's superclass.
- */
 public final class SkillManager<T extends ISkillEntity> {
     private final Monster mob;
     private final ISkillEntity entity;

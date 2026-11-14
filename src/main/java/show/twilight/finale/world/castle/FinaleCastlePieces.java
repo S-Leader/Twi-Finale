@@ -1,17 +1,15 @@
 package show.twilight.finale.world.castle;
 
-import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
-import net.neoforged.neoforge.registries.DeferredRegister;
-
 import java.util.function.Supplier;
 
-/**
- * Separate, persisted piece IDs: ordinary/previously generated TF castles stay intact.
- */
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
 public final class FinaleCastlePieces {
-    public static final DeferredRegister<net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType<?>> PROCESSORS = DeferredRegister.create(Registries.STRUCTURE_PROCESSOR, "twilightforest_finale");
-    public static final Supplier<net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType<BasementBossProcessor>> BASEMENT_BOSS_PROCESSOR = PROCESSORS.register("basement_boss", () -> () -> BasementBossProcessor.CODEC);
+    public static final DeferredRegister<StructureProcessorType<?>> PROCESSORS = DeferredRegister.create(Registries.STRUCTURE_PROCESSOR, "twilightforest_finale");
+    public static final Supplier<StructureProcessorType<BasementBossProcessor>> BASEMENT_BOSS_PROCESSOR = PROCESSORS.register("basement_boss", () -> () -> BasementBossProcessor.CODEC);
     public static final DeferredRegister<StructurePieceType> TYPES = DeferredRegister.create(Registries.STRUCTURE_PIECE, "twilightforest_finale");
     public static final Supplier<StructurePieceType> INTERIOR = TYPES.register("castle_interior", () -> FinaleCastleTemplatePiece::new);
     public static final Supplier<StructurePieceType> ROOM_LOAD = TYPES.register("castle_room_load", () -> FinalCastleRoomStructurePiece::new);
@@ -21,12 +19,12 @@ public final class FinaleCastlePieces {
     public static final Supplier<StructurePieceType> REVIVED_ENTRY = TYPES.register("revived_basement_entry", () -> RevivedBasementEntry::new);
     public static final Supplier<StructurePieceType> REVIVED_CORRIDOR = TYPES.register("revived_basement_corridor", () -> RevivedBasementCorridor::new);
     public static final Supplier<StructurePieceType> REVIVED_DESCENT = TYPES.register("revived_basement_descent", () -> RevivedBasementDescent::new);
-    public static final Supplier<StructurePieceType> TFFCMain = TYPES.register("tffcmain", () -> FinalCastleMainComponent::new);
+    public static final Supplier<StructurePieceType> TFFCMain = TYPES.register("tffcmain", () -> FinaleCastleMainComponent::new);
     public static final Supplier<StructurePieceType> TFFCStTo = TYPES.register("tffcstto", () -> FinalCastleStairTowerComponent::new);
     public static final Supplier<StructurePieceType> TFFCLaTo = TYPES.register("tffclato", () -> FinalCastleLargeTowerComponent::new);
     public static final Supplier<StructurePieceType> TFFCMur = TYPES.register("tffcmur", () -> FinalCastleMuralComponent::new);
     public static final Supplier<StructurePieceType> TFFCToF48 = TYPES.register("tffctof48", () -> FinalCastleFoundation48Component::new);
-    public static final Supplier<StructurePieceType> TFFCRo48Cr = TYPES.register("tffcro48cr", () -> FinalCastleRoof48CrenellatedComponent::new);
+    public static final Supplier<StructurePieceType> TFFCRo48Cr = TYPES.register("tffcro48cr", () -> FinaleCastleRoof48CrenellatedComponent::new);
     public static final Supplier<StructurePieceType> TFFCBoGaz = TYPES.register("tffcbogaz", () -> FinalCastleBossGazeboComponent::new);
     public static final Supplier<StructurePieceType> TFFCSiTo = TYPES.register("tffcsito", () -> FinalCastleMazeTower13Component::new);
     public static final Supplier<StructurePieceType> TFFCDunSt = TYPES.register("tffcdunst", () -> FinalCastleDungeonStepsComponent::new);

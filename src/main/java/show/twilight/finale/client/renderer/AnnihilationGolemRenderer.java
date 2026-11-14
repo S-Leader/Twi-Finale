@@ -60,7 +60,7 @@ public final class AnnihilationGolemRenderer extends EntityRenderer<Annihilation
         model.render(animation, pose, buffers.getBuffer(RenderType.entityCutoutNoCull(texture)), light, golem.hurtTime > 0 ? 0xFFFFAAAA : 0xFFFFFFFF, name -> !name.equals("glass_core"));
         model.render(animation, pose, buffers.getBuffer(RenderType.eyes(EYES)), 15728880, 0xFFFFFFFF, name -> !name.equals("glass_core"));
         if (!golem.isCoreBroken()) {
-            // The item stays at the centre of the glass; only its X/Z orientation changes.
+
             pose.pushPose();
             model.moveToBone("cube_talisman_origin", animation, pose);
             pose.mulPose(Axis.XP.rotationDegrees(age * 2.5F));
@@ -68,7 +68,7 @@ public final class AnnihilationGolemRenderer extends EntityRenderer<Annihilation
             pose.scale(0.72F, 0.72F, 0.72F);
             Minecraft.getInstance().getItemRenderer().renderStatic(talisman, ItemDisplayContext.NONE, 15728880, OverlayTexture.NO_OVERLAY, pose, buffers, golem.level(), golem.getId());
             pose.popPose();
-            // Draw transparent glass after its contents, with the texture's actual alpha.
+
             model.render(animation, pose, buffers.getBuffer(RenderType.entityTranslucent(texture)), light, 0xFFFFFFFF, name -> name.equals("glass_core"));
         }
         pose.popPose();

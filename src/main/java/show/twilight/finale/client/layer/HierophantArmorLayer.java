@@ -1,5 +1,7 @@
 package show.twilight.finale.client.layer;
 
+import java.util.Map;
+
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -17,6 +19,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -25,14 +29,14 @@ import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.armortrim.ArmorTrim;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.ClientHooks;
 import org.jetbrains.annotations.NotNull;
+
 import show.twilight.finale.client.model.TheTwilightHierophantModel;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
-
-import java.util.Map;
 
 @OnlyIn(value = Dist.CLIENT)
 public class HierophantArmorLayer<T extends TheTwilightHierophantEntity, M extends TheTwilightHierophantModel<T>, A extends HumanoidModel<T>> extends RenderLayer<T, M> {
@@ -68,12 +72,12 @@ public class HierophantArmorLayer<T extends TheTwilightHierophantEntity, M exten
             this.getParentModel().copyPropertiesTo(model);
             this.setPartVisibility(model, this.modelPart);
             Model armorModel = this.getArmorModelHook(entity, stack, slot, model);
-            int dye = net.minecraft.world.item.component.DyedItemColor.getOrDefault(stack, -1);
+            int dye = DyedItemColor.getOrDefault(stack, -1);
             for (ArmorMaterial.Layer layer : armorItem.getMaterial().value().layers()) {
                 int tint = layer.dyeable() ? dye : -1;
                 this.renderModel(poseStack, bufferSource, light, armorModel, ((tint >>> 16) & 255) / 255F, ((tint >>> 8) & 255) / 255F, (tint & 255) / 255F, ClientHooks.getArmorTexture(entity, stack, layer, this.innerModel, slot));
             }
-            ArmorTrim trim = stack.get(net.minecraft.core.component.DataComponents.TRIM);
+            ArmorTrim trim = stack.get(DataComponents.TRIM);
             if (trim != null)
                 this.renderTrim(armorItem.getMaterial(), poseStack, bufferSource, light, trim, armorModel, this.innerModel);
             if (stack.hasFoil()) {
@@ -117,7 +121,7 @@ public class HierophantArmorLayer<T extends TheTwilightHierophantEntity, M exten
         model.renderToBuffer(stack, consumer, light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1.0f, red, green, blue));
     }
 
-    private void renderTrim(net.minecraft.core.Holder<ArmorMaterial> material, PoseStack stack, MultiBufferSource bufferSource, int light, ArmorTrim trim, Model model, boolean innerModel) {
+    private void renderTrim(Holder<ArmorMaterial> material, PoseStack stack, MultiBufferSource bufferSource, int light, ArmorTrim trim, Model model, boolean innerModel) {
         TextureAtlasSprite sprite = this.armorTrimAtlas.getSprite(innerModel ? trim.innerTexture(material) : trim.outerTexture(material));
         VertexConsumer consumer = sprite.wrap(bufferSource.getBuffer(Sheets.armorTrimsSheet(trim.pattern().value().decal())));
         model.renderToBuffer(stack, consumer, light, OverlayTexture.NO_OVERLAY, FastColor.ARGB32.colorFromFloat(1.0f, 1.0f, 1.0f, 1.0f));

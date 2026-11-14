@@ -10,7 +10,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 import twilightforest.init.TFBlocks;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-
 public class FinalCastleEntranceSideTowerComponent extends FinalCastleMazeTower13Component {
 
     public FinalCastleEntranceSideTowerComponent(StructurePieceSerializationContext ctx, CompoundTag nbt) {
@@ -31,12 +30,10 @@ public class FinalCastleEntranceSideTowerComponent extends FinalCastleMazeTower1
             this.deco = ((TFStructureComponentOld) parent).deco;
         }
 
-        // add foundation
         FinalCastleFoundation13Component foundation = new FinalCastleFoundation13Component(FinaleCastlePieces.TFFCToF13.get(), 4, this, getLocatorPosition().getX(), getLocatorPosition().getY(), getLocatorPosition().getZ());
         list.addPiece(foundation);
         foundation.addChildren(this, list, rand);
 
-        // add roof
         TFStructureComponentOld roof = new FinalCastleRoof13PeakedComponent(4, this, getLocatorPosition().getX(), getLocatorPosition().getY(), getLocatorPosition().getZ());
         list.addPiece(roof);
         roof.addChildren(this, list, rand);

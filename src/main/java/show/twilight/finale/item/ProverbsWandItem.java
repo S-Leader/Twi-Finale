@@ -1,7 +1,10 @@
 package show.twilight.finale.item;
 
+import java.util.List;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -11,10 +14,10 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import show.twilight.finale.entity.projectile.ProverbsBolt;
 import twilightforest.init.TFSounds;
+import twilightforest.util.TFItemStackUtils;
 
-import java.util.List;
+import show.twilight.finale.entity.projectile.ProverbsBolt;
 
 public class ProverbsWandItem
         extends FinaleScepterItem {
@@ -30,7 +33,7 @@ public class ProverbsWandItem
         player.playSound(TFSounds.TWILIGHT_SCEPTER_USE.get(), 1.0f, (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * 0.2f + 1.0f);
         if (!level.isClientSide()) {
             level.addFreshEntity(new ProverbsBolt(level, player));
-            twilightforest.util.TFItemStackUtils.hurtButDontBreak(stack, 1, (net.minecraft.server.level.ServerLevel) level, player);
+            TFItemStackUtils.hurtButDontBreak(stack, 1, (ServerLevel) level, player);
         }
         return InteractionResultHolder.success(player.getItemInHand(hand));
     }

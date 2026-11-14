@@ -1,5 +1,7 @@
 package show.twilight.finale.init;
 
+import java.util.function.Supplier;
+
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -19,12 +21,11 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import twilightforest.config.TFConfig;
+
 import show.twilight.finale.client.model.FinaleExtraModels;
 import show.twilight.finale.client.renderer.*;
 import show.twilight.finale.compat.hadean.HadeanRenderCompat;
-import twilightforest.config.TFConfig;
-
-import java.util.function.Supplier;
 
 
 public class ModWithoutLevelRenderer extends BlockEntityWithoutLevelRenderer {
@@ -97,7 +98,7 @@ public class ModWithoutLevelRenderer extends BlockEntityWithoutLevelRenderer {
             poseStack.popPose();
             poseStack.translate(0.5f, 0.5f, 0.0f);
             poseStack.mulPose(Axis.XP.rotationDegrees(30.0f));
-            poseStack.mulPose(Axis.YN.rotationDegrees(TFConfig.rotateTrophyHeadsGui ? (float) (net.minecraft.Util.getMillis() % 24000L) * 0.015F : -45.0F));
+            poseStack.mulPose(Axis.YN.rotationDegrees(TFConfig.rotateTrophyHeadsGui ? (float) (Util.getMillis() % 24000L) * 0.015F : -45.0F));
             poseStack.translate(-0.5f, -0.25f, -0.5f);
         }
         withoutEntity.render(poseStack, bufferSourceMain, packedLight, packedOverlay);

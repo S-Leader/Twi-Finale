@@ -1,5 +1,7 @@
 package show.twilight.finale.world;
 
+import java.util.*;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
@@ -20,22 +22,18 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import twilightforest.world.components.structures.finalcastle.FinalCastleMainComponent;
+import twilightforest.world.components.structures.finalcastle.FinalCastleRoof48CrenellatedComponent;
+
 import show.twilight.finale.config.HierophantConfig;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.init.ModBlocks;
-import show.twilight.finale.world.castle.FinalCastleMainComponent;
-import show.twilight.finale.world.castle.FinalCastleRoof48CrenellatedComponent;
+import show.twilight.finale.world.castle.FinaleCastleMainComponent;
+import show.twilight.finale.world.castle.FinaleCastleRoof48CrenellatedComponent;
 
-import java.util.*;
-
-/**
- * Stationary roof encounter; only the gazebo's tagged barriers are opened.
- */
 @EventBusSubscriber(modid = "twilightforest_finale")
 public final class HierophantArena extends SavedData {
-    /**
-     * Legacy rise/visual metadata, never a combat boundary.
-     */
+
     public static final int RADIUS = 20;
     private static final int GAZEBO_RADIUS = 10, GAZEBO_HEIGHT = 12;
     private static final int LEGACY_RISE = 20, LEGACY_DURATION = 160;
@@ -46,9 +44,6 @@ public final class HierophantArena extends SavedData {
     private record Cell(BlockPos source, BlockState state, CompoundTag blockEntity) {
     }
 
-    /**
-     * The legacy type/name is retained to load old journals, not to animate a lift.
-     */
     public static final class Lift {
         public final BlockPos sourceHome;
         public final int radius;
@@ -82,7 +77,7 @@ public final class HierophantArena extends SavedData {
 
         public AABB bounds() {
             if (roofBounds != null) return roofBounds;
-            // Only manual summons outside a known castle use this fallback.
+
             int fallback = HierophantConfig.ARENA_RADIUS.get();
             double floor = home().getY();
             return new AABB(sourceHome.getX() - fallback, floor - 2, sourceHome.getZ() - fallback,
@@ -99,7 +94,7 @@ public final class HierophantArena extends SavedData {
         Lift exact = lifts.get(home.asLong());
         if (exact != null) return exact;
         for (Lift arena : lifts.values()) if (arena.home().equals(home)) return arena;
-        // Old boss entities/spawners saved the intended +20 home before ascent.
+
         for (Lift arena : lifts.values())
             if (arena.legacy && arena.sourceHome.above(LEGACY_RISE).equals(home)) return arena;
         return null;
@@ -108,7 +103,7 @@ public final class HierophantArena extends SavedData {
     public Lift attach(ServerLevel level, TheTwilightHierophantEntity boss, BlockPos home) {
         Lift arena = find(home);
         if (arena == null) {
-            // No floor capture, new moving entities, build-height gate or +20 home.
+
             arena = new Lift(home.immutable(), boss.getUUID(), RADIUS, 0, false);
             lifts.put(home.asLong(), arena);
             setDirty();
@@ -126,8 +121,7 @@ public final class HierophantArena extends SavedData {
     }
 
     public void refreshBounds(ServerLevel level, Lift arena) {
-        // Revalidate persisted bounds once after loading. Old bounds may have
-        // included adjacent towers; only the actual main roof is a landing zone.
+
         if (arena.roofBounds != null && arena.verifiedRoofBounds) return;
         BlockPos home = arena.sourceHome;
         var chunk = level.getChunkSource().getChunkNow(home.getX() >> 4, home.getZ() >> 4);
@@ -141,7 +135,7 @@ public final class HierophantArena extends SavedData {
             if (castle.equals(registry.getKey(entry.getKey()))) for (long reference : entry.getValue()) {
                 ChunkPos at = new ChunkPos(reference);
                 var origin = level.getChunkSource().getChunkNow(at.x, at.z);
-                if (origin == null) continue; // Never force-load structure starts.
+                if (origin == null) continue;
                 StructureStart start = origin.getStartForStructure(entry.getKey());
                 if (start != null) starts.add(start);
             }
@@ -151,17 +145,16 @@ public final class HierophantArena extends SavedData {
             for (var piece : start.getPieces()) {
                 var box = piece.getBoundingBox();
                 int minX, minZ, maxX, maxZ, floor;
-                if (piece instanceof FinalCastleRoof48CrenellatedComponent
-                        || piece instanceof twilightforest.world.components.structures.finalcastle.FinalCastleRoof48CrenellatedComponent) {
-                    // Roof local (2..50, 2, 2..50) is the actual 49x49 floor;
-                    // the bounding box also includes two blocks of outer trim.
+                if (piece instanceof FinaleCastleRoof48CrenellatedComponent
+                        || piece instanceof FinalCastleRoof48CrenellatedComponent) {
+
                     minX = box.minX() + 2;
                     minZ = box.minZ() + 2;
                     maxX = box.maxX() - 1;
                     maxZ = box.maxZ() - 1;
                     floor = box.minY() + 3;
-                } else if (piece instanceof FinalCastleMainComponent
-                        || piece instanceof twilightforest.world.components.structures.finalcastle.FinalCastleMainComponent) {
+                } else if (piece instanceof FinaleCastleMainComponent
+                        || piece instanceof FinalCastleMainComponent) {
                     minX = box.minX();
                     minZ = box.minZ();
                     maxX = box.maxX() + 1;
@@ -172,12 +165,11 @@ public final class HierophantArena extends SavedData {
                 if (home.getX() < minX || home.getX() >= maxX || home.getZ() < minZ || home.getZ() >= maxZ
                         || difference > 4 || difference >= nearestFloor) continue;
                 nearestFloor = difference;
-                floor += arena.floorOffset; // Preserve old recovered terrain, never restart its lift.
+                floor += arena.floorOffset;
                 found = new AABB(minX, floor - 2, minZ, maxX, floor + 24, maxZ);
             }
         if (found != null) {
-            // Old journals have only Radius: they migrate to roof-piece bounds
-            // here instead of retaining their circular platform restriction.
+
             arena.roofBounds = found;
             arena.verifiedRoofBounds = true;
             setDirty();
@@ -206,7 +198,7 @@ public final class HierophantArena extends SavedData {
 
     @SubscribeEvent
     public static void rejoin(PlayerEvent.PlayerLoggedInEvent event) {
-        // Retire the old passenger journal. Never teleport/carry a returning player.
+
         CompoundTag data = event.getEntity().getPersistentData();
         data.remove("FinaleLiftHome");
         data.remove("FinaleLiftDimension");
@@ -218,9 +210,7 @@ public final class HierophantArena extends SavedData {
         if (arena.recoverFloor && !recoverLegacyFloor(level, arena)) return;
         if (arena.barriersCleared) return;
         boolean loaded = true;
-        // Include the row below the new pedestal-mounted spawner as well as
-        // the old floor-level layout. Only tagged fields are removed, never
-        // the castle-brick pedestal or blocks in other castle sectors.
+
         int minY = Math.max(level.getMinBuildHeight(), arena.sourceHome.getY() - 1);
         int maxY = Math.min(level.getMaxBuildHeight() - 1, arena.sourceHome.getY() + GAZEBO_HEIGHT - 1);
         for (int x = -GAZEBO_RADIUS; x <= GAZEBO_RADIUS; x++)
@@ -242,9 +232,7 @@ public final class HierophantArena extends SavedData {
     }
 
     private boolean recoverLegacyFloor(ServerLevel level, Lift arena) {
-        // Cancel an interrupted ascent at its already reached integer height.
-        // Restore only recorded floor cells into air; never overwrite player
-        // builds, reward inventories or a completed platform. No path clearing.
+
         for (Cell cell : arena.recoveryCells)
             if (!level.hasChunkAt(cell.source.above(arena.floorOffset))) return false;
         for (Cell cell : arena.recoveryCells) {
@@ -261,8 +249,7 @@ public final class HierophantArena extends SavedData {
                 be.setChanged();
             }
         }
-        // Only relocate a reset spawner that actually exists at the old future
-        // home. Do not create a second spawner while its boss is still loading.
+
         BlockPos oldHome = arena.sourceHome.above(LEGACY_RISE), home = arena.home();
         if (!oldHome.equals(home) && level.hasChunkAt(oldHome) && level.hasChunkAt(home) && level.getBlockState(home).isAir()
                 && level.getBlockState(oldHome).is(ModBlocks.TWILIGHT_HIEROPHANT_BOSS_SPAWNER.get())) {
@@ -304,7 +291,7 @@ public final class HierophantArena extends SavedData {
             }
             saved.lifts.put(arena.sourceHome.asLong(), arena);
         }
-        // Persist the migration even for old completed/defeated arenas.
+
         saved.setDirty();
         return saved;
     }

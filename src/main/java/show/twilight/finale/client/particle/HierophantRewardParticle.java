@@ -11,9 +11,6 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
-/**
- * Native totem glitter carried by a rotating, travelling cluster, not a static beam.
- */
 @OnlyIn(Dist.CLIENT)
 public final class HierophantRewardParticle extends TotemParticle {
     private final Vec3 start, destination, along, across, up;
@@ -24,8 +21,7 @@ public final class HierophantRewardParticle extends TotemParticle {
                                      double targetX, double targetY, double targetZ, SpriteSet sprites) {
         super(level, x, y, z, 0, 0, 0, sprites);
         start = new Vec3(x, y, z);
-        // The existing TF particle packet sends the destination offset in its
-        // velocity fields without the Gaussian spread of a vanilla particle packet.
+
         Vec3 offset = new Vec3(targetX, targetY, targetZ);
         destination = start.add(offset);
         double distance = offset.length();
@@ -36,8 +32,7 @@ public final class HierophantRewardParticle extends TotemParticle {
         flightTicks = Mth.clamp(Mth.ceil(distance * 1.5), 40, 80);
         lifetime = flightTicks + 12;
         arcHeight = Math.min(1.5, 0.5 + distance * 0.12);
-        // Three narrow groups make the rotation readable instead of filling a
-        // rotationally symmetric tube with evenly distributed points.
+
         phase = random.nextInt(3) * Math.PI * 2 / 3 + random.nextGaussian() * 0.16;
         orbitRadius = 0.35 + random.nextDouble() * 0.2;
         spread = (random.nextDouble() - 0.5) * 0.4;
@@ -60,8 +55,7 @@ public final class HierophantRewardParticle extends TotemParticle {
             remove();
             return;
         }
-        // Deliberately skip TotemParticle's falling/friction tick: these are
-        // genuinely moving particles following a shared centre towards the chest.
+
         moveAlongSpiral(age);
         roll += 0.12F;
         alpha = 1 - Mth.clamp((age - flightTicks) / 12F, 0, 1);

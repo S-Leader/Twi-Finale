@@ -6,10 +6,6 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructurePieceAccessor;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
-/**
- * ChunkGenerator.createReferences and ChunkSerializer both enforce radius 8.
- * Planning a piece outside that window does NOT make it generate there.
- */
 final class CastleGenerationBounds {
     static final int REFERENCE_RADIUS = 8;
 
@@ -23,7 +19,7 @@ final class CastleGenerationBounds {
 
     static boolean allows(StructurePieceAccessor pieces, StructurePiece candidate) {
         if (pieces instanceof StructurePiecesBuilder builder && !builder.pieces.isEmpty()
-                && builder.pieces.getFirst() instanceof FinalCastleMainComponent main)
+                && builder.pieces.getFirst() instanceof FinaleCastleMainComponent main)
             return main.allowsDungeonPiece(candidate.getBoundingBox());
         return true;
     }

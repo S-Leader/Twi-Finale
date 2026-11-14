@@ -1,19 +1,20 @@
 package show.twilight.finale.event;
 
+import java.util.Optional;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
-import show.twilight.finale.capabilities.ForceFieldCapabilityList;
-import show.twilight.finale.init.ModItem;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotResult;
 import twilightforest.entity.CharmEffect;
@@ -22,7 +23,8 @@ import twilightforest.init.TFSounds;
 import twilightforest.init.TFStats;
 import twilightforest.util.TFItemStackUtils;
 
-import java.util.Optional;
+import show.twilight.finale.capabilities.ForceFieldCapabilityList;
+import show.twilight.finale.init.ModItem;
 
 @EventBusSubscriber(modid = "twilightforest_finale")
 public class ExtraCharmEvents {
@@ -66,9 +68,9 @@ public class ExtraCharmEvents {
                 player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 600, 0));
                 player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 600, 0));
             }
-            CharmEffect effect = new CharmEffect(TFEntities.CHARM_EFFECT.get(), player.level(), player, new net.minecraft.world.item.ItemStack(glassheart ? ModItem.GLASS_HEART.get() : ModItem.CHARM_OF_LIFE_3.get()));
+            CharmEffect effect = new CharmEffect(TFEntities.CHARM_EFFECT.get(), player.level(), player, new ItemStack(glassheart ? ModItem.GLASS_HEART.get() : ModItem.CHARM_OF_LIFE_3.get()));
             player.level().addFreshEntity(effect);
-            CharmEffect effect2 = new CharmEffect(TFEntities.CHARM_EFFECT.get(), player.level(), player, new net.minecraft.world.item.ItemStack(glassheart ? ModItem.GLASS_HEART.get() : ModItem.CHARM_OF_LIFE_3.get()));
+            CharmEffect effect2 = new CharmEffect(TFEntities.CHARM_EFFECT.get(), player.level(), player, new ItemStack(glassheart ? ModItem.GLASS_HEART.get() : ModItem.CHARM_OF_LIFE_3.get()));
             effect2.offset = (float) Math.PI;
             player.level().addFreshEntity(effect2);
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(), TFSounds.CHARM_LIFE.get(), player.getSoundSource(), 1.0f, 1.0f);

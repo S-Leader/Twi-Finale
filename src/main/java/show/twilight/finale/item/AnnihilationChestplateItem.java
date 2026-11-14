@@ -1,5 +1,6 @@
 package show.twilight.finale.item;
 
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -11,7 +12,7 @@ import twilightforest.item.PhantomArmorItem;
 
 public class AnnihilationChestplateItem
         extends PhantomArmorItem {
-    public AnnihilationChestplateItem(net.minecraft.core.Holder<ArmorMaterial> material, ArmorItem.Type type, Item.Properties properties) {
+    public AnnihilationChestplateItem(Holder<ArmorMaterial> material, ArmorItem.Type type, Item.Properties properties) {
         super(material, type, properties.durability(type.getDurability(30)));
     }
 

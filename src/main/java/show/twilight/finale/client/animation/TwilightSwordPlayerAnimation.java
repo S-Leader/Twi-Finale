@@ -21,9 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Maps the Hierophant's FIERY_THRUST pose onto vanilla player bones.
- */
 public final class TwilightSwordPlayerAnimation {
     private static final Map<UUID, Motion> MOTIONS = new HashMap<>();
     private static final Pose REST = new Pose(0, 0);
@@ -61,7 +58,7 @@ public final class TwilightSwordPlayerAnimation {
         long now = player.level().getGameTime();
         if (previous != null && previous.mode == mode) {
             previous.updated = now;
-            return; // Charge synchronization must not restart the pose every five ticks.
+            return;
         }
         if (previous == null && mode == TwilightSwordStatePacket.IDLE) return;
         Pose from = previous == null ? REST : previous.sample(player.tickCount);
@@ -94,7 +91,6 @@ public final class TwilightSwordPlayerAnimation {
         float weight = pose.weight, thrust = pose.thrust;
         if (weight <= 0) return;
 
-        // These are the same charge/thrust angles used by the Hierophant.
         float lean = Mth.lerp(thrust, 0.1F, 0.7F);
         float armPitch = Mth.lerp(thrust, -1.9F, -Mth.HALF_PI);
         float spread = Mth.lerp(thrust, 0.8F, 0.15F);
@@ -107,8 +103,6 @@ public final class TwilightSwordPlayerAnimation {
         model.head.z = Mth.lerp(weight, model.head.z, torsoZ);
         model.head.xRot += lean * weight;
 
-        // The boss's arms are children of its torso; player arms are siblings.
-        // Flatten that parent rotation so the shoulders and sword still follow it.
         poseArm(model.leftArm, lean, armPitch, spread, weight);
         poseArm(model.rightArm, lean, armPitch, -spread, weight);
         model.leftLeg.xRot = Mth.lerp(weight, model.leftLeg.xRot, -0.7F * thrust);
@@ -118,8 +112,7 @@ public final class TwilightSwordPlayerAnimation {
         model.leftLeg.zRot = Mth.lerp(weight, model.leftLeg.zRot, 0);
         model.rightLeg.zRot = Mth.lerp(weight, model.rightLeg.zRot, 0);
         model.hat.copyFrom(model.head);
-        // PlayerModel copies these bones into sleeves, jacket and pants after
-        // this hook; vanilla armor also copies the completed humanoid pose.
+
     }
 
     private static void poseArm(ModelPart arm, float lean, float pitch, float spread, float weight) {

@@ -1,26 +1,34 @@
 package show.twilight.finale.init;
 
+import java.util.function.Supplier;
+
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
 import show.twilight.finale.entity.*;
 import show.twilight.finale.entity.projectile.AnnihilationBolt;
+import show.twilight.finale.entity.projectile.EngineerWrench;
+import show.twilight.finale.entity.projectile.HierophantFragment;
+import show.twilight.finale.entity.projectile.HierophantMeteor;
+import show.twilight.finale.entity.projectile.HierophantThrownWeapon;
+import show.twilight.finale.entity.projectile.HomingVisShard;
+import show.twilight.finale.entity.projectile.MonstrosityBomb;
 import show.twilight.finale.entity.projectile.ProverbsBolt;
 
-import java.util.function.Supplier;
-
 public class ModEntity {
-    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE, "twilightforest_finale");
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, "twilightforest_finale");
     public static final Supplier<EntityType<EngineerAdherentEntity>> ENGINEER_ADHERENT = ENTITY_TYPES.register("engineer_adherent", () -> EntityType.Builder.<EngineerAdherentEntity>of(EngineerAdherentEntity::new, MobCategory.MONSTER).sized(0.6F, 1.8F).clientTrackingRange(10).updateInterval(1).build("twilightforest_finale:engineer_adherent"));
-    public static final Supplier<EntityType<show.twilight.finale.entity.projectile.EngineerWrench>> ENGINEER_WRENCH = ENTITY_TYPES.register("engineer_wrench", () -> EntityType.Builder.<show.twilight.finale.entity.projectile.EngineerWrench>of(show.twilight.finale.entity.projectile.EngineerWrench::new, MobCategory.MISC).sized(0.3F, 0.3F).clientTrackingRange(10).updateInterval(1).build("twilightforest_finale:engineer_wrench"));
+    public static final Supplier<EntityType<EngineerWrench>> ENGINEER_WRENCH = ENTITY_TYPES.register("engineer_wrench", () -> EntityType.Builder.<EngineerWrench>of(EngineerWrench::new, MobCategory.MISC).sized(0.3F, 0.3F).clientTrackingRange(10).updateInterval(1).build("twilightforest_finale:engineer_wrench"));
     public static final Supplier<EntityType<AnnihilationGolemEntity>> ANNIHILATION_GOLEM = ENTITY_TYPES.register("annihilation_golem", () -> EntityType.Builder.<AnnihilationGolemEntity>of(AnnihilationGolemEntity::new, MobCategory.MONSTER).sized(3.2F, 3.8F).fireImmune().clientTrackingRange(16).updateInterval(1).build("twilightforest_finale:annihilation_golem"));
     public static final Supplier<EntityType<CastleMonstrosityEntity>> CASTLE_MONSTROSITY = ENTITY_TYPES.register("castle_monstrosity", () -> EntityType.Builder.<CastleMonstrosityEntity>of(CastleMonstrosityEntity::new, MobCategory.MONSTER).sized(5.4F, 4.6F).fireImmune().clientTrackingRange(16).updateInterval(1).build("twilightforest_finale:castle_monstrosity"));
-    public static final Supplier<EntityType<show.twilight.finale.entity.projectile.MonstrosityBomb>> MONSTROSITY_BOMB = ENTITY_TYPES.register("monstrosity_bomb", () -> EntityType.Builder.<show.twilight.finale.entity.projectile.MonstrosityBomb>of(show.twilight.finale.entity.projectile.MonstrosityBomb::new, MobCategory.MISC).sized(0.8F, 0.8F).fireImmune().clientTrackingRange(16).updateInterval(1).build("twilightforest_finale:monstrosity_bomb"));
-    public static final Supplier<EntityType<show.twilight.finale.entity.projectile.HierophantMeteor>> HIEROPHANT_METEOR = ENTITY_TYPES.register("hierophant_meteor", () -> EntityType.Builder.<show.twilight.finale.entity.projectile.HierophantMeteor>of(show.twilight.finale.entity.projectile.HierophantMeteor::new, MobCategory.MISC).sized(0.75F, 0.75F).fireImmune().clientTrackingRange(16).updateInterval(1).build("twilightforest_finale:hierophant_meteor"));
-    public static final Supplier<EntityType<show.twilight.finale.entity.projectile.HierophantThrownWeapon>> HIEROPHANT_THROWN_WEAPON = ENTITY_TYPES.register("hierophant_thrown_weapon", () -> EntityType.Builder.<show.twilight.finale.entity.projectile.HierophantThrownWeapon>of(show.twilight.finale.entity.projectile.HierophantThrownWeapon::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(12).updateInterval(1).build("twilightforest_finale:hierophant_thrown_weapon"));
-    public static final Supplier<EntityType<show.twilight.finale.entity.projectile.HierophantFragment>> HIEROPHANT_FRAGMENT = ENTITY_TYPES.register("hierophant_fragment", () -> EntityType.Builder.<show.twilight.finale.entity.projectile.HierophantFragment>of(show.twilight.finale.entity.projectile.HierophantFragment::new, MobCategory.MISC).sized(0.3F, 0.3F).clientTrackingRange(12).updateInterval(1).build("twilightforest_finale:hierophant_fragment"));
-    public static final Supplier<EntityType<show.twilight.finale.entity.projectile.HomingVisShard>> HOMING_VIS_SHARD = ENTITY_TYPES.register("homing_vis_shard", () -> EntityType.Builder.<show.twilight.finale.entity.projectile.HomingVisShard>of(show.twilight.finale.entity.projectile.HomingVisShard::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(8).updateInterval(1).build("twilightforest_finale:homing_vis_shard"));
+    public static final Supplier<EntityType<MonstrosityBomb>> MONSTROSITY_BOMB = ENTITY_TYPES.register("monstrosity_bomb", () -> EntityType.Builder.<MonstrosityBomb>of(MonstrosityBomb::new, MobCategory.MISC).sized(0.8F, 0.8F).fireImmune().clientTrackingRange(16).updateInterval(1).build("twilightforest_finale:monstrosity_bomb"));
+    public static final Supplier<EntityType<HierophantMeteor>> HIEROPHANT_METEOR = ENTITY_TYPES.register("hierophant_meteor", () -> EntityType.Builder.<HierophantMeteor>of(HierophantMeteor::new, MobCategory.MISC).sized(0.75F, 0.75F).fireImmune().clientTrackingRange(16).updateInterval(1).build("twilightforest_finale:hierophant_meteor"));
+    public static final Supplier<EntityType<HierophantThrownWeapon>> HIEROPHANT_THROWN_WEAPON = ENTITY_TYPES.register("hierophant_thrown_weapon", () -> EntityType.Builder.<HierophantThrownWeapon>of(HierophantThrownWeapon::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(12).updateInterval(1).build("twilightforest_finale:hierophant_thrown_weapon"));
+    public static final Supplier<EntityType<HierophantFragment>> HIEROPHANT_FRAGMENT = ENTITY_TYPES.register("hierophant_fragment", () -> EntityType.Builder.<HierophantFragment>of(HierophantFragment::new, MobCategory.MISC).sized(0.3F, 0.3F).clientTrackingRange(12).updateInterval(1).build("twilightforest_finale:hierophant_fragment"));
+    public static final Supplier<EntityType<HomingVisShard>> HOMING_VIS_SHARD = ENTITY_TYPES.register("homing_vis_shard", () -> EntityType.Builder.<HomingVisShard>of(HomingVisShard::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(8).updateInterval(1).build("twilightforest_finale:homing_vis_shard"));
     public static final Supplier<EntityType<SeekerFireworkRocketEntity>> SEEKER_FIREWORK_ROCKET = ENTITY_TYPES.register("seeker_firework_rocket", () -> EntityType.Builder.<SeekerFireworkRocketEntity>of(SeekerFireworkRocketEntity::new, MobCategory.MISC).sized(0.25f, 0.25f).build(ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "seeker_firework_rocket").toString()));
     public static final Supplier<EntityType<AdherentHighPriestEntity>> ADHERENT_HIGH_PRIEST = ENTITY_TYPES.register("adherent_high_priest", () -> EntityType.Builder.<AdherentHighPriestEntity>of(AdherentHighPriestEntity::new, MobCategory.MONSTER).sized(0.8f, 2.25f).fireImmune().build(ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "adherent_high_priest").toString()));
     public static final Supplier<EntityType<TheTwilightHierophantEntity>> THE_TWILIGHT_HIEROPHANT = ENTITY_TYPES.register("the_twilight_hierophant", () -> EntityType.Builder.of(TheTwilightHierophantEntity::new, MobCategory.MONSTER).sized(0.9f, 1.95f).fireImmune().build(ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "the_twilight_hierophant").toString()));

@@ -28,9 +28,6 @@ import show.twilight.finale.network.TwilightSwordStatePacket;
 
 import java.util.*;
 
-/**
- * Server starts/stops the dash; native client collision still owns movement.
- */
 @EventBusSubscriber(modid = TwilightFinaleMod.MOD_ID, value = Dist.CLIENT)
 public final class TwilightSwordClientEffects {
     private static final Map<UUID, State> STATES = new HashMap<>();
@@ -90,9 +87,6 @@ public final class TwilightSwordClientEffects {
         HISTORIES.entrySet().removeIf(entry -> now - entry.getValue().updated > 12);
     }
 
-    /**
-     * Same position/pose snapshots and linear fading as the Hierophant's Vzling shadows.
-     */
     @SubscribeEvent
     public static void render(RenderPlayerEvent.Post event) {
         if (!(event.getEntity() instanceof AbstractClientPlayer player) || player.isInvisible() || !player.isAlive())

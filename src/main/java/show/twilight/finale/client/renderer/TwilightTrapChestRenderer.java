@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.phys.AABB;
+
 import show.twilight.finale.block.entity.TwilightTrapChestBlockEntity;
 
 public class TwilightTrapChestRenderer implements BlockEntityRenderer<TwilightTrapChestBlockEntity> {
@@ -57,7 +59,7 @@ public class TwilightTrapChestRenderer implements BlockEntityRenderer<TwilightTr
     }
 
     @Override
-    public net.minecraft.world.phys.AABB getRenderBoundingBox(TwilightTrapChestBlockEntity chest) {
-        return new net.minecraft.world.phys.AABB(chest.getBlockPos()).inflate(10);
+    public AABB getRenderBoundingBox(TwilightTrapChestBlockEntity chest) {
+        return new AABB(chest.getBlockPos()).inflate(10);
     }
 }

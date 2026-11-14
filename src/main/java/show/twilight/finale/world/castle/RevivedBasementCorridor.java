@@ -13,9 +13,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 import twilightforest.init.TFBlocks;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-/**
- * Only a chosen graph edge gets a corridor. Unchosen edges remain solid rock.
- */
 public final class RevivedBasementCorridor extends TFStructureComponentOld {
     final int floor, a, b;
     private final boolean east;

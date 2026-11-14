@@ -1,8 +1,11 @@
 package show.twilight.finale.entity;
 
+import java.util.*;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -19,6 +22,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -39,27 +43,26 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import show.twilight.finale.TwilightFinaleMod;
-import show.twilight.finale.entity.combat.ColoredAdherent;
-import show.twilight.finale.entity.combat.MonstrosityMoveControl;
-import show.twilight.finale.entity.projectile.MonstrosityBomb;
-import show.twilight.finale.init.ModDamageTypes;
+import net.neoforged.neoforge.event.EventHooks;
+import net.neoforged.neoforge.network.PacketDistributor;
 import twilightforest.entity.monster.Adherent;
 import twilightforest.init.TFEntities;
 import twilightforest.init.TFItems;
 import twilightforest.init.TFParticleType;
 import twilightforest.init.TFSounds;
+import twilightforest.network.ParticlePacket;
 
-import java.util.*;
+import show.twilight.finale.TwilightFinaleMod;
+import show.twilight.finale.entity.combat.ColoredAdherent;
+import show.twilight.finale.entity.combat.MonstrosityMoveControl;
+import show.twilight.finale.entity.projectile.MonstrosityBomb;
+import show.twilight.finale.init.ModDamageTypes;
 
-/**
- * Server owns attacks, charge accounting and encounter continuation.
- */
 public class CastleMonstrosityEntity extends Monster {
     public static final int CHASE = 0, SMASH = 1, SPIT = 2, SUMMON = 3, TRAP = 4, FIRE = 5, BROKEN = 6, RECOVER = 7, DYING = 8, ACTIVATE = 9, RETRACT_TRAP = 10, RETRACT_FIRE = 11, TRIPLE_SMASH = 12;
     public static final int COMBO_HIT_1 = 33, COMBO_HIT_2 = 55, COMBO_HIT_3 = 77, COMBO_DURATION = 106;
     public static final int TRAP_PULL_START = 33, TRAP_PULL_END = 93, TRAP_HIT = 108;
-    // Hydra's FLAMING state lasts 100 ticks and deals 19 fire damage, with 3 seconds of fire.
+
     public static final int FIRE_START = 33, FIRE_DURATION = 100, BROKEN_DURATION = 100, DEATH_DURATION = 140;
     private static final EntityDataAccessor<Integer> ACTION = SynchedEntityData.defineId(CastleMonstrosityEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Long> ACTION_START = SynchedEntityData.defineId(CastleMonstrosityEntity.class, EntityDataSerializers.LONG);
@@ -191,7 +194,7 @@ public class CastleMonstrosityEntity extends Monster {
     }
 
     public boolean canDamageWithSkill(LivingEntity e) {
-        // Adherents are allies for targeting, but can be caught in the giant's area attacks.
+
         return (e instanceof Adherent && e.isAlive() && !e.isSpectator()) || canAttackTarget(e);
     }
 
@@ -231,14 +234,13 @@ public class CastleMonstrosityEntity extends Monster {
             }
             if (cooldown <= 0) getNavigation().stop();
             if (tickCount % 5 == 0) breakObstacles(server);
-            // Both successful paths and wall-breaking fallback use the same forward move controller.
+
             if (cooldown > 0 && tickCount % 10 == 0) getNavigation().moveTo(getTarget(), 1);
             if (cooldown > 0 && getNavigation().isDone()) {
                 getMoveControl().setWantedPosition(getTarget().getX(), getTarget().getY(), getTarget().getZ(), 1);
             }
             if (--cooldown <= 0) {
-                // A path waypoint can be beside/behind the player. Finish aiming at the
-                // actual target before choosing an attack that plants the feet.
+
                 if (!isFacingTarget(8)) return;
                 int next;
                 if (distanceToSqr(getTarget()) < 81 && lastAttack != TRIPLE_SMASH) {
@@ -270,7 +272,7 @@ public class CastleMonstrosityEntity extends Monster {
                 if (t >= 66) finishAttack();
             }
             case TRIPLE_SMASH -> {
-                // Each impact has its own wind-up. Lock the feet/body for the whole combo.
+
                 if (t == COMBO_HIT_1 || t == COMBO_HIT_2 || t == COMBO_HIT_3)
                     slam(server, position().add(forward().scale(3)), 6, 16);
                 if (t >= COMBO_DURATION) finishAttack();
@@ -349,9 +351,8 @@ public class CastleMonstrosityEntity extends Monster {
         if (t == TRAP_PULL_START) playSound(TFSounds.GHAST_TRAP_ON.get(), 3, 1);
         if (t >= TRAP_PULL_START && t < TRAP_PULL_END) {
             Vec3 origin = devicePosition(true), direction = forward();
-            twilightforest.network.ParticlePacket particles = new twilightforest.network.ParticlePacket();
-            // The native particle takes a destination and its full displacement, not a velocity.
-            // TF's packet bypasses vanilla's Gaussian scatter and preserves those parameters.
+            ParticlePacket particles = new ParticlePacket();
+
             for (int i = 0; i < 4; i++) {
                 double angle = (t * 0.3 + i * Math.PI / 2);
                 Vec3 offset = direction.scale(2.5).add(Math.cos(angle) * 1.2, Math.sin(angle) * 1.2, 0);
@@ -370,7 +371,7 @@ public class CastleMonstrosityEntity extends Monster {
                 if (t % 2 == 0) for (int i = 0; i < 5; i++)
                     particles.queueParticle(TFParticleType.GHAST_TRAP.get(), true, origin, delta.add((random.nextDouble() - 0.5) * 0.8, (random.nextDouble() - 0.5) * 0.8, (random.nextDouble() - 0.5) * 0.8));
             }
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntity(this, particles);
+            PacketDistributor.sendToPlayersTrackingEntity(this, particles);
         }
         if (t == TRAP_PULL_END && !hasCapturedTarget()) {
             setAction(RETRACT_TRAP);
@@ -382,7 +383,7 @@ public class CastleMonstrosityEntity extends Monster {
 
     private void flame(ServerLevel server) {
         Vec3 origin = devicePosition(false), direction = getTarget().getEyePosition().subtract(origin).normalize();
-        // Limit turning by body orientation, so targets can evade the stream.
+
         Vec3 horizontal = forward();
         direction = new Vec3(horizontal.x, Mth.clamp(direction.y, -0.3, 0.3), horizontal.z).normalize();
         Vec3 end = server.clip(new ClipContext(origin, origin.add(direction.scale(20)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getLocation();
@@ -410,7 +411,7 @@ public class CastleMonstrosityEntity extends Monster {
 
     private void slam(ServerLevel server, Vec3 at, double radius, float damage) {
         playSound(TFSounds.MINOSHROOM_SLAM.get(), 3, 0.75F);
-        // Sample the real floor, like Minoshroom. These are debris particles, not block destruction.
+
         for (int i = 0; i < 80; i++) {
             double angle = random.nextDouble() * Math.PI * 2, distance = Math.sqrt(random.nextDouble()) * radius;
             BlockPos ground = groundAt(server, at.add(Math.cos(angle) * distance, 0, Math.sin(angle) * distance));
@@ -462,7 +463,7 @@ public class CastleMonstrosityEntity extends Monster {
             if (!server.hasChunkAt(p) || state.isAir() || state.getCollisionShape(server, p).isEmpty() || state.getDestroySpeed(server, p) < 0 || state.getBlock().getExplosionResistance() >= 1200)
                 continue;
             BlockEntity be = server.getBlockEntity(p);
-            if (be != null || !state.canEntityDestroy(server, p, this) || !net.neoforged.neoforge.event.EventHooks.onEntityDestroyBlock(this, p, state))
+            if (be != null || !state.canEntityDestroy(server, p, this) || !EventHooks.onEntityDestroyBlock(this, p, state))
                 continue;
             server.destroyBlock(p, false, this);
             if (++destroyed >= 64) break;
@@ -498,12 +499,12 @@ public class CastleMonstrosityEntity extends Monster {
 
     private void playChargeSound() {
         int charge = getTrapCharge();
-        // Match the three native inactive-trap notification levels; WARMUP is the activation loop.
+
         if (charge > 0)
             playSound(TFSounds.GHAST_TRAP_AMBIENT.get(), charge == 1 ? 1 : charge == 2 ? 1.2F : 1.5F, charge == 1 ? 1 : charge == 2 ? 0.8F : 2);
     }
 
-    public static void smokeTrail(ServerLevel server, Vec3 from, Vec3 to, net.minecraft.core.particles.SimpleParticleType particle) {
+    public static void smokeTrail(ServerLevel server, Vec3 from, Vec3 to, SimpleParticleType particle) {
         int steps = Math.min(32, Math.max(4, (int) from.distanceTo(to) * 2));
         for (int i = 0; i <= steps; i++) {
             Vec3 at = from.lerp(to, i / (double) steps), velocity = to.subtract(at).scale(0.08);
@@ -513,7 +514,7 @@ public class CastleMonstrosityEntity extends Monster {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        if (!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && (source.is(DamageTypeTags.IS_PROJECTILE) || source.is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC) || source.getDirectEntity() instanceof Projectile || source.getEntity() instanceof LivingEntity && source.getDirectEntity() != source.getEntity()))
+        if (!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && (source.is(DamageTypeTags.IS_PROJECTILE) || source.is(DamageTypes.INDIRECT_MAGIC) || source.getDirectEntity() instanceof Projectile || source.getEntity() instanceof LivingEntity && source.getDirectEntity() != source.getEntity()))
             return false;
         if (source.getEntity() != null && isAlliedTo(source.getEntity())) return false;
         boolean hit = super.hurt(source, amount);
@@ -551,7 +552,7 @@ public class CastleMonstrosityEntity extends Monster {
         server.sendParticles(TFParticleType.HUGE_SMOKE.get(), getX(), getY() + 2, getZ(), 4 + t / 6, 2.5, 2, 2.5, 0.03);
         server.sendParticles(TFParticleType.ANNIHILATE.get(), getX(), getY() + 2, getZ(), 5 + t / 10, 2, 2, 2, 0.04);
         if (t < DEATH_DURATION) return;
-        // The continuation lives in this entity's NBT, not an invisible one-HP boss.
+
         if (hierophant != null && !resumed) {
             captureLegacyOwner(server);
             if (!TheTwilightHierophantEntity.restoreAfterMonstrosity(server, hierophant, getUUID(), hierophantData, position()))

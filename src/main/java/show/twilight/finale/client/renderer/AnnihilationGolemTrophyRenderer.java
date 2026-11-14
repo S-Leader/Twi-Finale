@@ -20,7 +20,7 @@ public final class AnnihilationGolemTrophyRenderer implements BlockEntityRendere
     public void render(PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         pose.pushPose();
         pose.translate(0.5, 0.25, 0.5);
-        // Trophy renderers face +Z; the Blockbench head faces -Z around its rear pivot.
+
         pose.mulPose(Axis.YP.rotationDegrees(180));
         pose.scale(0.5F, 0.5F, 0.5F);
         pose.translate(0, 0, 0.375);

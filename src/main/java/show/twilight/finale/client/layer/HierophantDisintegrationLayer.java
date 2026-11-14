@@ -13,9 +13,6 @@ import net.minecraft.util.RandomSource;
 import show.twilight.finale.client.model.TheTwilightHierophantModel;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 
-/**
- * Expanding dragon-style rays; the skin dissolves in its own textured pass.
- */
 public final class HierophantDisintegrationLayer<T extends TheTwilightHierophantEntity> extends RenderLayer<T, TheTwilightHierophantModel<T>> {
     public HierophantDisintegrationLayer(RenderLayerParent<T, TheTwilightHierophantModel<T>> parent) {
         super(parent);

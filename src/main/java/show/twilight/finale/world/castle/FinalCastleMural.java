@@ -9,7 +9,6 @@ public class FinalCastleMural {
     final int height;
     final int width;
 
-    // we will model the mural in this byte array
     private final byte[] mural;
 
     public FinalCastleMural(CompoundTag compoundTag) {
@@ -43,21 +42,17 @@ public class FinalCastleMural {
         int startX = this.width / 2 - 1;
         int startY = 2;
 
-        // make mural, fill in dot by start
         for (int x = -1; x < 2; x++) {
             for (int y = -1; y < 2; y++) {
                 this.set(startX + x, startY + y, (byte) 1);
             }
         }
 
-        // side branches
         this.makeHorizontalTree(decoRNG, startX + 1, startY, decoRNG.nextInt(this.width / 6) + this.width / 6, true);
         this.makeHorizontalTree(decoRNG, startX - 1, startY, decoRNG.nextInt(this.width / 6) + this.width / 6, false);
 
-        // main tree
         this.makeVerticalTree(decoRNG, startX, startY + 1, decoRNG.nextInt(this.height / 6) + this.height / 6, true);
 
-        // stripes
         this.makeStripes(decoRNG);
     }
 
@@ -79,7 +74,6 @@ public class FinalCastleMural {
         int downLine = (length / 2) + 1 + rand.nextInt(Math.max(length / 2, 2));
         int branchLength = rand.nextInt(this.width / 8) + this.width / 8;
 
-        // check if the area is clear
         boolean clear = true;
         for (int i = 0; i <= branchLength; i++) {
             int cx = sx + (plusX ? downLine - 1 + i : -(downLine - 1 + i));
@@ -93,14 +87,12 @@ public class FinalCastleMural {
             int bx = sx + (plusX ? downLine : -downLine);
             int by = sy;
 
-            // jag
             this.fillVerticalLine(bx, by, 1, plusY);
 
             by += (plusY ? 2 : -2);
 
             this.fillHorizontalLine(bx, by, branchLength, plusX);
 
-            // recurse?
             if (bx > 0 && bx < this.width && by > 0 && by < this.height) {
                 if (!this.makeHorizontalBranch(rand, bx, by, branchLength, plusX, true)) {
                     if (!this.makeHorizontalBranch(rand, bx, by, branchLength, plusX, true)) {
@@ -127,7 +119,6 @@ public class FinalCastleMural {
         int downLine = (length / 2) + 1 + rand.nextInt(Math.max(length / 2, 2));
         int branchLength = rand.nextInt(this.height / 8) + this.height / 8;
 
-        // check if the area is clear
         boolean clear = true;
         for (int i = 0; i <= branchLength; i++) {
             int cx = sx + (plusX ? 2 : -2);
@@ -141,14 +132,12 @@ public class FinalCastleMural {
             int bx = sx;
             int by = sy + (plusY ? downLine : -downLine);
 
-            // jag
             this.fillHorizontalLine(bx, by, 1, plusX);
 
             bx += (plusX ? 2 : -2);
 
             this.fillVerticalLine(bx, by, branchLength, plusY);
 
-            // recurse?
             if (bx > 0 && bx < this.width && by > 0 && by < this.height) {
                 if (!this.makeVerticalBranch(rand, bx, by, branchLength, plusY, true)) {
                     if (!this.makeVerticalBranch(rand, bx, by, branchLength, plusY, true)) {
@@ -198,7 +187,7 @@ public class FinalCastleMural {
     }
 
     private void makeStripes(RandomSource decoRNG) {
-        // stagger slightly on our way down
+
         for (int y = this.height - 2; y > this.height / 3; y -= (2 + decoRNG.nextInt(2))) {
             this.makeSingleStripe(y);
         }

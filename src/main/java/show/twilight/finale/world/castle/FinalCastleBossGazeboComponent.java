@@ -1,5 +1,7 @@
 package show.twilight.finale.world.castle;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -24,7 +26,7 @@ import twilightforest.util.RotationUtil;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 import twilightforest.world.components.structures.util.StructureTemplateDefinitions;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import show.twilight.finale.init.ModBlocks;
 
 @ParametersAreNonnullByDefault
 public class FinalCastleBossGazeboComponent extends TFStructureComponentOld {
@@ -42,7 +44,7 @@ public class FinalCastleBossGazeboComponent extends TFStructureComponentOld {
     @SuppressWarnings("this-escape")
     public FinalCastleBossGazeboComponent(int i, TFStructureComponentOld keep, int x, int y, int z) {
         super(FinaleCastlePieces.TFFCBoGaz.get(), i, x, y, z);
-        this.spawnListIndex = -1; // no monsters
+        this.spawnListIndex = -1;
 
         this.setOrientation(keep.getOrientation());
         this.boundingBox = new BoundingBox(keep.getBoundingBox().minX() + 14, keep.getBoundingBox().maxY() + 2, keep.getBoundingBox().minZ() + 14, keep.getBoundingBox().maxX() - 14, keep.getBoundingBox().maxY() + 13, keep.getBoundingBox().maxZ() - 14);
@@ -77,9 +79,8 @@ public class FinalCastleBossGazeboComponent extends TFStructureComponentOld {
         this.placeBlock(world, (BlockState) ((BlockState) blockState.setValue(StairBlock.FACING, Direction.SOUTH)).setValue(StairBlock.SHAPE, StairsShape.STRAIGHT), 10, 0, 11, sbb);
         this.placeBlock(world, (BlockState) ((BlockState) blockState.setValue(StairBlock.FACING, Direction.SOUTH)).setValue(StairBlock.SHAPE, StairsShape.OUTER_LEFT), 11, 0, 11, sbb);
         this.placeBlock(world, TFBlocks.CASTLE_BRICK.get().defaultBlockState(), 10, 0, 10, sbb);
-        // Native spawning/reset uses this raised home, above a single castle-brick pedestal.
-        // The arena itself remains stationary; activation only opens the violet fields.
-        this.placeBlock(world, show.twilight.finale.init.ModBlocks.TWILIGHT_HIEROPHANT_BOSS_SPAWNER.get().defaultBlockState(), 10, 1, 10, sbb);
+
+        this.placeBlock(world, ModBlocks.TWILIGHT_HIEROPHANT_BOSS_SPAWNER.get().defaultBlockState(), 10, 1, 10, sbb);
 
     }
 

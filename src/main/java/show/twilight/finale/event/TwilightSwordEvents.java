@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 @EventBusSubscriber(modid = TwilightFinaleMod.MOD_ID)
 public final class TwilightSwordEvents {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, TwilightFinaleMod.MOD_ID);
-    // Runtime-only: neither saved, copied on respawn, nor synced as an attachment.
+
     private static final Supplier<AttachmentType<DashState>> DASH_STATE = ATTACHMENTS.register("twilight_sword_dash", () -> AttachmentType.builder(holder -> new DashState((Player) holder)).build());
 
     public static void registerAttachments(IEventBus bus) {
@@ -109,8 +109,7 @@ public final class TwilightSwordEvents {
             stop(player, state);
             return;
         }
-        // Riptide applies one impulse along the full look vector. Vanilla travel,
-        // gravity, friction and collision handle every subsequent movement tick.
+
         state.direction = player.getLookAngle().normalize();
         state.attackDamage = (float) player.getAttributes().getValue(Attributes.ATTACK_DAMAGE);
         state.previous = player.position();
@@ -136,8 +135,7 @@ public final class TwilightSwordEvents {
         if (current.distanceToSqr(state.previous) > 1.0E-8)
             player.serverLevel().sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() + 0.5, player.getZ(), 12, 0.35, 0.35, 0.35, 0.03);
         state.previous = current;
-        // Native riptide rebounds on contact, stops its attack at a wall, and
-        // otherwise expires after twenty ticks without deleting the momentum.
+
         if (hit) {
             player.setDeltaMovement(player.getDeltaMovement().scale(-0.2));
             sendVelocity(player);

@@ -7,24 +7,28 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import show.twilight.finale.TwilightFinaleMod;
 import show.twilight.finale.entity.AdherentHighPriestEntity;
 import show.twilight.finale.entity.AnnihilationGolemEntity;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import twilightforest.entity.EnforcedHomePoint;
+import twilightforest.init.TFEntities;
 import twilightforest.init.TFStructures;
+import twilightforest.world.components.structures.SpawnIndexProvider;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/** Per-dimension, per-castle history; unrelated castles never unlock journal endings. */
 @EventBusSubscriber(modid = TwilightFinaleMod.MOD_ID)
 public final class CastleEncounterProgress extends SavedData {
     public static final int PRIEST = 1, GOLEM = 2, HIEROPHANT = 4;
@@ -44,6 +48,30 @@ public final class CastleEncounterProgress extends SavedData {
 
     public int state(long castle) {
         return defeated.getOrDefault(castle, 0);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onPotentialSpawns(LevelEvent.PotentialSpawns event) {
+        if (event.getMobCategory() != MobCategory.MONSTER || !(event.getLevel() instanceof ServerLevel level)) return;
+        BlockPos pos = event.getPos();
+        var castle = findCastle(level, pos);
+        if (castle.isEmpty()) return;
+        var start = castle.get();
+        int progress = get(level).state(start.getChunkPos().toLong());
+        if ((progress & (GOLEM | HIEROPHANT)) == 0) return;
+        int spawnIndex = -1;
+        for (var piece : start.getPieces()) {
+            if (piece instanceof SpawnIndexProvider spawns && piece.getBoundingBox().isInside(pos))
+                spawnIndex = Math.max(spawnIndex, spawns.getSpawnIndex());
+        }
+        if ((progress & HIEROPHANT) != 0 && spawnIndex >= 0 && spawnIndex < 2) {
+            event.setCanceled(true);
+            return;
+        }
+        if (spawnIndex != 2 || (progress & GOLEM) == 0) return;
+        for (var spawn : List.copyOf(event.getSpawnerDataList())) {
+            if (spawn.type == TFEntities.ADHERENT.get()) event.removeSpawnerData(spawn);
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

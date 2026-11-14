@@ -12,9 +12,6 @@ import show.twilight.finale.entity.projectile.HierophantMeteor;
 import twilightforest.client.model.TFModelLayers;
 import twilightforest.client.model.entity.HydraMortarModel;
 
-/**
- * Use the native Hydra mesh/texture, without its stationary fuse's low-alpha flash.
- */
 public final class HierophantMeteorRenderer extends EntityRenderer<HierophantMeteor> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("twilightforest", "textures/entity/hydramortar.png");
     private final HydraMortarModel model;
@@ -37,7 +34,7 @@ public final class HierophantMeteorRenderer extends EntityRenderer<HierophantMet
         pose.translate(0, 0.375, 0);
         pose.mulPose(Axis.XP.rotationDegrees((entity.tickCount + partial) * 24));
         pose.scale(size, size, size);
-        // The native cube spans Y=0..8 pixels; tumble around its centre.
+
         pose.translate(0, -0.25, 0);
         model.renderToBuffer(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE)), 15728880, OverlayTexture.NO_OVERLAY, -1);
         pose.popPose();

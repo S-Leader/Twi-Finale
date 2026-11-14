@@ -17,8 +17,7 @@ import java.util.List;
 public abstract class AbstractSkillEntity extends Monster implements ISkillEntity, VzlingAnimatable {
     private static final EntityDataAccessor<Integer> SKILL_TYPE = SynchedEntityData.defineId(AbstractSkillEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SKILL_START = SynchedEntityData.defineId(AbstractSkillEntity.class, EntityDataSerializers.INT);
-    // Metadata is applied in accessor-ID order on the client. Publish the type
-    // and start before the flag that the existing boss animation callback reads.
+
     protected static final EntityDataAccessor<Boolean> USING_SKILL = SynchedEntityData.defineId(AbstractSkillEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> PHASE = SynchedEntityData.defineId(AbstractSkillEntity.class, EntityDataSerializers.INT);
     private final List<VzlingAnimation> animations = new ArrayList<>();
@@ -122,7 +121,7 @@ public abstract class AbstractSkillEntity extends Monster implements ISkillEntit
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         setPhase(tag.contains("FinalePhase") ? tag.getInt("FinalePhase") : 1);
-        // A cast is deliberately cancelled on reload, rather than resuming halfway.
+
         endSkill();
     }
 }

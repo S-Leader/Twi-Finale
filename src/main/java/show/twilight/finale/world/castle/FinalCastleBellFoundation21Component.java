@@ -13,11 +13,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 import twilightforest.util.RotationUtil;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-/**
- * A larger foundation that comes all the way from the top of a tower
- *
- * @author benma_000
- */
 public class FinalCastleBellFoundation21Component extends FinalCastleFoundation13Component {
 
     public FinalCastleBellFoundation21Component(StructurePieceSerializationContext ctx, CompoundTag nbt) {
@@ -36,11 +31,10 @@ public class FinalCastleBellFoundation21Component extends FinalCastleFoundation1
         int mid = 16;
         int low = 32;
 
-        // assume square
         int size = this.boundingBox.maxX() - this.boundingBox.minX();
 
         for (Rotation rotation : RotationUtil.ROTATIONS) {
-            // do corner
+
             this.replaceAirAndLiquidDownwardsRotated(world, deco.blockState, 2, -1, 1, rotation, sbb);
             this.replaceAirAndLiquidDownwardsRotated(world, deco.blockState, 2, -mid, 0, rotation, sbb);
             this.replaceAirAndLiquidDownwardsRotated(world, deco.blockState, 1, -1, 2, rotation, sbb);

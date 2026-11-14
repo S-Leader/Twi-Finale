@@ -4,9 +4,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import show.twilight.finale.runtime.entity.AbstractSkillEntity;
 
-/**
- * Chase only; actual hits and casts are implemented by the existing skill effects.
- */
 public class EmptyMeleeAttackGoal extends MeleeAttackGoal {
     private final AbstractSkillEntity entity;
 

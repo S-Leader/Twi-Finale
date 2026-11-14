@@ -12,9 +12,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import show.twilight.finale.init.ModBlocks;
 
-/**
- * Forge/basement templates only: never converts unrelated dungeon spawners.
- */
 public final class BasementBossProcessor extends StructureProcessor {
     public static final BasementBossProcessor INSTANCE = new BasementBossProcessor();
     public static final MapCodec<BasementBossProcessor> CODEC = MapCodec.unit(INSTANCE);
@@ -24,7 +21,7 @@ public final class BasementBossProcessor extends StructureProcessor {
         CompoundTag spawn = data.getCompound("SpawnData");
         if ("minecraft:blaze".equals(spawn.getCompound("entity").getString("id")) || "minecraft:blaze".equals(spawn.getString("id")))
             return true;
-        // Older exported templates may contain only the weighted spawn list.
+
         var potentials = data.getList("SpawnPotentials", 10);
         for (int i = 0; i < potentials.size(); i++) {
             CompoundTag entry = potentials.getCompound(i);

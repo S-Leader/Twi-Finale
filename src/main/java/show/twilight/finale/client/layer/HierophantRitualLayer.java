@@ -8,15 +8,16 @@ import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import org.joml.Vector3f;
+
 import show.twilight.finale.client.model.TheTwilightHierophantModel;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.init.ModItem;
+import show.twilight.finale.world.HierophantArena;
 
-/**
- * Visual props, not item entities: neither ritual can drop/duplicate its items.
- */
 public final class HierophantRitualLayer<T extends TheTwilightHierophantEntity> extends RenderLayer<T, TheTwilightHierophantModel<T>> {
     private final ItemRenderer items;
 
@@ -36,16 +37,16 @@ public final class HierophantRitualLayer<T extends TheTwilightHierophantEntity> 
         if (t >= 60 && t < 110) {
             float f = Mth.clamp((t - 60) / 50F, 0, 1);
             f = f * f * (3 - 2 * f);
-            // Follow the actual animated main hand, including a left-handed boss.
+
             var arm = boss.getMainArm();
             PoseStack hand = new PoseStack();
             getParentModel().translateToHand(arm, hand);
             hand.mulPose(Axis.XP.rotationDegrees(-90));
             hand.mulPose(Axis.YP.rotationDegrees(180));
-            hand.translate((arm == net.minecraft.world.entity.HumanoidArm.LEFT ? -1 : 1) / 16F, 0.125, -0.625);
-            var end = hand.last().pose().transformPosition(new org.joml.Vector3f());
-            double side = arm == net.minecraft.world.entity.HumanoidArm.LEFT ? 1 : -1;
-            draw(pose, buffers, boss, new ItemStack(ModItem.TWILIGHT_SWORD.get()), end.x + side * (1 - f) * (show.twilight.finale.world.HierophantArena.RADIUS + 4),
+            hand.translate((arm == HumanoidArm.LEFT ? -1 : 1) / 16F, 0.125, -0.625);
+            var end = hand.last().pose().transformPosition(new Vector3f());
+            double side = arm == HumanoidArm.LEFT ? 1 : -1;
+            draw(pose, buffers, boss, new ItemStack(ModItem.TWILIGHT_SWORD.get()), end.x + side * (1 - f) * (HierophantArena.RADIUS + 4),
                     end.y - Math.sin(f * Math.PI) * 2, end.z, 1, light, -40 + f * 40);
         }
     }

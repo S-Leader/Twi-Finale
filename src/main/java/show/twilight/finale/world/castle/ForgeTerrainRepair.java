@@ -1,8 +1,13 @@
 package show.twilight.finale.world.castle;
 
+import java.lang.ref.WeakReference;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import com.mojang.brigadier.Command;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -23,17 +28,10 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import show.twilight.finale.TwilightFinaleMod;
 import twilightforest.init.TFBlocks;
 
-import java.lang.ref.WeakReference;
-import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import show.twilight.finale.TwilightFinaleMod;
 
-/**
- * Remove post-decoration geology only from the forge template's AIR cells.
- * Never replays templates, loot, boss blocks or spawners when a chunk loads.
- */
 @EventBusSubscriber(modid = TwilightFinaleMod.MOD_ID)
 public final class ForgeTerrainRepair {
     private static final ResourceLocation CASTLE = ResourceLocation.fromNamespaceAndPath("twilightforest", "final_castle");
@@ -59,7 +57,7 @@ public final class ForgeTerrainRepair {
         var registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
         if (event.getChunk().getAllReferences().keySet().stream().noneMatch(s -> CASTLE.equals(registry.getKey(s))))
             return;
-        // Do NOT access neighbouring chunks here: Load can fire before FULL promotion.
+
         PENDING.add(new Pending(new WeakReference<>(level), event.getChunk().getPos(), 0));
     }
 
@@ -96,7 +94,7 @@ public final class ForgeTerrainRepair {
         var template = manager.getOrCreate(TEMPLATE);
         Mask cached = MASKS.get(manager);
         if (cached != null && cached.template == template) return cached.air;
-        if (!template.getSize().equals(new net.minecraft.core.Vec3i(51, 31, 51)))
+        if (!template.getSize().equals(new Vec3i(51, 31, 51)))
             throw new IllegalStateException("Incorrect complete forge template dimensions");
         CompoundTag root = template.save(new CompoundTag());
         ListTag palette = root.getList("palette", Tag.TAG_COMPOUND);
@@ -145,7 +143,7 @@ public final class ForgeTerrainRepair {
                     BlockPos at = new BlockPos(x, y, z);
                     var state = chunk.getBlockState(at);
                     if (state.isAir() || !state.is(INTRUSIVE) || state.hasBlockEntity()) continue;
-                    // In particular, keep the functional access stairs/supports added after the template.
+
                     if (state.is(TFBlocks.CASTLE_BRICK) || state.is(TFBlocks.THICK_CASTLE_BRICK) || state.is(TFBlocks.CASTLE_BRICK_STAIRS))
                         continue;
                     if (level.setBlock(at, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS)) removed++;

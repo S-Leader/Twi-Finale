@@ -17,16 +17,15 @@ import twilightforest.init.TFBlocks;
 import twilightforest.util.RotationUtil;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
+public class FinaleCastleRoof48CrenellatedComponent extends TFStructureComponentOld {
 
-public class FinalCastleRoof48CrenellatedComponent extends TFStructureComponentOld {
-
-    public FinalCastleRoof48CrenellatedComponent(StructurePieceSerializationContext ctx, CompoundTag nbt) {
+    public FinaleCastleRoof48CrenellatedComponent(StructurePieceSerializationContext ctx, CompoundTag nbt) {
         super(FinaleCastlePieces.TFFCRo48Cr.get(), nbt);
         this.deco = new StructureTFDecoratorCastle();
     }
 
     @SuppressWarnings("this-escape")
-    public FinalCastleRoof48CrenellatedComponent(int i, TFStructureComponentOld keep, int x, int y, int z) {
+    public FinaleCastleRoof48CrenellatedComponent(int i, TFStructureComponentOld keep, int x, int y, int z) {
         super(FinaleCastlePieces.TFFCRo48Cr.get(), i, x, y, z);
 
         int height = 5;
@@ -45,11 +44,10 @@ public class FinalCastleRoof48CrenellatedComponent extends TFStructureComponentO
 
     @Override
     public void postProcess(WorldGenLevel world, StructureManager manager, ChunkGenerator generator, RandomSource randomIn, BoundingBox sbb, ChunkPos chunkPosIn, BlockPos blockPos) {
-        // add second layer of floor
+
         final BlockState castleMagic = TFBlocks.VIOLET_CASTLE_RUNE_BRICK.get().defaultBlockState();
         this.generateBox(world, sbb, 2, 2, 2, 50, 2, 50, castleMagic, castleMagic, false);
 
-        // crenellations
         for (Rotation rotation : RotationUtil.ROTATIONS) {
             this.fillBlocksRotated(world, sbb, 3, 1, 1, 45, 3, 1, deco.blockState, rotation);
 

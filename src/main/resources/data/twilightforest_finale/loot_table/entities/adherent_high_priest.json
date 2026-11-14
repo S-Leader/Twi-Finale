@@ -2,7 +2,6 @@
   "type": "minecraft:entity",
   "pools": [
     {
-      "comment": "guaranteed_proverbs_scepter",
       "bonus_rolls": 0.0,
       "rolls": 1.0,
       "entries": [
@@ -13,7 +12,6 @@
       ]
     },
     {
-      "comment": "scepter",
       "bonus_rolls": 0.0,
       "rolls": 2.0,
       "entries": [
@@ -32,7 +30,6 @@
       ]
     },
     {
-      "comment": "random_scepter",
       "bonus_rolls": 0.0,
       "rolls": {
         "type": "minecraft:uniform",
@@ -59,7 +56,6 @@
       ]
     },
     {
-      "comment": "enchanted_book",
       "bonus_rolls": 0.0,
       "rolls": {
         "type": "minecraft:uniform",
@@ -85,7 +81,6 @@
       ]
     },
     {
-      "comment": "charm",
       "bonus_rolls": 0.0,
       "rolls": 1.0,
       "entries": [
@@ -102,7 +97,6 @@
       ]
     },
     {
-      "comment": "ender_pearl",
       "bonus_rolls": 0.0,
       "rolls": 1.0,
       "entries": [
@@ -133,7 +127,6 @@
       ]
     },
     {
-      "comment": "diamond",
       "bonus_rolls": 0.0,
       "rolls": 1.0,
       "entries": [
@@ -164,7 +157,6 @@
       ]
     },
     {
-      "comment": "trophy",
       "bonus_rolls": 0.0,
       "rolls": 1.0,
       "entries": [

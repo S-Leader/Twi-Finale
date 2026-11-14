@@ -1,25 +1,24 @@
 package show.twilight.finale.client.renderer;
 
+import java.io.IOException;
+
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
-import show.twilight.finale.TwilightFinaleMod;
-import show.twilight.finale.client.model.EngineerAdherentModel;
-import show.twilight.finale.entity.EngineerAdherentEntity;
-import show.twilight.finale.entity.combat.ColoredAdherent;
 import twilightforest.client.model.TFModelLayers;
 import twilightforest.client.renderer.entity.AdherentRenderer;
 import twilightforest.entity.monster.Adherent;
 
-/**
- * Pixel-exact glyph palettes, including the engineer's pale wind blue.
- */
+import show.twilight.finale.TwilightFinaleMod;
+import show.twilight.finale.client.model.EngineerAdherentModel;
+import show.twilight.finale.entity.EngineerAdherentEntity;
+import show.twilight.finale.entity.combat.ColoredAdherent;
+
 public final class ColoredAdherentRenderer extends AdherentRenderer {
     private static final ResourceLocation ORIGINAL = ResourceLocation.fromNamespaceAndPath("twilightforest", "textures/entity/adherent.png");
-    // Native image stores ABGR. Only the original navy glyph ink is replaced.
-    // Black/red-black cloth, the four bright blue eye pixels, and alpha stay intact.
+
     private static final int NATIVE_GLYPH = 0xFF8B0000;
     private static final int[] GLYPH_RGB = {0x00008B, 0x8B7300, 0x008B00, 0x8B0000, 0x66008B, 0xB9E6F5};
     private static final String[] NAMES = {"blue", "yellow", "green", "red", "purple", "wind"};
@@ -47,7 +46,7 @@ public final class ColoredAdherentRenderer extends AdherentRenderer {
             ResourceLocation id = ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "textures/entity/adherent_pattern/" + NAMES[color]);
             minecraft.getTextureManager().register(id, new DynamicTexture(image));
             return palettes[color] = id;
-        } catch (java.io.IOException ex) {
+        } catch (IOException ex) {
             TwilightFinaleMod.LOGGER.error("Cannot create adherent glyph palette {}", NAMES[color], ex);
             return palettes[color] = ORIGINAL;
         }

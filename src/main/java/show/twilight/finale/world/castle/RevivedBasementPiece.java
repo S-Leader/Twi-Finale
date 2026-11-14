@@ -15,9 +15,8 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 import twilightforest.init.TFBlocks;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-/**
- * One persisted randomized room or passage junction, with explicit open/closed ports.
- */
+import show.twilight.finale.init.ModBlocks;
+
 public final class RevivedBasementPiece extends TFStructureComponentOld {
     final BlockPos center;
     final int floor, cell, type, turns, links;
@@ -111,12 +110,12 @@ public final class RevivedBasementPiece extends TFStructureComponentOld {
                 BlockPos pos = rotated(e.x(), e.y(), e.z());
                 if (!clip.isInside(pos)) continue;
                 BlockState state = e.state().rotate(rotation);
-                // Seal old, off-centre doors before opening only the chosen graph ports.
+
                 if (state.getBlock().getDescriptionId().contains("castle_door")) state = brick;
                 if ((e.x() == 0 || e.x() == 16 || e.z() == 0 || e.z() == 16) && state.isAir()) state = brick;
                 boolean bossSpawner = BasementBossProcessor.isBlazeSpawner(state, e.data());
                 if (bossSpawner)
-                    state = show.twilight.finale.init.ModBlocks.ANNIHILATION_GOLEM_BOSS_SPAWNER.get().defaultBlockState();
+                    state = ModBlocks.ANNIHILATION_GOLEM_BOSS_SPAWNER.get().defaultBlockState();
                 level.setBlock(pos, state, 18);
                 if (!bossSpawner && e.data() != null && state.hasBlockEntity()) {
                     var entity = level.getBlockEntity(pos);

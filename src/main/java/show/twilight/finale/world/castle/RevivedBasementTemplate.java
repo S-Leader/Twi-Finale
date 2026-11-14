@@ -1,6 +1,12 @@
 package show.twilight.finale.world.castle;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -11,14 +17,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
-
-/**
- * Individual room architecture from the supplied building, never an entire fixed floor.
- */
 final class RevivedBasementTemplate {
     record Entry(int x, int y, int z, BlockState state, CompoundTag data) {
     }
@@ -31,7 +29,7 @@ final class RevivedBasementTemplate {
 
     private static final Map<StructureTemplateManager, Cached> CACHE = new WeakHashMap<>();
     static final int PIT = 7, COUNT = 8;
-    // Actual 17x17 room boundaries in chengbao3; original floor is y79.
+
     private static final int[][] SOURCES = {{37, 77}, {61, 58}, {85, 80}, {93, 128}, {129, 115}, {105, 104}, {68, 19}, {85, 43}};
     static final ResourceLocation BASE = ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "final_castle/revived_basement");
 
@@ -39,7 +37,7 @@ final class RevivedBasementTemplate {
         StructureTemplate template = manager.getOrCreate(BASE);
         Cached old = CACHE.get(manager);
         if (old != null && old.template == template) return old.data;
-        if (!template.getSize().equals(new net.minecraft.core.Vec3i(150, 105, 150)))
+        if (!template.getSize().equals(new Vec3i(150, 105, 150)))
             throw new IllegalStateException("Incorrect revived basement template dimensions");
         CompoundTag root = template.save(new CompoundTag());
         List<BlockState> palette = new ArrayList<>();

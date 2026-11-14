@@ -1,7 +1,10 @@
 package show.twilight.finale.item;
 
+import java.util.List;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,10 +16,10 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import show.twilight.finale.entity.projectile.AnnihilationBolt;
 import twilightforest.init.TFSounds;
+import twilightforest.util.TFItemStackUtils;
 
-import java.util.List;
+import show.twilight.finale.entity.projectile.AnnihilationBolt;
 
 public class ShadowWandItem
         extends FinaleScepterItem {
@@ -51,7 +54,7 @@ public class ShadowWandItem
                 bolt.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0f, 1.5f, 1.0f);
                 level.addFreshEntity(bolt);
                 if (!player.getAbilities().instabuild && duration % 5 == 0) {
-                    twilightforest.util.TFItemStackUtils.hurtButDontBreak(stack, 1, (net.minecraft.server.level.ServerLevel) level, player);
+                    TFItemStackUtils.hurtButDontBreak(stack, 1, (ServerLevel) level, player);
                 }
             }
         }
@@ -64,7 +67,7 @@ public class ShadowWandItem
     }
 
     @Override
-    public int getUseDuration(ItemStack stack, net.minecraft.world.entity.LivingEntity entity) {
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
         return 72000;
     }
 

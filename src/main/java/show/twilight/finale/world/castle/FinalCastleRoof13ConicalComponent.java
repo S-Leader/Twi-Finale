@@ -15,10 +15,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 import twilightforest.util.RotationUtil;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-
-/**
- * Pointy cone roof with variable height
- */
 public class FinalCastleRoof13ConicalComponent extends TFStructureComponentOld {
 
     public final int slope;
@@ -64,12 +60,10 @@ public class FinalCastleRoof13ConicalComponent extends TFStructureComponentOld {
 
             this.fillBlocksRotated(world, sbb, 4, 0, 1, 12, 1, 1, deco.blockState, rotation);
 
-            // more teeny crenellations
             for (int i = 3; i < 13; i += 2) {
                 this.fillBlocksRotated(world, sbb, i, -1, 1, i, 2, 1, deco.blockState, rotation);
             }
 
-            // cone roof
             for (int i = 2; i < 9; i++) {
                 int base = 2 - slope;
                 if (i < 7) {
@@ -80,7 +74,6 @@ public class FinalCastleRoof13ConicalComponent extends TFStructureComponentOld {
                 this.fillBlocksRotated(world, sbb, i + 1, ((i - 1) * slope) + base, i, 15 - i, (i * slope) + base - 1, i, deco.roofState, rotation);
             }
 
-            // point!
             this.fillBlocksRotated(world, sbb, 8, (slope * 6) + 2, 8, 8, (slope * 7) + 2, 8, deco.roofState, rotation);
         }
     }

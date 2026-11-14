@@ -1,13 +1,12 @@
 package show.twilight.finale.entity.combat;
 
+import java.util.Optional;
+
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-/**
- * Server-authoritative ray; solid blocks limit the ray before entities are considered.
- */
 public final class CombatRay {
     private CombatRay() {
     }
@@ -24,7 +23,7 @@ public final class CombatRay {
                 new AABB(start, end).inflate(width), entity -> entity != source && entity.isAlive()
                         && !entity.isSpectator() && !source.isAlliedTo(entity))) {
             var intersection = candidate.getBoundingBox().inflate(width).clip(start, end);
-            if (candidate.getBoundingBox().inflate(width).contains(start)) intersection = java.util.Optional.of(start);
+            if (candidate.getBoundingBox().inflate(width).contains(start)) intersection = Optional.of(start);
             if (intersection.isPresent() && start.distanceToSqr(intersection.get()) <= nearest) {
                 nearest = start.distanceToSqr(intersection.get());
                 victim = candidate;

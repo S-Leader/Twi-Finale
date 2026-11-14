@@ -20,7 +20,7 @@ import java.util.List;
 
 public final class TwilightSwordItem extends SwordItem {
     public static final int MIN_CHARGE_TICKS = 10;
-    // Riptide III launch strength; movement remains native after this impulse.
+
     public static final double DASH_SPEED = 3.0;
     public static final int DASH_TICKS = 20;
     public static final double GROUND_LIFT = 1.1999999F;
@@ -45,8 +45,7 @@ public final class TwilightSwordItem extends SwordItem {
 
     @Override
     public int getUseDuration(ItemStack stack, LivingEntity entity) {
-        // Bow-like holding: becoming fully charged does not release the item.
-        // The dash starts only when the player releases the right mouse button.
+
         return 72000;
     }
 

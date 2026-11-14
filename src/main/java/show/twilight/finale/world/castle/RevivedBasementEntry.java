@@ -14,9 +14,6 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-/**
- * Joins the legacy castle stairs to the first randomized floor, without a drop.
- */
 public final class RevivedBasementEntry extends TFStructureComponentOld {
     private final BlockPos landing;
 

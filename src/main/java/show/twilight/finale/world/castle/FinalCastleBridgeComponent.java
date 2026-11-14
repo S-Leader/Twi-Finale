@@ -18,7 +18,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 import twilightforest.init.TFBlocks;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 
-
 public class FinalCastleBridgeComponent extends TFStructureComponentOld {
 
     public FinalCastleBridgeComponent(StructurePieceSerializationContext ctx, CompoundTag nbt) {
@@ -44,25 +43,22 @@ public class FinalCastleBridgeComponent extends TFStructureComponentOld {
     public void postProcess(WorldGenLevel world, StructureManager manager, ChunkGenerator generator, RandomSource rand, BoundingBox sbb, ChunkPos chunkPosIn, BlockPos blockPos) {
         int length = (this.getOrientation() == Direction.SOUTH || this.getOrientation() == Direction.NORTH) ? this.boundingBox.maxX() - this.boundingBox.minX() : this.boundingBox.maxZ() - this.boundingBox.minZ();
 
-        // span
         generateBox(world, sbb, 0, 0, 0, length, 1, 6, false, rand, deco.randomBlocks);
-        // rails
+
         BlockState castlePillar = TFBlocks.BOLD_CASTLE_BRICK_PILLAR.get().defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.X);
 
         generateBox(world, sbb, 0, 2, 0, length, 2, 0, castlePillar, castlePillar, false);
         generateBox(world, sbb, 0, 2, 6, length, 2, 6, castlePillar, castlePillar, false);
 
-        // supports
         int l3 = length / 3;
         for (int i = 0; i < l3; i++) {
-            int sl = l3 - (int) (Mth.cos((float) (l3 - i) / (float) l3 * 1.6F) * l3); // this could be better, maybe?
+            int sl = l3 - (int) (Mth.cos((float) (l3 - i) / (float) l3 * 1.6F) * l3);
             generateBox(world, sbb, i, -sl, 0, i, 0, 0, false, rand, deco.randomBlocks);
             generateBox(world, sbb, i, -sl, 6, i, 0, 6, false, rand, deco.randomBlocks);
             generateBox(world, sbb, length - i, -sl, 0, length - i, 0, 0, false, rand, deco.randomBlocks);
             generateBox(world, sbb, length - i, -sl, 6, length - i, 0, 6, false, rand, deco.randomBlocks);
         }
 
-        // doorframes
         this.generateBox(world, sbb, 0, 2, 1, 0, 7, 1, deco.pillarState, deco.pillarState, false);
         this.generateBox(world, sbb, 0, 2, 5, 0, 7, 5, deco.pillarState, deco.pillarState, false);
         this.generateBox(world, sbb, 0, 6, 2, 0, 6, 4, deco.accentState, deco.accentState, false);

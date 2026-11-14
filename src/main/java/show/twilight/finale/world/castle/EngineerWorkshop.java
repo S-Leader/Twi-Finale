@@ -39,7 +39,6 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-/** Upgrades only the original, still-empty tower cage in already generated castles. */
 @EventBusSubscriber(modid = TwilightFinaleMod.MOD_ID)
 public final class EngineerWorkshop {
     public static final ResourceLocation TEMPLATE = TwilightFinaleMod.prefix("final_castle/engineer_workshop");
@@ -55,7 +54,7 @@ public final class EngineerWorkshop {
         var registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
         if (event.getChunk().getAllReferences().keySet().stream()
                 .noneMatch(s -> TFStructures.FINAL_CASTLE.location().equals(registry.getKey(s)))) return;
-        // Load can precede FULL promotion; defer all block/entity access to the server thread.
+
         SCANS.add(new Scan(new WeakReference<>(level), event.getChunk().getPos(), 0));
     }
 
@@ -103,7 +102,7 @@ public final class EngineerWorkshop {
                     iterator.remove();
                     continue;
                 }
-                // Include neighbour-shape updates; do not force adjacent chunks to load.
+
                 if (!roomLoaded(level, pos)) continue;
                 if (!furnish(level, tower)) continue;
                 level.setBlock(pos, ModBlocks.ENGINEER_SPAWNER.get().defaultBlockState(), 3);
@@ -126,13 +125,12 @@ public final class EngineerWorkshop {
         BlockPos origin = FinaleCastleInteriors.local(tower, 11, 38, 1);
         CompoundTag data = template.get().save(new CompoundTag());
         var palette = data.getList("palette", Tag.TAG_COMPOUND);
-        // Read exactly the exported template. Apply mirror to BOTH coordinates and
-        // states: vanilla filterBlocks rotates states but does not mirror them.
+
         for (Tag raw : data.getList("blocks", Tag.TAG_COMPOUND)) {
             CompoundTag block = (CompoundTag) raw;
             BlockState state = NbtUtils.readBlockState(level.holderLookup(Registries.BLOCK), palette.getCompound(block.getInt("state")))
                     .mirror(settings.getMirror()).rotate(settings.getRotation());
-            // Moving an old furnished room must never recreate a consumed encounter.
+
             if (state.isAir() || state.is(ModBlocks.ENGINEER_SPAWNER.get())) continue;
             var xyz = block.getList("pos", Tag.TAG_INT);
             BlockPos pos = StructureTemplate.calculateRelativePosition(settings,
@@ -178,8 +176,7 @@ public final class EngineerWorkshop {
                 && level.getBlockState(destination).isAir();
         if (intactOldLayout && level.getStructureManager().get(TEMPLATE).isPresent()) {
             CompoundTag original = casket.saveWithFullMetadata(level.registryAccess());
-            // Disable lazy loot BEFORE removing a container; removal must not unpack
-            // and spill the original library roll while moving the same casket.
+
             casket.setLootTable(null);
             casket.clearContent();
             level.removeBlock(pos, false);

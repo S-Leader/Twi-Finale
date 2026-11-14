@@ -19,9 +19,6 @@ import twilightforest.item.recipe.ScepterRepairRecipe;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TF 4.8.3345 has an inverted grid-size check; fix ONLY our four recharge recipes.
- */
 @Mixin(value = ScepterRepairRecipe.class, remap = false)
 public abstract class FinaleScepterRepairMixin {
     @Shadow

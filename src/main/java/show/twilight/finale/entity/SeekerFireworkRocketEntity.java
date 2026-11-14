@@ -1,5 +1,8 @@
 package show.twilight.finale.entity;
 
+import java.util.List;
+
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -8,14 +11,14 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import show.twilight.finale.init.ModEntity;
 import twilightforest.entity.projectile.ITFProjectile;
 
-import java.util.List;
+import show.twilight.finale.init.ModEntity;
 
 
 public class SeekerFireworkRocketEntity extends FireworkRocketEntity implements ITFProjectile {
@@ -32,7 +35,7 @@ public class SeekerFireworkRocketEntity extends FireworkRocketEntity implements 
         int i = 1;
         if (!stack.isEmpty()) {
             this.entityData.set(DATA_ID_FIREWORKS_ITEM, stack.copy());
-            i += stack.getOrDefault(net.minecraft.core.component.DataComponents.FIREWORKS, new net.minecraft.world.item.component.Fireworks(0, java.util.List.of())).flightDuration();
+            i += stack.getOrDefault(DataComponents.FIREWORKS, new Fireworks(0, List.of())).flightDuration();
         }
         this.setDeltaMovement(this.random.triangle(0.0, 0.002297), 0.05, this.random.triangle(0.0, 0.002297));
         this.lifetime = 10 * i + this.random.nextInt(6) + this.random.nextInt(7);

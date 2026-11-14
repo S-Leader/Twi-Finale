@@ -1,18 +1,20 @@
 package show.twilight.finale.init;
 
+import java.util.function.Supplier;
+
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.*;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import show.twilight.finale.item.*;
-import show.twilight.finale.item.SmithingTemplateItem;
 import twilightforest.init.TFArmorMaterials;
 import twilightforest.item.PhantomArmorItem;
 import twilightforest.util.TFToolMaterials;
 
-import java.util.function.Supplier;
+import show.twilight.finale.item.*;
+import show.twilight.finale.item.FinaleSmithingTemplateItem;
 
 public class ModItem {
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.ITEM, "twilightforest_finale");
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, "twilightforest_finale");
     public static final Supplier<Item> ENGINEER_SPAWNER = ITEMS.register("engineer_spawner", () -> new BlockItem(ModBlocks.ENGINEER_SPAWNER.get(), new Item.Properties()));
     public static final Supplier<Item> ENGINEER_SPAWN_EGG = ITEMS.register("engineer_adherent_spawn_egg", () -> new DeferredSpawnEggItem(ModEntity.ENGINEER_ADHERENT, 0x171722, 0xB9E6F5, new Item.Properties()));
 
@@ -48,7 +50,7 @@ public class ModItem {
     public static final Supplier<Item> ADHERENT_BOSS_SPAWNER = ITEMS.register("adherent_boss_spawner", () -> new BlockItem(ModBlocks.ADHERENT_BOSS_SPAWNER.get(), new Item.Properties()));
     public static final Supplier<Item> TWILIGHT_HIEROPHANT_BOSS_SPAWNER = ITEMS.register("twilight_hierophant_boss_spawner", () -> new BlockItem(ModBlocks.TWILIGHT_HIEROPHANT_BOSS_SPAWNER.get(), new Item.Properties()));
     public static final Supplier<Item> ANNIHILATION_GOLEM_BOSS_SPAWNER = ITEMS.register("annihilation_golem_boss_spawner", () -> new BlockItem(ModBlocks.ANNIHILATION_GOLEM_BOSS_SPAWNER.get(), new Item.Properties()));
-    public static final Supplier<Item> TWILIGHT_RETROFITTING_SMITHING_TEMPLATE = ITEMS.register("twilight_retrofitting_smithing_template", SmithingTemplateItem::createTwilightRetrofittingTemplate);
+    public static final Supplier<Item> TWILIGHT_RETROFITTING_SMITHING_TEMPLATE = ITEMS.register("twilight_retrofitting_smithing_template", FinaleSmithingTemplateItem::createTwilightRetrofittingTemplate);
     static int adherent_bc = -16121856;
     static int adherent_hc = -15331718;
     public static final Supplier<Item> ADHERENT_SPAWN_EGG = ITEMS.register("adherent_high_priest_spawn_egg", () -> new DeferredSpawnEggItem(ModEntity.ADHERENT_HIGH_PRIEST, adherent_bc, adherent_hc, new Item.Properties()));

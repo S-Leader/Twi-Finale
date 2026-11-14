@@ -40,8 +40,7 @@ public class FinalCastleBellTower21Component extends FinalCastleMazeTower13Compo
         this.size = 21;
         this.height = FLOORS * 8 + 1;
         this.boundingBox = TFStructureComponentOld.getComponentToAddBoundingBox2(x, y, z, -6, -8, -this.size / 2, this.size - 1, this.height, this.size - 1, direction);
-        // The legacy EAST branch incorrectly mixes x/z offsets: 21 x 27 instead
-        // of 21 x 21. Keep the entrance-side maxZ, shorten only the far end.
+
         if (direction == Direction.EAST) {
             var b = this.boundingBox;
             this.boundingBox = new BoundingBox(b.minX(), b.minY(), b.maxZ() - this.size + 1, b.maxX(), b.maxY(), b.maxZ());
@@ -56,12 +55,10 @@ public class FinalCastleBellTower21Component extends FinalCastleMazeTower13Compo
             this.deco = ((TFStructureComponentOld) parent).deco;
         }
 
-        // add foundation
         FinalCastleBellFoundation21Component foundation = new FinalCastleBellFoundation21Component(4, this, getLocatorPosition().getX(), getLocatorPosition().getY(), getLocatorPosition().getZ());
         list.addPiece(foundation);
         foundation.addChildren(this, list, rand);
 
-        // add roof
         TFStructureComponentOld roof = new FinalCastleRoof13CrenellatedComponent(4, this, getLocatorPosition().getX(), getLocatorPosition().getY(), getLocatorPosition().getZ());
         list.addPiece(roof);
         roof.addChildren(this, list, rand);
@@ -72,7 +69,6 @@ public class FinalCastleBellTower21Component extends FinalCastleMazeTower13Compo
     public void postProcess(WorldGenLevel world, StructureManager manager, ChunkGenerator generator, RandomSource rand, BoundingBox sbb, ChunkPos chunkPosIn, BlockPos blockPos) {
         super.postProcess(world, manager, generator, rand, sbb, chunkPosIn, blockPos);
 
-        // openings!
         BlockState fieldBlock = TFBlocks.BLUE_FORCE_FIELD.get().defaultBlockState();
         for (Rotation rotation : RotationUtil.ROTATIONS) {
             int y = 48;
@@ -82,19 +78,15 @@ public class FinalCastleBellTower21Component extends FinalCastleMazeTower13Compo
             y = 24;
             for (int x = 1; x < this.size - 1; x += 8) {
                 this.fillBlocksRotated(world, sbb, x, y, 0, x, y + 14, 0, fieldBlock, rotation);
-//	        		fieldMeta = rand.nextInt(5);
+
                 this.fillBlocksRotated(world, sbb, x + 2, y, 0, x + 2, y + 14, 0, fieldBlock, rotation);
             }
         }
 
-        // sign placed by template
-        // this.placeSignAtCurrentPosition(world, 7, 9, 8, "Parkour area 2", "mini-boss 1", sbb);
-
-        // this.placeBlock(world, Blocks.JIGSAW.defaultBlockState().setValue(BlockStateProperties.ORIENTATION, FrontAndTop.WEST_UP), 0, 9, 10, sbb);
     }
 
     @Override
     protected void addFloors(WorldGenLevel world, BoundingBox sbb) {
-        // NO-OP, let the Jigsaw handle it
+
     }
 }

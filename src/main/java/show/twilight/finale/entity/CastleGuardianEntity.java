@@ -1,7 +1,12 @@
 package show.twilight.finale.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -24,15 +29,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
+
 import show.twilight.finale.entity.combat.CombatRay;
+import show.twilight.finale.init.ModSounds;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-/**
- * Surface-mounted guardian. Damage is a single server ray, never a visual-only projectile.
- */
 public class CastleGuardianEntity extends Monster {
     private static final EntityDataAccessor<Direction> ATTACH_FACE = SynchedEntityData.defineId(CastleGuardianEntity.class, EntityDataSerializers.DIRECTION);
     private static final EntityDataAccessor<Boolean> ATTACHED = SynchedEntityData.defineId(CastleGuardianEntity.class, EntityDataSerializers.BOOLEAN);
@@ -135,7 +135,7 @@ public class CastleGuardianEntity extends Monster {
             if (cooldown > 0 || !getSensing().hasLineOfSight(target)) return;
             attackTicks = 0;
             entityData.set(LASER_PHASE, 1);
-            playSound(show.twilight.finale.init.ModSounds.GUARDIAN_TARGETING.get(), 1, 1);
+            playSound(ModSounds.GUARDIAN_TARGETING.get(), 1, 1);
         }
         attackTicks++;
         if (attackTicks <= 60) {
@@ -157,7 +157,7 @@ public class CastleGuardianEntity extends Monster {
             if (hit.victim() != null)
                 hit.victim().hurt(damageSources().indirectMagic(this, this), (float) getAttributeValue(Attributes.ATTACK_DAMAGE));
             playSound(SoundEvents.BEACON_POWER_SELECT, 1.5F, 1.8F);
-            server.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK, hit.end().x, hit.end().y, hit.end().z, 16, 0.2, 0.2, 0.2, 0.1);
+            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, hit.end().x, hit.end().y, hit.end().z, 16, 0.2, 0.2, 0.2, 0.1);
         } else if (attackTicks >= 78) {
             resetAttack();
             cooldown = 70;
@@ -203,7 +203,6 @@ public class CastleGuardianEntity extends Monster {
         }
     }
 
-    // Saved pre-port.6 tentacles are removed when they load, without deleting the entity type from saves.
     public boolean usesLaser() {
         return true;
     }

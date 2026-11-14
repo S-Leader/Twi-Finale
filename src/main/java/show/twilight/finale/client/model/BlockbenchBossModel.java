@@ -18,9 +18,6 @@ import java.io.Reader;
 import java.util.*;
 import java.util.function.Predicate;
 
-/**
- * Per-face UV model; retains original Blockbench bone and animation coordinates.
- */
 public final class BlockbenchBossModel {
     private final Map<String, JsonObject> groups = new HashMap<>(), cubes = new HashMap<>(), animations = new HashMap<>();
     private final Map<String, JsonObject> trees = new HashMap<>();

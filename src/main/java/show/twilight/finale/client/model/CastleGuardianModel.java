@@ -16,6 +16,8 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 
+import show.twilight.finale.entity.CastleGuardianEntity;
+
 public class CastleGuardianModel<T extends LivingEntity> extends HierarchicalModel<T> {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("twilightforest_finale", "castle_guardian"), "main");
     private final ModelPart root;
@@ -132,13 +134,13 @@ public class CastleGuardianModel<T extends LivingEntity> extends HierarchicalMod
     public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         this.head.yRot = netHeadYaw / 57.295776f;
         this.head.xRot = headPitch / 57.295776f;
-        if (entity instanceof show.twilight.finale.entity.CastleGuardianEntity guardian && guardian.isAttached()) {
+        if (entity instanceof CastleGuardianEntity guardian && guardian.isAttached()) {
             this.mainBody.yRot = 1.5707963F;
             this.midBody.yRot = 0;
             if (guardian.getLaserPhase() > 0) {
                 var aim = guardian.getBeamEnd().subtract(guardian.getBeamOrigin()).toVector3f();
                 aim.rotate(guardian.getAttachFace().getOpposite().getRotation().conjugate()).rotateY((float) Math.PI);
-                // The eye faces model -Z; LivingEntityRenderer also mirrors X/Y.
+
                 this.head.yRot = (float) Math.atan2(aim.x, -aim.z);
                 this.head.xRot = -(float) Math.atan2(aim.y, Math.sqrt(aim.x * aim.x + aim.z * aim.z));
             }

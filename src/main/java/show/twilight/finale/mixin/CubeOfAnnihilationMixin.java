@@ -19,9 +19,6 @@ import show.twilight.finale.init.ModBlockTags;
 import twilightforest.entity.projectile.CubeOfAnnihilation;
 import twilightforest.init.TFBlocks;
 
-/**
- * The allowlist replaces TF's explosion-resistance and inclusion-tag fallbacks.
- */
 @Mixin(CubeOfAnnihilation.class)
 public abstract class CubeOfAnnihilationMixin {
     @Shadow
@@ -37,7 +34,7 @@ public abstract class CubeOfAnnihilationMixin {
             target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
     private boolean finale$identifyCubeAgainstPriest(Entity victim, DamageSource source, float amount) {
         if (victim instanceof AdherentHighPriestEntity) {
-            // TF normally reports the owner as the direct attacker, hiding the cube from shield checks.
+
             CubeOfAnnihilation cube = (CubeOfAnnihilation) (Object) this;
             source = new DamageSource(source.typeHolder(), cube, source.getEntity());
         }

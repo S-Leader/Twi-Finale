@@ -1,7 +1,10 @@
 package show.twilight.finale.item;
 
+import java.util.List;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -17,11 +20,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import twilightforest.init.TFSounds;
+import twilightforest.util.TFItemStackUtils;
+
 import show.twilight.finale.entity.LoyalWraithEntity;
 import show.twilight.finale.init.ModEntity;
-import twilightforest.init.TFSounds;
-
-import java.util.List;
 
 public class WraithWandItem extends FinaleScepterItem {
     public WraithWandItem(Item.Properties properties) {
@@ -46,7 +49,7 @@ public class WraithWandItem extends FinaleScepterItem {
             zombie.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 1200, 1));
             level.addFreshEntity(zombie);
             level.gameEvent(player, GameEvent.ENTITY_PLACE, result.getBlockPos());
-            twilightforest.util.TFItemStackUtils.hurtButDontBreak(stack, 1, (net.minecraft.server.level.ServerLevel) level, player);
+            TFItemStackUtils.hurtButDontBreak(stack, 1, (ServerLevel) level, player);
             zombie.playSound(TFSounds.ZOMBIE_SCEPTER_USE.get(), 1.0f, zombie.getVoicePitch());
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());

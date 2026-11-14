@@ -1,23 +1,29 @@
 package show.twilight.finale.world.castle;
 
+import java.util.List;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.TemplateStructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
+import net.minecraft.world.level.levelgen.structure.templatesystem.AlwaysTrueTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.ProcessorRule;
+import net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
-/**
- * Vanilla template piece owns the FULL transformed template bounds, including across chunks.
- */
+import show.twilight.finale.init.ModBlocks;
+
 public final class FinaleCastleTemplatePiece extends TemplateStructurePiece {
     public FinaleCastleTemplatePiece(StructureTemplateManager manager, String name, BlockPos origin, Rotation rotation, Mirror mirror) {
         super(FinaleCastlePieces.INTERIOR.get(), 10, manager,
@@ -33,17 +39,16 @@ public final class FinaleCastleTemplatePiece extends TemplateStructurePiece {
     private static StructurePlaceSettings settings(Rotation rotation, Mirror mirror, boolean dryForge) {
         var settings = new StructurePlaceSettings().setRotation(rotation).setMirror(mirror)
                 .setIgnoreEntities(false).addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
-        // Do not transfer aquifer water into the forge's dry stairs during placement.
+
         if (dryForge) settings.setLiquidSettings(LiquidSettings.IGNORE_WATERLOGGING);
-        // The large basement arena now belongs to the golem. Its old placeholder and
-        // exported blaze spawners both become the native one-shot boss spawner.
+
         if (dryForge) settings.addProcessor(BasementBossProcessor.INSTANCE);
         else
-            settings.addProcessor(new net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor(java.util.List.of(
-                    new net.minecraft.world.level.levelgen.structure.templatesystem.ProcessorRule(
-                            new net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest(show.twilight.finale.init.ModBlocks.TWILIGHT_HIEROPHANT_BOSS_SPAWNER.get()),
-                            net.minecraft.world.level.levelgen.structure.templatesystem.AlwaysTrueTest.INSTANCE,
-                            net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()))));
+            settings.addProcessor(new RuleProcessor(List.of(
+                    new ProcessorRule(
+                            new BlockMatchTest(ModBlocks.TWILIGHT_HIEROPHANT_BOSS_SPAWNER.get()),
+                            AlwaysTrueTest.INSTANCE,
+                            Blocks.AIR.defaultBlockState()))));
         return settings;
     }
 

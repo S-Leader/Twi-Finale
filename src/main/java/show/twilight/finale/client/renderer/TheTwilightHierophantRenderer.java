@@ -1,12 +1,20 @@
 package show.twilight.finale.client.renderer;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
@@ -16,8 +24,12 @@ import net.minecraft.world.entity.Entity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
+
 import show.twilight.finale.client.layer.HierophantArmorLayer;
+import show.twilight.finale.client.layer.HierophantDisintegrationLayer;
+import show.twilight.finale.client.layer.HierophantHeldItemLayer;
 import show.twilight.finale.client.layer.HierophantOuterLayer;
+import show.twilight.finale.client.layer.HierophantRitualLayer;
 import show.twilight.finale.client.model.TheTwilightHierophantModel;
 import show.twilight.finale.entity.TheTwilightHierophantEntity;
 import show.twilight.finale.runtime.client.renderer.Shadow;
@@ -28,14 +40,14 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
     private final TheTwilightHierophantModel<T> normalModel;
     private final HierophantCubeMesh cube;
     private final TheTwilightHierophantModel<T> ghostNormal, ghostSlim, ghostOuterNormal, ghostOuterSlim;
-    private final java.util.Map<T, ShadowHistory> histories = new java.util.WeakHashMap<>();
+    private final Map<T, ShadowHistory> histories = new WeakHashMap<>();
 
-    private record ShadowFrame(Shadow sample, java.util.List<TheTwilightHierophantModel.ShadowBone> bones,
+    private record ShadowFrame(Shadow sample, List<TheTwilightHierophantModel.ShadowBone> bones,
                                boolean slim) {
     }
 
     private static final class ShadowHistory {
-        final java.util.List<ShadowFrame> frames = new java.util.ArrayList<>();
+        final List<ShadowFrame> frames = new ArrayList<>();
         float lastSample = Float.NEGATIVE_INFINITY;
     }
 
@@ -48,9 +60,9 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
         ghostSlim = new TheTwilightHierophantModel<>(context.bakeLayer(TheTwilightHierophantModel.LAYER_LOCATION_SLIM), true);
         ghostOuterNormal = new TheTwilightHierophantModel<>(context.bakeLayer(TheTwilightHierophantModel.LAYER_LOCATION_OUTER), false);
         ghostOuterSlim = new TheTwilightHierophantModel<>(context.bakeLayer(TheTwilightHierophantModel.LAYER_LOCATION_OUTER_SLIM), true);
-        this.addLayer(new show.twilight.finale.client.layer.HierophantHeldItemLayer<>(this, context.getItemInHandRenderer()));
-        this.addLayer(new show.twilight.finale.client.layer.HierophantRitualLayer<>(this, context.getItemRenderer()));
-        this.addLayer(new show.twilight.finale.client.layer.HierophantDisintegrationLayer<>(this));
+        this.addLayer(new HierophantHeldItemLayer<>(this, context.getItemInHandRenderer()));
+        this.addLayer(new HierophantRitualLayer<>(this, context.getItemRenderer()));
+        this.addLayer(new HierophantDisintegrationLayer<>(this));
         HierophantArmorLayer.addCustomArmorLayers(this, context, TheTwilightHierophantModel.LAYER_LOCATION_I, TheTwilightHierophantModel.LAYER_LOCATION_O);
         this.addLayer(new HierophantOuterLayer(this, context.getModelSet()));
     }
@@ -70,7 +82,7 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
     }
 
     public void render(@NotNull T entity, float entityYaw, float partialTicks, @NotNull PoseStack stack, @NotNull MultiBufferSource bufferSource, int light) {
-        getTextureLocation(entity); // Select the model before setupAnim, not halfway through rendering.
+        getTextureLocation(entity);
         float age = entity.tickCount + partialTicks;
         int action = entity.getAction(), time = entity.getActionTime();
         float blur = entity.getBlur();
@@ -102,9 +114,7 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
             float opacity = alpha;
             stack.pushPose();
             try {
-                // Metadata can arrive before vanilla's three-tick position
-                // interpolation reaches the floor. Render the impact and its
-                // planted/vanishing pose at the server's actual contact height.
+
                 if (entity.isSwordComboGrounded())
                     stack.translate(0, entity.getSwordImpactY() - entity.getPosition(partialTicks).y, 0);
                 var dissolveType = disintegrating ? HierophantRenderTypes.disintegration(getTextureLocation(entity)) : null;
@@ -128,10 +138,10 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
     }
 
     @Override
-    protected net.minecraft.client.renderer.RenderType getRenderType(T entity, boolean visible, boolean translucent, boolean glowing) {
+    protected RenderType getRenderType(T entity, boolean visible, boolean translucent, boolean glowing) {
         if (entity.getPhase() == 4 && entity.isDeadOrDying())
             return HierophantRenderTypes.disintegration(getTextureLocation(entity));
-        return visible || translucent ? net.minecraft.client.renderer.RenderType.entityTranslucent(getTextureLocation(entity)) : super.getRenderType(entity, visible, translucent, glowing);
+        return visible || translucent ? RenderType.entityTranslucent(getTextureLocation(entity)) : super.getRenderType(entity, visible, translucent, glowing);
     }
 
     @Override
@@ -170,9 +180,9 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
                 scale(entity, pose, partial);
                 pose.translate(0, -1.501, 0);
                 int color = FastColor.ARGB32.colorFromFloat(opacity, 1, 1, 1);
-                ghost.renderToBuffer(pose, buffers.getBuffer(net.minecraft.client.renderer.RenderType.entityTranslucent(getTextureLocation(entity))), light, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, color);
+                ghost.renderToBuffer(pose, buffers.getBuffer(RenderType.entityTranslucent(getTextureLocation(entity))), light, OverlayTexture.NO_OVERLAY, color);
                 var texture = ResourceLocation.fromNamespaceAndPath("twilightforest_finale", frame.slim() ? "textures/entity/the_twilight_hierophant_slim_outer.png" : "textures/entity/the_twilight_hierophant_outer.png");
-                robe.renderToBuffer(pose, buffers.getBuffer(net.minecraft.client.renderer.RenderType.entityTranslucent(texture)), light, net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, color);
+                robe.renderToBuffer(pose, buffers.getBuffer(RenderType.entityTranslucent(texture)), light, OverlayTexture.NO_OVERLAY, color);
             } finally {
                 pose.popPose();
             }
@@ -181,13 +191,13 @@ public class TheTwilightHierophantRenderer<T extends TheTwilightHierophantEntity
 
     @Override
     protected void setupRotations(T entity, PoseStack pose, float age, float yaw, float partial, float scale) {
-        // The final curl/spread/dissolution must not receive vanilla's sideways roll.
+
         if (entity.isDeadOrDying()) pose.mulPose(Axis.YP.rotationDegrees(180 - yaw));
         else super.setupRotations(entity, pose, age, yaw, partial, scale);
     }
 
     @Override
-    public boolean shouldRender(T entity, net.minecraft.client.renderer.culling.Frustum frustum, double x, double y, double z) {
+    public boolean shouldRender(T entity, Frustum frustum, double x, double y, double z) {
         var history = histories.get(entity);
         return history != null && !history.frames.isEmpty() || super.shouldRender(entity, frustum, x, y, z);
     }

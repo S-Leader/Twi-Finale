@@ -19,7 +19,6 @@ import twilightforest.util.BoundingBoxUtils;
 import twilightforest.world.components.structures.TFStructureComponentOld;
 import twilightforest.world.components.structures.lichtower.TowerWingComponent;
 
-
 public class FinalCastleStairTowerComponent extends TowerWingComponent {
 
     public FinalCastleStairTowerComponent(StructurePieceSerializationContext ctx, CompoundTag nbt) {
@@ -41,7 +40,7 @@ public class FinalCastleStairTowerComponent extends TowerWingComponent {
         if (parent != null && parent instanceof TFStructureComponentOld) {
             this.deco = ((TFStructureComponentOld) parent).deco;
         }
-        // add crown
+
         FinalCastleRoof9CrenellatedComponent roof = new FinalCastleRoof9CrenellatedComponent(4, this, getLocatorPosition().getX(), getLocatorPosition().getY(), getLocatorPosition().getZ());
         list.addPiece(roof);
         roof.addChildren(this, list, rand);
@@ -53,26 +52,22 @@ public class FinalCastleStairTowerComponent extends TowerWingComponent {
 
         generateBox(world, sbb, 0, 0, 0, 8, 49, 8, false, rand, deco.randomBlocks);
 
-        // add branching runes
         int numBranches = 6 + decoRNG.nextInt(4);
         for (int i = 0; i < numBranches; i++) {
             makeGlyphBranches(world, decoRNG, this.getGlyphMeta(), sbb);
         }
 
-        // beard
         for (int i = 1; i < 4; i++) {
             generateBox(world, sbb, i, -(i * 2), i, 8 - i, 1 - (i * 2), 8 - i, false, rand, deco.randomBlocks);
         }
         this.placeBlock(world, deco.blockState, 4, -7, 4, sbb);
 
-        // door, first floor
         final BlockState castleDoor = TFBlocks.YELLOW_CASTLE_DOOR.get().defaultBlockState();
         this.generateBox(world, sbb, 0, 1, 1, 0, 3, 2, castleDoor, AIR, false);
 
-        // stairs
         Rotation rotation = Rotation.CLOCKWISE_90;
         for (int f = 0; f < 5; f++) {
-            //int rotation = (f + 2) % 4;
+
             rotation = rotation.getRotated(Rotation.CLOCKWISE_90);
             int y = f * 3 + 1;
             for (int i = 0; i < 3; i++) {
@@ -85,29 +80,25 @@ public class FinalCastleStairTowerComponent extends TowerWingComponent {
                 this.setBlockStateRotated(world, getStairState(deco.stairState, Direction.WEST, false), sx, sy, sz + 1, rotation, sbb);
                 this.setBlockStateRotated(world, deco.blockState, sx, sy - 1, sz + 1, rotation, sbb);
             }
-            // landing
+
             this.fillBlocksRotated(world, sbb, 6, y + 2, 1, 7, y + 2, 2, deco.blockState, rotation);
         }
 
-        // door, second floor
         this.generateBox(world, sbb, 1, 18, 0, 2, 20, 0, castleDoor, AIR, false);
 
         BlockState stairState = getStairState(deco.stairState, Direction.SOUTH, false);
 
-        // second floor landing
         this.generateBox(world, sbb, 1, 17, 1, 3, 17, 3, deco.blockState, deco.blockState, false);
         this.generateBox(world, sbb, 1, 17, 4, 2, 17, 4, stairState, stairState, false);
         this.generateBox(world, sbb, 1, 16, 4, 2, 16, 4, deco.blockState, deco.blockState, false);
         this.generateBox(world, sbb, 1, 16, 5, 2, 16, 5, stairState, stairState, false);
         this.generateBox(world, sbb, 1, 15, 5, 2, 15, 5, deco.blockState, deco.blockState, false);
 
-        // door, roof
         this.generateBox(world, sbb, 1, 39, 0, 2, 41, 0, TFBlocks.VIOLET_CASTLE_DOOR.get().defaultBlockState(), AIR, false);
 
-        // stairs
         rotation = Rotation.COUNTERCLOCKWISE_90;
         for (int f = 0; f < 7; f++) {
-            //int rotation = (f + 0) % 4;
+
             rotation = rotation.getRotated(Rotation.CLOCKWISE_90);
             int y = f * 3 + 18;
             for (int i = 0; i < 3; i++) {
@@ -120,11 +111,10 @@ public class FinalCastleStairTowerComponent extends TowerWingComponent {
                 this.setBlockStateRotated(world, getStairState(deco.stairState, Direction.WEST, false), sx, sy, sz + 1, rotation, sbb);
                 this.setBlockStateRotated(world, deco.blockState, sx, sy - 1, sz + 1, rotation, sbb);
             }
-            // landing
+
             this.fillBlocksRotated(world, sbb, 6, y + 2, 1, 7, y + 2, 2, deco.blockState, rotation);
         }
 
-        // roof access landing
         this.generateBox(world, sbb, 1, 38, 1, 3, 38, 5, deco.blockState, deco.blockState, false);
         this.generateBox(world, sbb, 3, 39, 1, 3, 39, 5, deco.fenceState, deco.fenceState, false);
     }
